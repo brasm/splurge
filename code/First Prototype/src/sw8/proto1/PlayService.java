@@ -29,7 +29,7 @@ public class PlayService extends Service {
 		intent = new Intent(UPDATE_INFO);
 		Log.d(tag, "in oncreate. made intent.");
 		handler.removeCallbacks(sendUpdatesToUI);
-		handler.postDelayed(sendUpdatesToUI, 100); // 0.1 second
+		handler.postDelayed(sendUpdatesToUI, 1000); // 1 second
 		Log.d(tag, "in onCreate. Handler started runnable.");
 	}
 
@@ -42,9 +42,8 @@ public class PlayService extends Service {
 
 	private Runnable sendUpdatesToUI = new Runnable() {
 		public void run() {
-			Log.d(tag, "runnable started.");
 			updateInfo();
-			handler.postDelayed(this, 100); // 0.1 seconds
+			handler.postDelayed(this, 1000); // 1 seconds
 			
 		}
 	};
@@ -87,7 +86,6 @@ public class PlayService extends Service {
 
 	private void updateInfo() {
 		if (playing) {
-			Log.d(tag, "Started building track info.");
 			// Current progress
 			float current = songPlayer.getCurrentPosition();
 			float dur = songPlayer.getDuration();
