@@ -6,6 +6,12 @@ import java.io.FilenameFilter;
 import android.app.ListActivity;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 public class ChoosePlaylistActivity extends ListActivity {
 
@@ -19,6 +25,17 @@ public class ChoosePlaylistActivity extends ListActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.songlist);
 		updateSongList();
+		ListView lv = getListView();
+		
+		lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+		lv.setOnItemClickListener(new OnItemClickListener() {
+		    public void onItemClick(AdapterView<?> parent, View view,
+		        int position, long id) {
+		      // When clicked, show a toast with the TextView text
+		    	TextView t = ((SongView) view).getText();
+		    	Toast.makeText(getApplicationContext(), t.getText(), Toast.LENGTH_SHORT).show();
+		    }
+		  });
 	}
 
 	public void updateSongList() {
