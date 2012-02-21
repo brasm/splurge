@@ -78,18 +78,23 @@ public class FirstProtoPlayerActivity extends Activity {
 		final Button next = (Button) findViewById(R.id.playNext);
 		next.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				if (currentsong == (songstrings.size() - 1)) currentsong = 0;
-				else currentsong++;
-				player.switchTrack(Uri.parse(songstrings.get(currentsong).getAbsPath()));
+				if (pBound) {
+					currentsong++;
+					if (currentsong == songstrings.size()) currentsong = 0;
+					player.switchTrack(Uri.parse(songstrings.get(currentsong).getAbsPath()));
+				}
 			}
 		});
 		
 		final Button previous = (Button) findViewById(R.id.playLast);
 		previous.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				currentsong--;
-				if (currentsong < 0) currentsong = songstrings.size() - 1;
-				player.switchTrack(Uri.parse(songstrings.get(currentsong).getAbsPath()));
+				if (pBound) {
+					if (currentsong == 0) currentsong = songstrings.size();
+					
+					currentsong--;
+					player.switchTrack(Uri.parse(songstrings.get(currentsong).getAbsPath()));
+				}
 			}
 		});
 		
@@ -200,12 +205,19 @@ public class FirstProtoPlayerActivity extends Activity {
 	};
 	
 	private void fillPlaylist() {
+		boolean anders = false;
+		
 		String basePath = "/sdcard/Music/";
-		Song s1 = new Song("The Spell", basePath + "Alphabeat/The Best of Blue Magic_ Soulful Spell/01 The Spell.wma");
-		Song s2 = new Song("You Make me feel", basePath + "Cobra Starship/You Make Me Feel... (feat. Sabi) - Singl/01 You Make Me Feel... (feat. Sabi).wma");
-		Song s3 = new Song("Hvem springer du for", basePath + "De Eneste To/De eneste to/02 Hvem springer du for.wma");
-		songstrings.add(s1);
-		songstrings.add(s2);
-		songstrings.add(s3);
+		
+		if (anders) {
+			songstrings.add(new Song("The Spell", basePath + "Alphabeat/The Best of Blue Magic_ Soulful Spell/01 The Spell.wma"));
+			songstrings.add(new Song("You Make me feel", basePath + "Cobra Starship/You Make Me Feel... (feat. Sabi) - Singl/01 You Make Me Feel... (feat. Sabi).wma"));
+			songstrings.add(new Song("Hvem springer du for", basePath + "De Eneste To/De eneste to/02 Hvem springer du for.wma"));
+		} else {
+			songstrings.add(new Song("Cemeteries of London", basePath + "Coldplay/Coldplay - Cemeteries Of London - Viva La Vida Or Death and all his friends.mp3"));
+			songstrings.add(new Song("Danmark Man Dark", basePath + "Nephew/Nephew - Danmark Man Dark - DanmarkDenmark.WMA"));
+			songstrings.add(new Song("Jerk It Out", basePath + "The Caesars/The Caesars - Jerk It Out - Love For The Streets.mp3"));
+			songstrings.add(new Song("Berlin", basePath + "Kent/Kent - Berlin - Tillbaka Till Samtiden.mp3"));
+		}		
 	}
 }

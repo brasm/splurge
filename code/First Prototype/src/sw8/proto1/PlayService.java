@@ -1,5 +1,7 @@
 package sw8.proto1;
 
+import java.io.IOException;
+
 import android.app.Service;
 import android.content.Intent;
 import android.media.AudioManager;
@@ -96,7 +98,7 @@ public class PlayService extends Service {
 	 * @param trackUri Song to play instead of current.
 	 */
 	public void switchTrack(Uri trackUri) {
-		songPlayer.release();
+		songPlayer.reset();
 		playing = false;
 		paused = false;
 		startTrack(trackUri);
@@ -109,14 +111,16 @@ public class PlayService extends Service {
 	private void startTrack(Uri trackUri) {
 		try {
 			songPlayer.setDataSource(getApplicationContext(), trackUri);
+			Log.d(tag, "Player starting song at path: " + trackUri.toString());
 			songPlayer.prepare();
-			songPlayer.start();
-			Log.d(tag, "Player started");
-			playing = true;
-			paused = false;
 		} catch (Exception e) {
+			Log.d(tag + "PREP", e.getMessage());
 			e.printStackTrace();
 		}
+		songPlayer.start();
+		Log.d(tag, "Starting...");
+		playing = true;
+		paused = false;
 	}
 	
 	public void seekTrack(int progress) {
