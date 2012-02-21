@@ -16,6 +16,7 @@ public class PlayService extends Service {
 	public static final String UPDATE_INFO = "com.sw802f12.playservice.update_info";
 	private final Handler handler = new Handler();
 	Intent intent;
+	boolean playing;
 
 	// Binder given to clients
 	private final IBinder mBinder = new LocalBinder();
@@ -27,12 +28,12 @@ public class PlayService extends Service {
 		super.onCreate();
 		intent = new Intent(UPDATE_INFO);
 	}
-	
+
 	@Override
-    public void onStart(Intent intent, int startId) {
-        handler.removeCallbacks(sendUpdatesToUI);
-        handler.postDelayed(sendUpdatesToUI, 100); // 0.1 second   
-    }
+	public void onStart(Intent intent, int startId) {
+		handler.removeCallbacks(sendUpdatesToUI);
+		handler.postDelayed(sendUpdatesToUI, 100); // 0.1 second
+	}
 
 	private Runnable sendUpdatesToUI = new Runnable() {
 		public void run() {
@@ -69,6 +70,7 @@ public class PlayService extends Service {
 			e.printStackTrace();
 		}
 		songPlayer.start();
+		playing = true;
 	}
 
 	public void die() {
@@ -76,14 +78,23 @@ public class PlayService extends Service {
 	}
 
 	private void updateInfo() {
-		Log.d(tag, "Started building track info.");
-		//Current progress
-		int progress = (songPlayer.getCurrentPosition()/songPlayer.getDuration())*100;
-		Log.d(tag, "Current progress was: " + progress);
-		intent.putExtra("progress", progress);
-		//Any other things we might need.
-		
-		//Sending the broadcast
-		sendBroadcast(intent);
+		if (playing) {
+			Log.d(tag, "Started building track info.");
+			// Current progress
+			int progress = (songPlayer.getCurrentPosition() / songPlayer.getDuration()) * 100;
+			Log.d(tag, "Current progress was: " + progress);
+			// Checking to make sure that progress is calculated correctly.
+			if (0 > progress || progress > 100) {
+				progress = 0;
+				Log.d(tag, "Progress reset to 0");
+			}
+			intent.putExtra("progress", progress);
+			// Any other things we might need.
+
+			// Sending the broadcast
+			sendBroadcast(intent);
+		}
+		else
+			Log.d(tag, "Track was not playing.");
 	}
 }
