@@ -79,6 +79,11 @@ public class PlayService extends Service {
 		Log.d(tag, "music started.");
 		playing = true;
 	}
+	
+	public void seekTrack(int msec) {
+		songPlayer.seekTo(msec);
+		Log.d(tag, "Updated song position.");
+	}
 
 	public void die() {
 		songPlayer.release();

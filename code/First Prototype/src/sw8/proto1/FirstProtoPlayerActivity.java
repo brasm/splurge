@@ -54,6 +54,7 @@ public class FirstProtoPlayerActivity extends Activity {
 		setContentView(R.layout.player);
 		
 		progressBar = (SeekBar) findViewById(R.id.playProgress);
+		progressBar.setOnSeekBarChangeListener(new SeekbarListener());
 		final TextView t = (TextView) findViewById(R.id.trackName);
 
 		final String songstring1 = "/sdcard/Music/Alphabeat/The Best of Blue Magic_ Soulful Spell/01 The Spell.wma";
@@ -157,4 +158,21 @@ public class FirstProtoPlayerActivity extends Activity {
     	
     	progressBar.setProgress((int) progress);
     }
+    
+    private class SeekbarListener implements SeekBar.OnSeekBarChangeListener {
+		public void onStopTrackingTouch(SeekBar seekBar) {
+			// TODO Auto-generated method stub
+			
+		}
+		
+		public void onStartTrackingTouch(SeekBar seekBar) {
+			// TODO Auto-generated method stub
+			
+		}
+		
+		public void onProgressChanged(SeekBar seekBar, int progress,
+				boolean fromUser) {
+			player.seekTrack(progress);
+		}
+	};
 }
