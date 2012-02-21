@@ -18,7 +18,7 @@ public class PlayService extends Service {
 	Intent intent;
 	boolean playing;
 	boolean paused;
-
+	
 	// Binder given to clients
 	private final IBinder mBinder = new LocalBinder();
 	// Mediaplayer
@@ -68,7 +68,7 @@ public class PlayService extends Service {
 
 	/** method for clients */
 	public void playTrack(Uri trackUri) {
-		if (!paused) {
+		if (!paused && !playing) {
 			songPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 			try {
 				songPlayer.setDataSource(getApplicationContext(), trackUri);

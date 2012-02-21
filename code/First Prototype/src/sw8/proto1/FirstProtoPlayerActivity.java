@@ -31,6 +31,7 @@ public class FirstProtoPlayerActivity extends Activity {
 	Intent intent = new Intent();
 	
 	final Playlist songstrings = new Playlist();
+	AudioManager am;
 	
 	@Override
     protected void onStart() {
@@ -55,7 +56,7 @@ public class FirstProtoPlayerActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.player);
 		
-		AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+		am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		volumeBar = (SeekBar) findViewById(R.id.volume);
 		volumeBar.setProgress(am.getStreamVolume(AudioManager.STREAM_MUSIC));
 		
@@ -70,7 +71,7 @@ public class FirstProtoPlayerActivity extends Activity {
 			public void onClick(View v) {
 				if (pBound) {
 					if (!player.playing) {
-						player.playTrack(Uri.parse(songstrings.get(currentsong)));
+						player.playTrack(Uri.parse(songstrings.get(currentsong).getAbsPath()));
 					} else {
 						player.pauseTrack();
 					}
@@ -81,20 +82,19 @@ public class FirstProtoPlayerActivity extends Activity {
 		final Button next = (Button) findViewById(R.id.playNext);
 		next.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				currentsong++;
-				if (currentsong == songstrings.size()) currentsong = 0;
-				player.playTrack(Uri.parse(songstrings.get(currentsong)));
+				if (currentsong == (songstrings.size() - 1)) currentsong = 0;
+				else currentsong++;
+				player.playTrack(Uri.parse(songstrings.get(currentsong).getAbsPath()));
 			}
 		});
 		
-		final Button previous = (Button) findViewById(R.id.playNext);
+		final Button previous = (Button) findViewById(R.id.playLast);
 		previous.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				currentsong--;
 				if (currentsong < 0) currentsong = songstrings.size() - 1;
-				player.playTrack(Uri.parse(songstrings.get(currentsong)));
+				player.playTrack(Uri.parse(songstrings.get(currentsong).getAbsPath()));
 			}
-
 		});
 		
 		final Button playlist = (Button) findViewById(R.id.playlist_button);
@@ -187,20 +187,29 @@ public class FirstProtoPlayerActivity extends Activity {
 		
 		public void onProgressChanged(SeekBar seekBar, int progress,
 				boolean fromUser) {
-			if(fromUser){
-				Log.d(tag, "progress was seeked to:" +progress);
-				player.seekTrack(progress);
+			if (seekBar == progressBar) {
+				if(fromUser){
+					Log.d(tag, "progress was seeked to:" +progress);
+					player.seekTrack(progress);
+				}
+			} else if (seekBar == volumeBar) {
+				if (fromUser) {
+					Log.d(tag, "Changing volume to " + progress);
+					float maxvol = (float) am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+					float vol = ((float) progress/maxvol) * 100;
+					am.setStreamVolume(AudioManager.STREAM_MUSIC, (int) vol, 0);
+				}
 			}
 		}
 	};
 	
 	private void fillPlaylist() {
 		String basePath = "/sdcard/Music/";
-		final String songstring1 = basePath + "Alphabeat/The Best of Blue Magic_ Soulful Spell/01 The Spell.wma";
-		final String songstring2 = basePath + "Cobra Starship/You Make Me Feel... (feat. Sabi) - Singl/01 You Make Me Feel... (feat. Sabi).wma";
-		final String songstring3 = basePath + "De Eneste To/De eneste to/02 Hvem springer du for.wma";
-		songstrings.add(songstring1);
-		songstrings.add(songstring2);
-		songstrings.add(songstring3);
+		Song s1 = new Song("The Spell", basePath + "Alphabeat/The Best of Blue Magic_ Soulful Spell/01 The Spell.wma");
+		Song s2 = new Song("You Make me feel", basePath + "Cobra Starship/You Make Me Feel... (feat. Sabi) - Singl/01 You Make Me Feel... (feat. Sabi).wma");
+		Song s3 = new Song("Hvem springer du for", basePath + "De Eneste To/De eneste to/02 Hvem springer du for.wma");
+		songstrings.add(s1);
+		songstrings.add(s2);
+		songstrings.add(s3);
 	}
 }
