@@ -70,11 +70,7 @@ public class FirstProtoPlayerActivity extends Activity {
 		play.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				if (pBound) {
-					if (!player.playing) {
-						player.playTrack(Uri.parse(songstrings.get(currentsong).getAbsPath()));
-					} else {
-						player.pauseTrack();
-					}
+					player.playTrack(Uri.parse(songstrings.get(currentsong).getAbsPath()));
 				}
 			}
 		});
@@ -84,7 +80,7 @@ public class FirstProtoPlayerActivity extends Activity {
 			public void onClick(View v) {
 				if (currentsong == (songstrings.size() - 1)) currentsong = 0;
 				else currentsong++;
-				player.playTrack(Uri.parse(songstrings.get(currentsong).getAbsPath()));
+				player.switchTrack(Uri.parse(songstrings.get(currentsong).getAbsPath()));
 			}
 		});
 		
@@ -93,7 +89,7 @@ public class FirstProtoPlayerActivity extends Activity {
 			public void onClick(View v) {
 				currentsong--;
 				if (currentsong < 0) currentsong = songstrings.size() - 1;
-				player.playTrack(Uri.parse(songstrings.get(currentsong).getAbsPath()));
+				player.switchTrack(Uri.parse(songstrings.get(currentsong).getAbsPath()));
 			}
 		});
 		

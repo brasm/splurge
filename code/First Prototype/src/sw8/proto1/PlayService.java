@@ -16,8 +16,14 @@ public class PlayService extends Service {
 	public static final String UPDATE_INFO = "com.sw802f12.playservice.update_info";
 	private final Handler handler = new Handler();
 	Intent intent;
-	boolean playing;
-	boolean paused;
+	/**
+	 * Whether a playback is currently in session.
+	 */
+	boolean playing = false;
+	/**
+	 * Whether the current playback is paused.
+	 */
+	boolean paused = false;
 	
 	// Binder given to clients
 	private final IBinder mBinder = new LocalBinder();
@@ -66,29 +72,50 @@ public class PlayService extends Service {
 		return mBinder;
 	}
 
-	/** method for clients */
+	/** 
+	 * Initiate or pause playback.
+	 */
 	public void playTrack(Uri trackUri) {
-		if (!paused && !playing) {
-			songPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-			try {
-				songPlayer.setDataSource(getApplicationContext(), trackUri);
-				songPlayer.prepare();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		if (paused) {
+			songPlayer.start();
+			paused = false;
+		} else {
+			if (playing) {
+				songPlayer.pause();
+				paused = true;
+			} else {
+				startTrack(trackUri);
 			}
 		}
-		songPlayer.start();
-		Log.d(tag, "music started.");
-		playing = true;
-		paused = false;
 	}
 	
-	public void pauseTrack() {
-		songPlayer.pause();
-		Log.d(tag, "Music paused.");
+	/**
+	 * Release the SongPlayer from the current song, and reassign it to the provided URI.
+	 * @param trackUri Song to play instead of current.
+	 */
+	public void switchTrack(Uri trackUri) {
+		songPlayer.release();
 		playing = false;
-		paused = true;
+		paused = false;
+		startTrack(trackUri);
+	}
+	
+	/**
+	 * Do initial setup to start the song playback, as well as start it.
+	 * @param trackUri The URI to play.
+	 */
+	private void startTrack(Uri trackUri) {
+		songPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+		try {
+			songPlayer.setDataSource(getApplicationContext(), trackUri);
+			songPlayer.prepare();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		songPlayer.start();
+		Log.d(tag, "Player started");
+		playing = true;
+		paused = false;
 	}
 	
 	public void seekTrack(int progress) {
