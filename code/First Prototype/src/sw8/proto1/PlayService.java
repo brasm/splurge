@@ -38,6 +38,8 @@ public class PlayService extends Service {
 		handler.removeCallbacks(sendUpdatesToUI);
 		handler.postDelayed(sendUpdatesToUI, 1000); // 1 second
 		Log.d(tag, "in onCreate. Handler started runnable.");
+		
+		songPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 	}
 
 //	@Override
@@ -105,7 +107,6 @@ public class PlayService extends Service {
 	 * @param trackUri The URI to play.
 	 */
 	private void startTrack(Uri trackUri) {
-		songPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 		try {
 			songPlayer.setDataSource(getApplicationContext(), trackUri);
 			songPlayer.prepare();
