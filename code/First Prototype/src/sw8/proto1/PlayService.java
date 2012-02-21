@@ -110,13 +110,13 @@ public class PlayService extends Service {
 		try {
 			songPlayer.setDataSource(getApplicationContext(), trackUri);
 			songPlayer.prepare();
+			songPlayer.start();
+			Log.d(tag, "Player started");
+			playing = true;
+			paused = false;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		songPlayer.start();
-		Log.d(tag, "Player started");
-		playing = true;
-		paused = false;
 	}
 	
 	public void seekTrack(int progress) {
