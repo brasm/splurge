@@ -13,6 +13,7 @@ import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
@@ -87,6 +88,15 @@ public class FirstProtoPlayerActivity extends Activity {
 		previous.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				
+			}
+
+		});
+		
+		final Button playlist = (Button) findViewById(R.id.playlist_button);
+		playlist.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				intent = new Intent(FirstProtoPlayerActivity.this, ChoosePlaylistActivity.class);
+	            startActivity(intent);
 			}
 
 		});
@@ -172,7 +182,10 @@ public class FirstProtoPlayerActivity extends Activity {
 		
 		public void onProgressChanged(SeekBar seekBar, int progress,
 				boolean fromUser) {
-			player.seekTrack(progress);
+			if(fromUser){
+				Log.d(tag, "progress was seeked to:" +progress);
+				player.seekTrack(progress);
+			}
 		}
 	};
 }

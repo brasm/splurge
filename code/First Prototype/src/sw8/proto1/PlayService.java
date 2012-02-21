@@ -80,8 +80,9 @@ public class PlayService extends Service {
 		playing = true;
 	}
 	
-	public void seekTrack(int msec) {
-		songPlayer.seekTo(msec);
+	public void seekTrack(int progress) {
+		float msec = ((float)progress/100)*songPlayer.getDuration();
+		songPlayer.seekTo((int)msec);
 		Log.d(tag, "Updated song position.");
 	}
 
