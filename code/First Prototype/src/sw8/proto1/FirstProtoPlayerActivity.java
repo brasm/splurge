@@ -34,7 +34,7 @@ public class FirstProtoPlayerActivity extends Activity {
     protected void onStart() {
         super.onStart();
         // Bind to PlayService
-        Intent intent = new Intent(this, PlayService.class);
+        intent = new Intent(this, PlayService.class);
         bindService(intent, mConnection , Context.BIND_AUTO_CREATE);
     }
 
@@ -52,6 +52,7 @@ public class FirstProtoPlayerActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.player);
+		
 		progressBar = (SeekBar) findViewById(R.id.playProgress);
 		final TextView t = (TextView) findViewById(R.id.trackName);
 
@@ -149,11 +150,11 @@ public class FirstProtoPlayerActivity extends Activity {
     private void updateUI(Intent intent) {
     	progressBar = (SeekBar) findViewById(R.id.playProgress);
     	
-    	int progress = intent.getIntExtra("progress", 0);
+    	float progress = intent.getFloatExtra("progress", 0);
     	if (progress > 100 || progress < 0) {
     		progress = 0;
     	}
     	
-    	progressBar.setProgress(progress);
+    	progressBar.setProgress((int) progress);
     }
 }

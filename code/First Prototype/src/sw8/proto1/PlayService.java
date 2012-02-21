@@ -27,18 +27,25 @@ public class PlayService extends Service {
 	public void onCreate() {
 		super.onCreate();
 		intent = new Intent(UPDATE_INFO);
-	}
-
-	@Override
-	public void onStart(Intent intent, int startId) {
+		Log.d(tag, "in oncreate. made intent.");
 		handler.removeCallbacks(sendUpdatesToUI);
 		handler.postDelayed(sendUpdatesToUI, 100); // 0.1 second
+		Log.d(tag, "in onCreate. Handler started runnable.");
 	}
+
+//	@Override
+//	public void onStart(Intent intent, int startId) {
+//		handler.removeCallbacks(sendUpdatesToUI);
+//		handler.postDelayed(sendUpdatesToUI, 100); // 0.1 second
+//		Log.d(tag, "in onStart. Handler started runnable.");
+//	}
 
 	private Runnable sendUpdatesToUI = new Runnable() {
 		public void run() {
+			Log.d(tag, "runnable started.");
 			updateInfo();
 			handler.postDelayed(this, 100); // 0.1 seconds
+			
 		}
 	};
 
@@ -70,6 +77,7 @@ public class PlayService extends Service {
 			e.printStackTrace();
 		}
 		songPlayer.start();
+		Log.d(tag, "music started.");
 		playing = true;
 	}
 
@@ -81,8 +89,10 @@ public class PlayService extends Service {
 		if (playing) {
 			Log.d(tag, "Started building track info.");
 			// Current progress
-			int progress = (songPlayer.getCurrentPosition() / songPlayer.getDuration()) * 100;
-			Log.d(tag, "Current progress was: " + progress);
+			float current = songPlayer.getCurrentPosition();
+			float dur = songPlayer.getDuration();
+			float progress = (current/dur) * 100;
+			Log.d(tag, "Current progress was: " + progress + "     " + songPlayer.getCurrentPosition() + "      " + songPlayer.getDuration());
 			// Checking to make sure that progress is calculated correctly.
 			if (0 > progress || progress > 100) {
 				progress = 0;
