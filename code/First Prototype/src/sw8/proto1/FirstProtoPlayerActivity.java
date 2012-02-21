@@ -4,9 +4,11 @@ import java.util.ArrayList;
 
 import sw8.proto1.PlayService.LocalBinder;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Bundle;
@@ -26,6 +28,7 @@ public class FirstProtoPlayerActivity extends Activity {
 	String tag = "SW8tag";
 	PlayService player;
 	boolean pBound = false;
+	Intent intent = new Intent();
 	
 	@Override
     protected void onStart() {
@@ -94,6 +97,24 @@ public class FirstProtoPlayerActivity extends Activity {
 		super.onDestroy();
 	}
 	
+	/**
+	 * Receiver registering for play service update.
+	 */
+	public void onResume() {
+		super.onResume();
+		startService(intent);
+		registerReceiver(bcr, new IntentFilter(PlayService.UPDATE_INFO));
+	}
+	
+	/**
+	 * Receiver unregistering for play service update.
+	 */
+	public void onPause() {
+		super.onPause();
+		unregisterReceiver(bcr);
+		stopService(intent);
+	}
+	
 	/** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection mConnection = new ServiceConnection() {
   
@@ -110,5 +131,29 @@ public class FirstProtoPlayerActivity extends Activity {
             player.die();
         }
     };
-
+    
+    /**
+     * BroadcastReceiver for updating user interface.
+     */
+    private BroadcastReceiver bcr = new BroadcastReceiver() {
+    	@Override
+    	public void onReceive(Context context, Intent intent) {
+    		updateUI(intent);
+    	}
+    };
+    
+    /**
+     * Updates the progressbar in the UI, with the value sent to the bcr.
+     * @param intent
+     */
+    private void updateUI(Intent intent) {
+    	progressBar = (SeekBar) findViewById(R.id.playProgress);
+    	
+    	int progress = intent.getIntExtra("progress", 0);
+    	if (progress > 100 || progress < 0) {
+    		progress = 0;
+    	}
+    	
+    	progressBar.setProgress(progress);
+    }
 }
