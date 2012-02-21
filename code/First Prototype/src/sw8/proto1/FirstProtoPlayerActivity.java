@@ -1,7 +1,5 @@
 package sw8.proto1;
 
-import java.util.ArrayList;
-
 import sw8.proto1.PlayService.LocalBinder;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -10,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -30,6 +29,8 @@ public class FirstProtoPlayerActivity extends Activity {
 	PlayService player;
 	boolean pBound = false;
 	Intent intent = new Intent();
+	
+	final Playlist songstrings = new Playlist();
 	
 	@Override
     protected void onStart() {
@@ -54,40 +55,44 @@ public class FirstProtoPlayerActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.player);
 		
+		AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+		volumeBar = (SeekBar) findViewById(R.id.volume);
+		volumeBar.setProgress(am.getStreamVolume(AudioManager.STREAM_MUSIC));
+		
 		progressBar = (SeekBar) findViewById(R.id.playProgress);
 		progressBar.setOnSeekBarChangeListener(new SeekbarListener());
 		final TextView t = (TextView) findViewById(R.id.trackName);
 
-		final String songstring1 = "/sdcard/Music/Alphabeat/The Best of Blue Magic_ Soulful Spell/01 The Spell.wma";
-		final String songstring2 = "/sdcard/Music/Cobra Starship/You Make Me Feel... (feat. Sabi) - Singl/01 You Make Me Feel... (feat. Sabi).wma";
-		final String songstring3 = "/sdcard/Music/De Eneste To/De eneste to/02 Hvem springer du for.wma";
-		final ArrayList<String> songstrings = new ArrayList<String>();
-		songstrings.add(songstring1);
-		songstrings.add(songstring2);
-		songstrings.add(songstring3);
-
+		fillPlaylist();
 		
-
 		final Button play = (Button) findViewById(R.id.play);
 		play.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				if (pBound)				
-					player.playTrack(Uri.parse(songstrings.get(0)));
-
+				if (pBound) {
+					if (!player.playing) {
+						player.playTrack(Uri.parse(songstrings.get(currentsong)));
+					} else {
+						player.pauseTrack();
+					}
+				}
 			}
 		});
 
 		final Button next = (Button) findViewById(R.id.playNext);
 		next.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				
+				currentsong++;
+				if (currentsong == songstrings.size()) currentsong = 0;
+				player.playTrack(Uri.parse(songstrings.get(currentsong)));
 			}
 		});
 		
 		final Button previous = (Button) findViewById(R.id.playNext);
 		previous.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				
+				currentsong--;
+				if (currentsong < 0) currentsong = songstrings.size() - 1;
+				player.playTrack(Uri.parse(songstrings.get(currentsong)));
 			}
 
 		});
@@ -188,4 +193,14 @@ public class FirstProtoPlayerActivity extends Activity {
 			}
 		}
 	};
+	
+	private void fillPlaylist() {
+		String basePath = "/sdcard/Music/";
+		final String songstring1 = basePath + "Alphabeat/The Best of Blue Magic_ Soulful Spell/01 The Spell.wma";
+		final String songstring2 = basePath + "Cobra Starship/You Make Me Feel... (feat. Sabi) - Singl/01 You Make Me Feel... (feat. Sabi).wma";
+		final String songstring3 = basePath + "De Eneste To/De eneste to/02 Hvem springer du for.wma";
+		songstrings.add(songstring1);
+		songstrings.add(songstring2);
+		songstrings.add(songstring3);
+	}
 }

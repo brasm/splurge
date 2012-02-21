@@ -17,6 +17,7 @@ public class PlayService extends Service {
 	private final Handler handler = new Handler();
 	Intent intent;
 	boolean playing;
+	boolean paused;
 
 	// Binder given to clients
 	private final IBinder mBinder = new LocalBinder();
@@ -67,17 +68,27 @@ public class PlayService extends Service {
 
 	/** method for clients */
 	public void playTrack(Uri trackUri) {
-		songPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-		try {
-			songPlayer.setDataSource(getApplicationContext(), trackUri);
-			songPlayer.prepare();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (!paused) {
+			songPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+			try {
+				songPlayer.setDataSource(getApplicationContext(), trackUri);
+				songPlayer.prepare();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		songPlayer.start();
 		Log.d(tag, "music started.");
 		playing = true;
+		paused = false;
+	}
+	
+	public void pauseTrack() {
+		songPlayer.pause();
+		Log.d(tag, "Music paused.");
+		playing = false;
+		paused = true;
 	}
 	
 	public void seekTrack(int progress) {
