@@ -7,5 +7,6 @@
     <string name="progress">Progress</string>
     <string name="defaultnotrack">No track currently playing.</string>
     <string name="playliststring">Playlist</string>
+    <string name="nextsong_text">Next Songs:</string>
 
 </resources>

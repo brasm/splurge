@@ -13,14 +13,19 @@
         android:label="@string/app_name" >
         <activity
             android:name=".FirstProtoPlayerActivity"
+            android:configChanges="keyboardHidden|orientation"
             android:label="@string/app_name" >
+            
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
         <activity android:name=".ChoosePlaylistActivity"></activity>
          <service android:name=".PlayService" />
+         
     </application>
+    
 </manifest>

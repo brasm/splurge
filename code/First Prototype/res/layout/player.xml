@@ -1,73 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="fill_horizontal"
     android:gravity="center_horizontal"
     android:orientation="vertical" >
-
-    <TextView
-        android:id="@+id/playerVolumeText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/volume"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
 
-    <SeekBar
-        android:id="@+id/volume"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        android:id="@+id/trackPlayProgressText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/progress"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
-
-    <SeekBar
-        android:id="@+id/playProgress"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-     <TextView
-         android:id="@+id/trackName"
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:text="@string/defaultnotrack"
-         android:textAppearance="?android:attr/textAppearanceMedium" />
-
     <LinearLayout
         android:id="@+id/linearLayout1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_weight="0.55"
         android:gravity="center" >
-
-        <Button
-            android:id="@+id/playLast"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Last" />
-
-        <Button
-            android:id="@+id/play"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Play/Pause" />
-
-        <Button
-            android:id="@+id/playNext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Next" />
-
     </LinearLayout>
-
+
     <Button
-        android:id="@+id/playlist_button"
+        android:id="@+id/play"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/playliststring" />
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="98dp"
+        android:text="Play/Pause" />
 
-</LinearLayout>
+    <Button
+        android:id="@+id/playNext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/play"
+        android:layout_alignBottom="@+id/play"
+        android:layout_toRightOf="@+id/play"
+        android:text="Next" />
+
+    <Button
+        android:id="@+id/playLast"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/play"
+        android:layout_alignBottom="@+id/play"
+        android:layout_toLeftOf="@+id/play"
+        android:text="Last" />
+
+    <SeekBar
+        android:id="@+id/volume"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/linearLayout1"
+        android:layout_marginTop="14dp" />
+
+    <TextView
+        android:id="@+id/playerVolumeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/volume"
+        android:layout_centerHorizontal="true"
+        android:text="@string/volume"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <SeekBar
+        android:id="@+id/playProgress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/play"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="25dp" />
+
+    <TextView
+        android:id="@+id/trackName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/playProgress"
+        android:layout_centerHorizontal="true"
+        android:text="@string/defaultnotrack"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/nextsongspacer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/trackName"
+        android:layout_below="@+id/playerVolumeText"
+        android:layout_marginTop="25dp"
+        android:text="@string/nextsong_text" />
+
+    <TextView
+        android:id="@+id/song4_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/nextsongspacer"
+        android:layout_below="@+id/nextsongspacer"
+        android:layout_marginTop="10dp"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/song3_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/song4_text"
+        android:layout_below="@+id/song4_text"
+        android:layout_marginTop="10dp"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/song2_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/song3_text"
+        android:layout_below="@+id/song3_text"
+        android:layout_marginTop="10dp"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/song1_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/song2_text"
+        android:layout_below="@+id/song2_text"
+        android:layout_marginTop="10dp"
+        android:text="" />
+
+</RelativeLayout>

@@ -8,14 +8,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.media.AudioManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 public class FirstProtoPlayerActivity extends Activity {
 	/** Called when the activity is first created. */
@@ -31,6 +33,12 @@ public class FirstProtoPlayerActivity extends Activity {
 	
 	Playlist songstrings;
 	AudioManager am;
+	
+	TextView current_text;
+	TextView song1;
+	TextView song2;
+	TextView song3;
+	TextView song4;
 	
 	@Override
     protected void onStart() {
@@ -66,6 +74,15 @@ public class FirstProtoPlayerActivity extends Activity {
 		progressBar = (SeekBar) findViewById(R.id.playProgress);
 		progressBar.setOnSeekBarChangeListener(sbl);
 
+		//TextViews for trackinfo
+		current_text = (TextView) findViewById(R.id.trackName);
+		song1 = (TextView) findViewById(R.id.song1_text);
+		song2 = (TextView) findViewById(R.id.song2_text);
+		song3 = (TextView) findViewById(R.id.song3_text);
+		song4 = (TextView) findViewById(R.id.song4_text);
+		
+		
+		
 		songstrings = new Playlist();
 		
 		final Button play = (Button) findViewById(R.id.play);
@@ -142,6 +159,12 @@ public class FirstProtoPlayerActivity extends Activity {
 		stopService(intent);
 	}
 	
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+	    super.onConfigurationChanged(newConfig);
+	    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+	}
+	
 	/** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection mConnection = new ServiceConnection() {
   
@@ -162,7 +185,14 @@ public class FirstProtoPlayerActivity extends Activity {
     private BroadcastReceiver nextSongReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			// TODO Auto-generated method stub
+			Log.d(tag, "New Track intent received");
+			String testname = intent.getStringExtra("currentsong");
+			current_text.setText(songstrings.get(currentsong).getName());
+			song1.setText("1. " + songstrings.get(currentsong+1).getName());
+			song2.setText("2. " + songstrings.get(currentsong+2).getName());
+			song3.setText("3. " + songstrings.get(currentsong+3).getName());
+			song4.setText("4. " + songstrings.get(currentsong+4).getName());
+			
 			
 		}
     };

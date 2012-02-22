@@ -38,6 +38,7 @@ public class PlayService extends Service {
 	public void onCreate() {
 		super.onCreate();
 		currentPositionIntent = new Intent(UPDATE_INFO);
+		trackChangeNotificationIntent = new Intent(TRACK_CHANGE_NOTIFICATION);
 		Log.d(tag, "in oncreate. made intent.");
 		handler.removeCallbacks(sendUpdatesToUI);
 		handler.postDelayed(sendUpdatesToUI, 1000); // 1 second
@@ -133,7 +134,6 @@ public class PlayService extends Service {
 	 * Send song notification intent.
 	 */
 	private void newSongNotification() {
-		trackChangeNotificationIntent = new Intent();
 		trackChangeNotificationIntent.putExtra("currentTrack", currentSong.getName());
 		sendBroadcast(trackChangeNotificationIntent);
 		Log.d(tag, "Track change notification sent.");
