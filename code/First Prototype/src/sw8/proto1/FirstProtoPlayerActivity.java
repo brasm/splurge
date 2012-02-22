@@ -81,8 +81,6 @@ public class FirstProtoPlayerActivity extends Activity {
 		song3 = (TextView) findViewById(R.id.song3_text);
 		song4 = (TextView) findViewById(R.id.song4_text);
 		
-		
-		
 		songstrings = new Playlist();
 		
 		final Button play = (Button) findViewById(R.id.play);
@@ -147,6 +145,7 @@ public class FirstProtoPlayerActivity extends Activity {
 		startService(intent);
 		registerReceiver(bcr, new IntentFilter(PlayService.UPDATE_INFO));
 		registerReceiver(nextSongReceiver, new IntentFilter(PlayService.TRACK_CHANGE_NOTIFICATION));
+		registerReceiver(playbackCompleteReceiver, new IntentFilter(PlayService.PLAYBACK_COMPLETE_NOTIFICATION));
 	}
 	
 	/**
@@ -156,6 +155,7 @@ public class FirstProtoPlayerActivity extends Activity {
 		super.onPause();
 		unregisterReceiver(bcr);
 		unregisterReceiver(nextSongReceiver);
+		unregisterReceiver(playbackCompleteReceiver);
 		stopService(intent);
 	}
 	
@@ -192,8 +192,6 @@ public class FirstProtoPlayerActivity extends Activity {
 			song2.setText("2. " + songstrings.get(currentsong+2).getName());
 			song3.setText("3. " + songstrings.get(currentsong+3).getName());
 			song4.setText("4. " + songstrings.get(currentsong+4).getName());
-			
-			
 		}
     };
     
@@ -207,6 +205,13 @@ public class FirstProtoPlayerActivity extends Activity {
     	}
     };
     
+    private BroadcastReceiver playbackCompleteReceiver = new BroadcastReceiver() {
+    	public void onReceive(Context context, Intent intent) {
+    		Log.d(tag, "Playback completed.");
+    		switchTrack(true);
+    	}
+    };
+    
     /**
      * Updates the progressbar in the UI, with the value sent to the bcr.
      * @param intent
@@ -214,11 +219,13 @@ public class FirstProtoPlayerActivity extends Activity {
     private void updateUI(Intent intent) {
     	progressBar = (SeekBar) findViewById(R.id.playProgress);
     	
-    	float progress = intent.getFloatExtra("progress", 0);
-    	if (progress > 100 || progress < 0) {
+    	int maxVal = intent.getIntExtra("maxval", 1000000);
+    	int progress = intent.getIntExtra("progress", 0);
+    	if (progress > maxVal || progress < 0) {
     		progress = 0;
     	}
     	
+    	if (progressBar.getMax() != maxVal) progressBar.setMax(maxVal);
     	progressBar.setProgress((int) progress);
     }
     

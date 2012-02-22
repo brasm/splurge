@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
@@ -15,10 +16,11 @@ public class PlayService extends Service {
 	private static final String tag = "SW8tag.PlayService";
 	public static final String UPDATE_INFO = "com.sw802f12.playservice.update_info";
 	public static final String TRACK_CHANGE_NOTIFICATION = "com.sw802f12.playservice.track_change_notification";
-	
+	public static final String PLAYBACK_COMPLETE_NOTIFICATION = "com.sw802f12.playservice.playback_complete_notification";
 	private final Handler handler = new Handler();
 	Intent currentPositionIntent;
 	Intent trackChangeNotificationIntent;
+	Intent playbackCompleteIntent;
 	Song currentSong;
 	/**
 	 * Whether a playback is currently in session.
@@ -39,12 +41,15 @@ public class PlayService extends Service {
 		super.onCreate();
 		currentPositionIntent = new Intent(UPDATE_INFO);
 		trackChangeNotificationIntent = new Intent(TRACK_CHANGE_NOTIFICATION);
+		playbackCompleteIntent = new Intent(PLAYBACK_COMPLETE_NOTIFICATION);
 		Log.d(tag, "in oncreate. made intent.");
 		handler.removeCallbacks(sendUpdatesToUI);
 		handler.postDelayed(sendUpdatesToUI, 1000); // 1 second
 		Log.d(tag, "in onCreate. Handler started runnable.");
 		
 		songPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+		
+		songPlayer.setOnCompletionListener(new playbackCompleteListener());
 	}
 
 //	@Override
@@ -102,6 +107,7 @@ public class PlayService extends Service {
 	 * @param song Song to play instead of current.
 	 */
 	public void switchTrack(Song song) {
+		Log.d(tag, "Switching track.");
 		songPlayer.reset();
 		currentSong = song;
 		playing = false;
@@ -114,6 +120,7 @@ public class PlayService extends Service {
 	 * @param trackUri The URI to play.
 	 */
 	private void startTrack(Uri trackUri) {
+		Log.d(tag, "Starting playback.");
 		try {
 			songPlayer.setDataSource(getApplicationContext(), trackUri);
 			Log.d(tag, "Player starting song at path: " + trackUri.toString());
@@ -130,6 +137,11 @@ public class PlayService extends Service {
 		paused = false;
 	}
 	
+	private void trackCompleteNotification() {
+		sendBroadcast(playbackCompleteIntent);
+		Log.d(tag, "Sending completion notification.");
+	}
+	
 	/**
 	 * Send song notification intent.
 	 */
@@ -144,8 +156,7 @@ public class PlayService extends Service {
 	 * @param progress The value of the progressBar
 	 */
 	public void seekTrack(int progress) {
-		float msec = ((float)progress/100)*songPlayer.getDuration();
-		songPlayer.seekTo((int)msec);
+		songPlayer.seekTo(progress);
 		Log.d(tag, "Updated song position.");
 	}
 
@@ -156,22 +167,23 @@ public class PlayService extends Service {
 	private void updateInfo() {
 		if (playing) {
 			// Current progress
-			float current = songPlayer.getCurrentPosition();
-			float dur = songPlayer.getDuration();
-			float progress = (current/dur) * 100;
-			Log.d(tag, "Current progress was: " + progress + "     " + songPlayer.getCurrentPosition() + "      " + songPlayer.getDuration());
-			// Checking to make sure that progress is calculated correctly.
-			if (0 > progress || progress > 100) {
-				progress = 0;
-				Log.d(tag, "Progress reset to 0");
-			}
-			currentPositionIntent.putExtra("progress", progress);
+			int cur = songPlayer.getCurrentPosition();
+			int max = songPlayer.getDuration();
+			
+			currentPositionIntent.putExtra("progress", cur);
+			currentPositionIntent.putExtra("maxval", max);
 			// Any other things we might need.
 
 			// Sending the broadcast
 			sendBroadcast(currentPositionIntent);
 		}
-		else
-			Log.d(tag, "Track was not playing.");
+	}
+	
+	private class playbackCompleteListener implements OnCompletionListener {
+		public void onCompletion(MediaPlayer mp) {
+			playing = false;
+			paused = false;
+			trackCompleteNotification();
+		}
 	}
 }
