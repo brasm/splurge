@@ -1,7 +1,5 @@
 package sw8.proto1;
 
-import java.io.IOException;
-
 import android.app.Service;
 import android.content.Intent;
 import android.media.AudioManager;
@@ -19,7 +17,8 @@ public class PlayService extends Service {
 	public static final String TRACK_CHANGE_NOTIFICATION = "com.sw802f12.playservice.track_change_notification";
 	
 	private final Handler handler = new Handler();
-	Intent intent;
+	Intent currentPositionIntent;
+	Intent trackChangeNotificationIntent;
 	Song currentSong;
 	/**
 	 * Whether a playback is currently in session.
@@ -38,7 +37,7 @@ public class PlayService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		intent = new Intent(UPDATE_INFO);
+		currentPositionIntent = new Intent(UPDATE_INFO);
 		Log.d(tag, "in oncreate. made intent.");
 		handler.removeCallbacks(sendUpdatesToUI);
 		handler.postDelayed(sendUpdatesToUI, 1000); // 1 second
@@ -123,11 +122,27 @@ public class PlayService extends Service {
 			e.printStackTrace();
 		}
 		songPlayer.start();
+		
 		Log.d(tag, "Starting...");
+		newSongNotification();
 		playing = true;
 		paused = false;
 	}
 	
+	/**
+	 * Send song notification intent.
+	 */
+	private void newSongNotification() {
+		trackChangeNotificationIntent = new Intent();
+		trackChangeNotificationIntent.putExtra("currentTrack", currentSong.getName());
+		sendBroadcast(trackChangeNotificationIntent);
+		Log.d(tag, "Track change notification sent.");
+	}
+	
+	/**
+	 * Seek to progress in the song
+	 * @param progress The value of the progressBar
+	 */
 	public void seekTrack(int progress) {
 		float msec = ((float)progress/100)*songPlayer.getDuration();
 		songPlayer.seekTo((int)msec);
@@ -150,11 +165,11 @@ public class PlayService extends Service {
 				progress = 0;
 				Log.d(tag, "Progress reset to 0");
 			}
-			intent.putExtra("progress", progress);
+			currentPositionIntent.putExtra("progress", progress);
 			// Any other things we might need.
 
 			// Sending the broadcast
-			sendBroadcast(intent);
+			sendBroadcast(currentPositionIntent);
 		}
 		else
 			Log.d(tag, "Track was not playing.");
