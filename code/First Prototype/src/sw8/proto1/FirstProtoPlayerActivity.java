@@ -55,12 +55,16 @@ public class FirstProtoPlayerActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.player);
 		
+		SeekbarListener sbl = new SeekbarListener();
+		
 		am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		volumeBar = (SeekBar) findViewById(R.id.volume);
+		volumeBar.setMax(am.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
 		volumeBar.setProgress(am.getStreamVolume(AudioManager.STREAM_MUSIC));
+		volumeBar.setOnSeekBarChangeListener(sbl);
 		
 		progressBar = (SeekBar) findViewById(R.id.playProgress);
-		progressBar.setOnSeekBarChangeListener(new SeekbarListener());
+		progressBar.setOnSeekBarChangeListener(sbl);
 
 		songstrings = new Playlist();
 		
@@ -68,7 +72,7 @@ public class FirstProtoPlayerActivity extends Activity {
 		play.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				if (pBound) {
-					player.playTrack(Uri.parse(songstrings.get(currentsong).getAbsPath()));
+					player.playTrack(songstrings.get(currentsong));
 				}
 			}
 		});
@@ -77,9 +81,7 @@ public class FirstProtoPlayerActivity extends Activity {
 		next.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				if (pBound) {
-					currentsong++;
-					if (currentsong == songstrings.size()) currentsong = 0;
-					player.switchTrack(Uri.parse(songstrings.get(currentsong).getAbsPath()));
+					switchTrack(true);
 				}
 			}
 		});
@@ -88,10 +90,7 @@ public class FirstProtoPlayerActivity extends Activity {
 		previous.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				if (pBound) {
-					if (currentsong == 0) currentsong = songstrings.size();
-					
-					currentsong--;
-					player.switchTrack(Uri.parse(songstrings.get(currentsong).getAbsPath()));
+					switchTrack(false);
 				}
 			}
 		});
@@ -102,9 +101,26 @@ public class FirstProtoPlayerActivity extends Activity {
 				intent = new Intent(FirstProtoPlayerActivity.this, ChoosePlaylistActivity.class);
 	            startActivity(intent);
 			}
-
 		});
-
+	}
+	
+	/**
+	 * Enforce the media player to switch to another track.
+	 * @param goNext If true, switch to next track in the play queue. If false, switch to previous track.
+	 */
+	private void switchTrack (boolean goNext) {
+		if (goNext) {
+			currentsong++;
+			if (currentsong == songstrings.size()) {
+				currentsong = 0;
+			}
+		} else {
+			currentsong--;
+			if (currentsong < 0) {
+				currentsong = songstrings.size() - 1;
+			}
+		}
+		player.switchTrack(songstrings.get(currentsong));
 	}
 
 	@Override
@@ -120,6 +136,7 @@ public class FirstProtoPlayerActivity extends Activity {
 		super.onResume();
 		startService(intent);
 		registerReceiver(bcr, new IntentFilter(PlayService.UPDATE_INFO));
+		registerReceiver(nextSongReceiver, new IntentFilter(PlayService.TRACK_CHANGE_NOTIFICATION));
 	}
 	
 	/**
@@ -128,6 +145,7 @@ public class FirstProtoPlayerActivity extends Activity {
 	public void onPause() {
 		super.onPause();
 		unregisterReceiver(bcr);
+		unregisterReceiver(nextSongReceiver);
 		stopService(intent);
 	}
 	
@@ -146,6 +164,14 @@ public class FirstProtoPlayerActivity extends Activity {
             pBound = false;
             player.die();
         }
+    };
+    
+    private BroadcastReceiver nextSongReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			
+		}
     };
     
     /**
@@ -194,9 +220,7 @@ public class FirstProtoPlayerActivity extends Activity {
 			} else if (seekBar == volumeBar) {
 				if (fromUser) {
 					Log.d(tag, "Changing volume to " + progress);
-					float maxvol = (float) am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-					float vol = ((float) progress/maxvol) * 100;
-					am.setStreamVolume(AudioManager.STREAM_MUSIC, (int) vol, 0);
+					am.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0);
 				}
 			}
 		}

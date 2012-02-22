@@ -16,8 +16,11 @@ public class PlayService extends Service {
 
 	private static final String tag = "SW8tag.PlayService";
 	public static final String UPDATE_INFO = "com.sw802f12.playservice.update_info";
+	public static final String TRACK_CHANGE_NOTIFICATION = "com.sw802f12.playservice.track_change_notification";
+	
 	private final Handler handler = new Handler();
 	Intent intent;
+	Song currentSong;
 	/**
 	 * Whether a playback is currently in session.
 	 */
@@ -79,7 +82,7 @@ public class PlayService extends Service {
 	/** 
 	 * Initiate or pause playback.
 	 */
-	public void playTrack(Uri trackUri) {
+	public void playTrack(Song song) {
 		if (paused) {
 			songPlayer.start();
 			paused = false;
@@ -88,20 +91,22 @@ public class PlayService extends Service {
 				songPlayer.pause();
 				paused = true;
 			} else {
-				startTrack(trackUri);
+				currentSong = song;
+				startTrack(Uri.parse(song.getAbsPath()));
 			}
 		}
 	}
 	
 	/**
 	 * Release the SongPlayer from the current song, and reassign it to the provided URI.
-	 * @param trackUri Song to play instead of current.
+	 * @param song Song to play instead of current.
 	 */
-	public void switchTrack(Uri trackUri) {
+	public void switchTrack(Song song) {
 		songPlayer.reset();
+		currentSong = song;
 		playing = false;
 		paused = false;
-		startTrack(trackUri);
+		startTrack(Uri.parse(song.getAbsPath()));
 	}
 	
 	/**
