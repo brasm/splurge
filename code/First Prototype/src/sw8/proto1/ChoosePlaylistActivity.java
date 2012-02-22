@@ -34,25 +34,15 @@ public class ChoosePlaylistActivity extends ListActivity {
 		File home = new File(MEDIA_PATH);
 		if (home.listFiles(new Mp3Filter()).length > 0) {
 			for (File file : home.listFiles(new Mp3Filter())) {
-				Song s = new Song(file.getName(), file.getAbsolutePath());
+				Song s = new Song(file.getAbsolutePath());
 				songs.add(s);
 			}
 		}
 
 		if (home.listFiles(new WmaFilter()).length > 0) {
 			for (File file : home.listFiles(new WmaFilter())) {
-				Song s = new Song(file.getName(), file.getAbsolutePath());
+				Song s = new Song(file.getAbsolutePath());
 				songs.add(s);
-			}
-
-		}
-
-		if (home.listFiles().length > 0) {
-			for (File file : home.listFiles()) {
-				if (file.isDirectory()) {
-					Song s = new Song(file.getName(), file.getAbsolutePath());
-					songs.add(s);
-				}
 			}
 
 		}

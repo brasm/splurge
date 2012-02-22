@@ -31,14 +31,14 @@ public class Playlist extends ArrayList<Song> {
 		File home = new File(path);
 		if (home.listFiles(new Mp3Filter()).length > 0) {
 			for (File file : home.listFiles(new Mp3Filter())) {
-				Song s = new Song(file.getName(), file.getAbsolutePath());
+				Song s = new Song(file.getAbsolutePath());
 				this.add(s);
 			}
 		}
 
 		if (home.listFiles(new WmaFilter()).length > 0) {
 			for (File file : home.listFiles(new WmaFilter())) {
-				Song s = new Song(file.getName(), file.getAbsolutePath());
+				Song s = new Song(file.getAbsolutePath());
 				this.add(s);
 			}
 
