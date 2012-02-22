@@ -95,13 +95,6 @@ public class FirstProtoPlayerActivity extends Activity {
 			}
 		});
 		
-		final Button playlist = (Button) findViewById(R.id.playlist_button);
-		playlist.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				intent = new Intent(FirstProtoPlayerActivity.this, ChoosePlaylistActivity.class);
-	            startActivity(intent);
-			}
-		});
 	}
 	
 	/**
