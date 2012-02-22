@@ -41,7 +41,7 @@
         android:layout_alignBottom="@+id/play"
         android:layout_toLeftOf="@+id/play"
         android:text="Last" />
-
+
     <SeekBar
         android:id="@+id/volume"
         android:layout_width="match_parent"
@@ -75,50 +75,47 @@
         android:layout_centerHorizontal="true"
         android:text="@string/defaultnotrack"
         android:textAppearance="?android:attr/textAppearanceMedium" />
-
+
+    
+
     <TextView
         android:id="@+id/nextsongspacer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/trackName"
+        android:layout_alignParentLeft="true"
         android:layout_below="@+id/playerVolumeText"
-        android:layout_marginTop="25dp"
+        android:layout_marginTop="10dp"
         android:text="@string/nextsong_text" />
 
     <TextView
         android:id="@+id/song4_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/nextsongspacer"
+        android:layout_alignParentLeft="true"
         android:layout_below="@+id/nextsongspacer"
-        android:layout_marginTop="10dp"
-        android:text="" />
+        android:layout_marginTop="10dp" />
 
     <TextView
         android:id="@+id/song3_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/song4_text"
         android:layout_below="@+id/song4_text"
-        android:layout_marginTop="10dp"
-        android:text="" />
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="10dp" />
 
     <TextView
         android:id="@+id/song2_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/song3_text"
         android:layout_below="@+id/song3_text"
-        android:layout_marginTop="10dp"
-        android:text="" />
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="10dp" />
 
     <TextView
         android:id="@+id/song1_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/song2_text"
         android:layout_below="@+id/song2_text"
-        android:layout_marginTop="10dp"
-        android:text="" />
-
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="10dp" />
 </RelativeLayout>
