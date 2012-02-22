@@ -16,7 +16,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
-import android.widget.TextView;
 
 public class FirstProtoPlayerActivity extends Activity {
 	/** Called when the activity is first created. */
@@ -30,7 +29,7 @@ public class FirstProtoPlayerActivity extends Activity {
 	boolean pBound = false;
 	Intent intent = new Intent();
 	
-	final Playlist songstrings = new Playlist();
+	Playlist songstrings;
 	AudioManager am;
 	
 	@Override
@@ -62,9 +61,8 @@ public class FirstProtoPlayerActivity extends Activity {
 		
 		progressBar = (SeekBar) findViewById(R.id.playProgress);
 		progressBar.setOnSeekBarChangeListener(new SeekbarListener());
-		final TextView t = (TextView) findViewById(R.id.trackName);
 
-		fillPlaylist();
+		songstrings = new Playlist();
 		
 		final Button play = (Button) findViewById(R.id.play);
 		play.setOnClickListener(new View.OnClickListener() {
@@ -203,21 +201,4 @@ public class FirstProtoPlayerActivity extends Activity {
 			}
 		}
 	};
-	
-	private void fillPlaylist() {
-		boolean anders = false;
-		
-		String basePath = "/sdcard/Music/";
-		
-		if (anders) {
-			songstrings.add(new Song("The Spell", basePath + "Alphabeat/The Best of Blue Magic_ Soulful Spell/01 The Spell.wma"));
-			songstrings.add(new Song("You Make me feel", basePath + "Cobra Starship/You Make Me Feel... (feat. Sabi) - Singl/01 You Make Me Feel... (feat. Sabi).wma"));
-			songstrings.add(new Song("Hvem springer du for", basePath + "De Eneste To/De eneste to/02 Hvem springer du for.wma"));
-		} else {
-			songstrings.add(new Song("Cemeteries of London", basePath + "Coldplay/Coldplay - Cemeteries Of London - Viva La Vida Or Death and all his friends.mp3"));
-			songstrings.add(new Song("Danmark Man Dark", basePath + "Nephew/Nephew - Danmark Man Dark - DanmarkDenmark.WMA"));
-			songstrings.add(new Song("Jerk It Out", basePath + "The Caesars/The Caesars - Jerk It Out - Love For The Streets.mp3"));
-			songstrings.add(new Song("Berlin", basePath + "Kent/Kent - Berlin - Tillbaka Till Samtiden.mp3"));
-		}		
-	}
 }

@@ -27,15 +27,7 @@ public class ChoosePlaylistActivity extends ListActivity {
 		updateSongList();
 		ListView lv = getListView();
 		
-		lv.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-		lv.setOnItemClickListener(new OnItemClickListener() {
-		    public void onItemClick(AdapterView<?> parent, View view,
-		        int position, long id) {
-		      // When clicked, show a toast with the TextView text
-		    	TextView t = ((SongView) view).getText();
-		    	Toast.makeText(getApplicationContext(), t.getText(), Toast.LENGTH_SHORT).show();
-		    }
-		  });
+		
 	}
 
 	public void updateSongList() {
