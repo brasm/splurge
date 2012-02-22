@@ -1,10 +1,11 @@
 package sw8.proto1;
 
+
 public class Song {
 
 	private String absPath;
 	private String name;
-	
+
 	public String getAbsPath() {
 		return absPath;
 	}
@@ -21,8 +22,10 @@ public class Song {
 		this.name = name;
 	}
 
-	public Song(String name, String abspath){
+	public Song(String name, String abspath) {
 		this.name = name;
 		this.absPath = abspath;
 	}
+
+	
 }
