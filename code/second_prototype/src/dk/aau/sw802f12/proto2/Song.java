@@ -54,10 +54,10 @@ public class Song {
 		this.absPath = abspath;
 		MediaMetadataRetriever mmr = new MediaMetadataRetriever();
 		mmr.setDataSource(abspath);
-		this.name = mmr.extractMetadata(mmr.METADATA_KEY_TITLE);
-		this.artist = mmr.extractMetadata(mmr.METADATA_KEY_ARTIST);
-		this.album = mmr.extractMetadata(mmr.METADATA_KEY_ALBUM);
-		this.tracknumber = mmr.extractMetadata(mmr.METADATA_KEY_CD_TRACK_NUMBER);
+		this.name = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+		this.artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+		this.album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+		this.tracknumber = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER);
 	}
 
 	
