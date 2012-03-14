@@ -12,6 +12,7 @@ import android.media.MediaPlayer.OnInfoListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.media.MediaPlayer.OnSeekCompleteListener;
 import android.os.IBinder;
+import android.util.Log;
 
 public class PlayService extends Service implements OnBufferingUpdateListener,
 		OnCompletionListener, OnErrorListener, OnInfoListener,
