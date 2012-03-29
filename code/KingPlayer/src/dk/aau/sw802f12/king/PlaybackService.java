@@ -1,6 +1,6 @@
 package dk.aau.sw802f12.king;
 
-import java.io.File;
+import java.io.IOException;
 
 import android.app.Service;
 import android.content.Intent;
@@ -8,12 +8,14 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Binder;
 import android.os.IBinder;
+import android.util.Log;
 
 public class PlaybackService extends Service implements OnCompletionListener {
 	private final IBinder mBinder = new LocalBinder();
-	private MediaPlayer mp;
+	private MediaPlayer mPlayer;
 	private boolean mPaused = false;
-	private Library mLibrary;
+	private PlayQueue mPlayQueue;
+	private Song mNext;
 
 	public class LocalBinder extends Binder {
 		PlaybackService getService() {
@@ -23,9 +25,10 @@ public class PlaybackService extends Service implements OnCompletionListener {
 
 	@Override
 	public void onCreate() {
-		mp = new MediaPlayer();
-		mp.setOnCompletionListener(this);
-		mLibrary = new Library(new File("/sdcard/Music"));
+		mPlayer = new MediaPlayer();
+		mPlayer.setOnCompletionListener(this);
+		mPlayQueue = PlayQueue.getInstance();
+		Log.d("KING", "onCreate done");
 	}
 
 	@Override
@@ -34,45 +37,79 @@ public class PlaybackService extends Service implements OnCompletionListener {
 	}
 
 	public void onCompletion(MediaPlayer mp) {
-		play();
+		next();
 	}
 
+
+	
+	// Playback Controls //////////////////////////////////////////////////////
+	
 	public void play() {
-		Song s = nextSong();
-		mp.reset();
 		try {
-			mp.setDataSource(s.getPath());
-			mp.prepare();
-		} catch (Exception e) {
-			e.printStackTrace();
+			mPlayer.reset();
+			mPlayer.setDataSource(mNext.getPath());
+			mPlayer.prepare();
+			mPlayer.start();
+			mPaused = false;
+		} catch (IllegalArgumentException e) {
+			// TODO
+		} catch (IllegalStateException e) {
+			// TODO
+		} catch (IOException e) {
+			// TODO
 		}
-		mp.start();
-		mPaused = false;
+	}
+	
+	public int getDuration(){
+		return mPlayer.getDuration();
+	}
+	
+	public int getCurrentPosition(){
+		return mPlayer.getCurrentPosition();
+	}
+	
+	public int getProgress(){
+		return (int) 100 * getCurrentPosition() / getDuration();
+	}
+	
+	public void stop(){
+		mPlayer.stop();
 	}
 
 	public void pause() {
-		mp.pause();
+		mPlayer.pause();
 		mPaused = true;
 	}
 
 	public void resume() {
-		mp.start();
+		mPlayer.start();
 		mPaused = false;
+	}
+	
+	public void next(){
+		Log.d("KING", "PlaybackService.next()");
+		mNext = mPlayQueue.getNext();
+		Log.d("KING",String
+				.format("Artist: %s, Title: %s, Album: %s", 
+						mNext.getArtist(), mNext.getTitle(), mNext.getAlbum()));
+		
+		play();
 	}
 
 	public void toggle() {
-		if (mp.isPlaying()) {
+		if (mNext == null) {
+			next();
+			return;
+		}
+		
+		if (mPlayer.isPlaying()) {
 			pause();
 			return;
 		}
-
+	
 		if (mPaused)
 			resume();
 		else
 			play();
-	}
-
-	private Song nextSong() {
-		return mLibrary.getRandomSong();
 	}
 }

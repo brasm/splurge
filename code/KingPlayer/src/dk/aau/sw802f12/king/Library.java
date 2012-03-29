@@ -1,41 +1,54 @@
 package dk.aau.sw802f12.king;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.HashMap;
+import java.util.Map;
+
+import android.util.Log;
 
 public class Library {
-	private List<Song> local = new ArrayList<Song>();
-	private int elements = 0;
-
-	public Song getRandomSong() {
-		if (elements == 0)
-			return null;
-		Random r = new Random();
-		int index = r.nextInt(elements);
-		local.get(index);
-		return local.get(index);
+	
+	private Map<String,SongList> mAllSongs;
+	private SongList mLocal;
+	
+	public SongList getLocal(){
+		return mLocal;
+	}
+	
+	private static Library mInstance = null;
+	public static Library getInstance(){
+		Log.d("KING", "Library.getInstance()");
+		if(mInstance == null){
+			mInstance = new Library();
+		}
+		return mInstance;
+	}
+		
+	private Library() {
+		mAllSongs = new HashMap<String,SongList>();
+		mLocal = new SongList(true,"local");
+		mAllSongs.put(mLocal.NAME,mLocal);
+		updateLocal(new File("/sdcard/Music"));
 	}
 
-	public Library(File path) {
-		update(path);
-	}
-
-	public void update(File path) {
-		if (!path.isDirectory())
-			throw new IllegalArgumentException("Not a directory: "
-					+ path.getAbsolutePath());
-
-		for (File f : path.listFiles()) {
+	private void updateLocal(File dir) {
+		File[] files;
+		try {
+			files = dir.listFiles();
+		} catch (NullPointerException e){
+			throw new IllegalArgumentException("Not a directory");
+		}
+		
+		for (File f : files) {
 			if (f.isDirectory()) {
-				update(f);
+				updateLocal(f);
 				continue;
 			}
+			
 			try {
-				local.add(new Song(f));
-				elements++;
-			} catch (IllegalSongFormatException e) {
+				mLocal.add(new Song(f));
+			} 
+			catch (IllegalArgumentException e) {
 				continue;
 			}
 		}
