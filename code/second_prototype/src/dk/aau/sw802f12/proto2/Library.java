@@ -2,8 +2,6 @@ package dk.aau.sw802f12.proto2;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,7 +10,7 @@ import android.os.Handler;
 public class Library {
 	private SongList mLocal;
 	private Map<File,Integer> mModificationTimes = new HashMap<File, Integer>();
-	private String mLibraryChecksum = null;
+	private long mLibraryChecksum;
 	private Handler mHandler = new Handler();
 	private Settings mSettings = Settings.getInstance();
 	
@@ -20,7 +18,7 @@ public class Library {
 		return mLocal;
 	}
 	
-	public String getChecksum(){
+	public long getChecksum(){
 		return mLibraryChecksum;
 	}
 	
@@ -62,32 +60,13 @@ public class Library {
 			return pathname.getName().toLowerCase().matches(fileTypeRegex);
 		}
 	};
-	 
-	private String md5(String s) {
-	    try {
-	        // Create MD5 Hash
-	        MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
-	        digest.update(s.getBytes());
-	        byte messageDigest[] = digest.digest();
-	        
-	        // Create Hex String
-	        StringBuffer hexString = new StringBuffer();
-	        for (int i=0; i<messageDigest.length; i++)
-	            hexString.append(Integer.toHexString(0xFF & messageDigest[i]));
-	        return hexString.toString();
-	        
-	    } catch (NoSuchAlgorithmException e) {
-	        e.printStackTrace();
-	    }
-	    return "";
-	}
 	
 	private void updateLibraryChecksum() {
-		long modtimes = 0;
+		long modsum = 0;
 		for(Entry<File, Integer> e :mModificationTimes.entrySet()){
-			modtimes += (long) e.getValue();
+			modsum += (long) e.getValue();
 		}
-		mLibraryChecksum = md5(String.valueOf(modtimes));	
+		mLibraryChecksum = modsum;		
 	}
 	
 	private void scanFilesystem(File dir){
