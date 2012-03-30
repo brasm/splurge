@@ -1,64 +1,76 @@
 package dk.aau.sw802f12.proto2;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import android.media.MediaMetadataRetriever;
 
 public class Song {
-
-	private String absPath;
-	private String name;
-	private String artist;
-	private String album;
-	private String tracknumber;
-
-	public String getAbsPath() {
-		return absPath;
-	}
-
-	public void setAbsPath(String absPath) {
-		this.absPath = absPath;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getArtist() {
-		return artist;
-	}
-
-	public void setArtist(String artist) {
-		this.artist = artist;
-	}
-
-	public String getAlbum() {
-		return album;
-	}
-
-	public void setAlbum(String album) {
-		this.album = album;
-	}
-
-	public String getTracknumber() {
-		return tracknumber;
-	}
-
-	public void setTracknumber(String tracknumber) {
-		this.tracknumber = tracknumber;
-	}
-
-	public Song(String abspath) {
-		this.absPath = abspath;
-		MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-		mmr.setDataSource(abspath);
-		this.name = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
-		this.artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-		this.album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
-		this.tracknumber = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER);
-	}
-
 	
+	private enum ID3 {
+		ARTIST, ALBUM, PATH, TITLE
+	}
+
+	private File song;
+	private Map<ID3,String> mId3;
+	
+	public String getAlbum(){
+		return getMetadata(ID3.ALBUM);
+	}
+		
+	public String getArtist(){
+		return getMetadata(ID3.ARTIST);
+	}
+	
+	public String getTitle() {
+		return getMetadata(ID3.TITLE);	
+	}
+	
+	public String getPath() {
+		return song.getAbsolutePath();
+	}
+	
+	public String getName(){
+		return song.getName();
+	}
+	
+	private String getMetadata(ID3 key){
+		String data = mId3.get(key);
+		if (data == null){
+			extractId3();
+			data = mId3.get(key);
+		}
+		return data;	
+	}
+	
+	private void extractId3(){
+		MediaMetadataRetriever mmdr = new MediaMetadataRetriever();
+		mmdr.setDataSource(song.getAbsolutePath());
+		
+		String artist = mmdr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+		String album = mmdr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+		String title = mmdr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+		
+		mId3.put(ID3.ARTIST, artist);
+		mId3.put(ID3.ALBUM, album);
+		mId3.put(ID3.TITLE, title);
+	}
+	
+	public Song(String path) throws IllegalArgumentException{
+		File f = new File(path);
+		init(f);
+	}
+
+	public Song(File f) throws IllegalArgumentException{
+		init(f);
+	}
+	
+	private void init(File f) throws IllegalArgumentException{
+		mId3 = new HashMap<Song.ID3, String>();
+		String fileTypeRegex = ".*\\.(flac|ogg|oga|mp3|wma)";
+		if (f.getName().toLowerCase().matches(fileTypeRegex))
+			song = f.getAbsoluteFile();
+		else
+			throw new IllegalArgumentException();	
+	}
 }

@@ -2,11 +2,14 @@
 <resources>
 
     <string name="hello">Hello World, FirstProtoPlayerActivity!</string>
-    <string name="app_name">First Prototype</string>
+    <string name="app_name">Second Prototype</string>
     <string name="volume">Volume</string>
     <string name="progress">Progress</string>
     <string name="defaultnotrack">No track currently playing.</string>
     <string name="playliststring">Playlist</string>
     <string name="nextsong_text">Next Songs:</string>
+    <string name="stop">Stop</string>
+    <string name="toggle">Play/Pause</string>
+    <string name="next">Next</string>
 
 </resources>
