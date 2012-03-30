@@ -30,7 +30,7 @@ public class PlayerActivity extends Activity {
 	private Button mNextBtn;
 
 	private void initView() {
-		setContentView(R.layout.brian);
+		setContentView(R.layout.bmtest);
 		mNowPlayingTitle = (TextView) findViewById(R.id.nowPlayingTitle);
 		mNowPlayingArtist = (TextView) findViewById(R.id.nowPlayingArtist);
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
