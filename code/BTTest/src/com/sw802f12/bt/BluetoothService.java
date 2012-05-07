@@ -8,10 +8,11 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
-import android.os.Handler;
+import android.util.Log;
 import android.widget.Toast;
 
 public class BluetoothService {
+	private static final String TAG = "SW8.bt";
 	private static final UUID MY_UUID = UUID.fromString("1fc95650-9836-11e1-a8b0-0800200c9a66");
 	
 	private Context context;
@@ -24,12 +25,12 @@ public class BluetoothService {
 	
 	public synchronized void start() {
 		AcceptThread aThread = new AcceptThread();
-		aThread.run();
+		aThread.start();
 	}
 	
 	public synchronized void connect(BluetoothDevice bd) {
 		ConnectThread cThread = new ConnectThread(bd);
-		cThread.run();
+		cThread.start();
 		cThread.cancel();
 	}
 
@@ -48,6 +49,7 @@ public class BluetoothService {
 	    }
 	 
 	    public void run() {
+	    	Log.d(TAG, "Starting server thread.");
 	        BluetoothSocket socket = null;
 	        // Keep listening until exception occurs or a socket is returned
 	        while (true) {
@@ -103,6 +105,7 @@ public class BluetoothService {
 	    }
 	 
 	    public void run() {
+	    	Log.d(TAG, "Starting client thread.");
 	        // Cancel discovery because it will slow down the connection
 	        mBluetoothAdapter.cancelDiscovery();
 	 
