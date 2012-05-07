@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Hello World, BTTestActivity!</string>
+    <string name="app_name">BTTest</string>
+    <string name="bt_on_string">Turn on Bluetooth!</string>
+    <string name="bt_off_string">Turn off Bluetooth!</string>
+    <string name="disc_string">Start Device Discovery!</string>
+    <string name="discover_enable">Enable Device Discovery!</string>
+    <string name="showbut">Show discovered devices</string>
+
+</resources>

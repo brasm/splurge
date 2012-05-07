@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <Button
+            android:id="@+id/bt_on"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="@string/bt_on_string" />
+
+        <Button
+            android:id="@+id/bt_off"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="@string/bt_off_string" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <Button
+            android:id="@+id/enable_disc_button"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="@string/discover_enable" />
+
+        <Button
+            android:id="@+id/disc_button"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="@string/disc_string" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <Button
+            android:id="@+id/showbut"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="@string/showbut" />
+
+    </LinearLayout>
+
+</LinearLayout>
