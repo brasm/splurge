@@ -13,7 +13,7 @@ import android.widget.Toast;
 
 public class BluetoothService {
 	private static final String TAG = "SW8.bt";
-	static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+	static final UUID MY_UUID = UUID.fromString("99E67F40-9849-11E1-A8B0-0800200C9A66");
 	
 	private Context context;
 	private BluetoothAdapter mBluetoothAdapter;
@@ -35,57 +35,48 @@ public class BluetoothService {
 	}
 
 	private class AcceptThread extends Thread {
-	    private final BluetoothServerSocket mmServerSocket;
-	 
+		private final BluetoothServerSocket mmServerSocket;
+		 
 	    public AcceptThread() {
 	        // Use a temporary object that is later assigned to mmServerSocket,
 	        // because mmServerSocket is final
 	        BluetoothServerSocket tmp = null;
 	        try {
 	            // MY_UUID is the app's UUID string, also used by the client code
-	            tmp = mBluetoothAdapter.listenUsingRfcommWithServiceRecord("ServerTest", MY_UUID);
+	            tmp = mBluetoothAdapter.listenUsingRfcommWithServiceRecord("BTserviceTest", MY_UUID);
 	        } catch (IOException e) { }
 	        mmServerSocket = tmp;
 	    }
 	 
 	    public void run() {
-	    	Log.d(TAG, "Starting server thread.");
 	        BluetoothSocket socket = null;
 	        // Keep listening until exception occurs or a socket is returned
 	        while (true) {
 	            try {
-	            	Log.d(TAG, "Waiting for incoming connection...");
 	                socket = mmServerSocket.accept();
 	            } catch (IOException e) {
-	            	Log.d(TAG, "Socket exception: " + e.getMessage());
 	                break;
 	            }
-	            
 	            // If a connection was accepted
 	            if (socket != null) {
-	            	Log.d(TAG, "BT connection OK. Starting worker.");
 	                // Do work to manage the connection (in a separate thread)
 	                manageConnectedSocket(socket);
 	                try {
-	                	Log.d(TAG, "Closing connection...");
 						mmServerSocket.close();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 	                break;
-	            } else {
-	            	Log.d(TAG, "Socket connection not accepted.");
-            	}
+	            }
 	        }
 	    }
-	 
+	    
 	    private void manageConnectedSocket(BluetoothSocket socket) {
-			// TODO Auto-generated method stub
-	    	Toast.makeText(context, "Jeg er server.", Toast.LENGTH_SHORT).show();
-		}
-
-		/** Will cancel the listening socket, and cause the thread to finish */
+	    	Log.d(TAG, "Connection as server OK - transmitting data");
+	    	Toast.makeText(context, "Server connected!", Toast.LENGTH_SHORT);
+	    }
+	 
+	    /** Will cancel the listening socket, and cause the thread to finish */
 	    public void cancel() {
 	        try {
 	            mmServerSocket.close();
@@ -94,58 +85,48 @@ public class BluetoothService {
 	}
 
 	private class ConnectThread extends Thread {
-	    private final BluetoothSocket mmSocket;
-	    private final BluetoothDevice mmDevice;
+		 private final BluetoothSocket mmSocket;
 	 
 	    public ConnectThread(BluetoothDevice device) {
 	        // Use a temporary object that is later assigned to mmSocket,
 	        // because mmSocket is final
 	        BluetoothSocket tmp = null;
-	        mmDevice = device;
 	 
 	        // Get a BluetoothSocket to connect with the given BluetoothDevice
 	        try {
 	            // MY_UUID is the app's UUID string, also used by the server code
 	            tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
-	        } catch (IOException e) {
-	        	Log.d(TAG, "Failed to set Socket service using UUID! " + e.getMessage());
-	        }
+	        } catch (IOException e) { }
 	        mmSocket = tmp;
 	    }
 	 
 	    public void run() {
-	    	Log.d(TAG, "Starting client thread.");
 	        // Cancel discovery because it will slow down the connection
 	        mBluetoothAdapter.cancelDiscovery();
-	        if (mmSocket != null) {
-	        	Log.d(TAG, "Connection OK.");
-	        }
 	 
 	        try {
 	            // Connect the device through the socket. This will block
 	            // until it succeeds or throws an exception
+	        	Log.d(TAG, "Connecting to BT peer.");
 	            mmSocket.connect();
 	        } catch (IOException connectException) {
-	        	Log.d(TAG, "Failed to connect: " + connectException.getMessage());
-	            // Unable to connect; close the socket and get clean up
+	            // Unable to connect; close the socket and get out
 	            try {
-	            	Log.d(TAG, "Closing connection.");
 	                mmSocket.close();
 	            } catch (IOException closeException) { }
 	            return;
 	        }
-	        
-	        Log.d(TAG, "Managing connection, yes...");
+	 
 	        // Do work to manage the connection (in a separate thread)
 	        manageConnectedSocket(mmSocket);
 	    }
+	    
+	    private void manageConnectedSocket(BluetoothSocket socket) {
+	    	Log.d(TAG, "Connected.");
+	    	Toast.makeText(context, "Client connected.", Toast.LENGTH_SHORT);
+	    }
 	 
-	    private void manageConnectedSocket(BluetoothSocket mmSocket2) {
-			// TODO Auto-generated method stub
-	    	Toast.makeText(context, "Jeg er client.", Toast.LENGTH_SHORT).show();
-		}
-
-		/** Will cancel an in-progress connection, and close the socket */
+	    /** Will cancel an in-progress connection, and close the socket */
 	    public void cancel() {
 	        try {
 	            mmSocket.close();
