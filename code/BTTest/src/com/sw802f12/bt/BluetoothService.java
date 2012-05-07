@@ -13,7 +13,7 @@ import android.widget.Toast;
 
 public class BluetoothService {
 	private static final String TAG = "SW8.bt";
-	private static final UUID MY_UUID = UUID.fromString("1fc95650-9836-11e1-a8b0-0800200c9a66");
+	static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 	
 	private Context context;
 	private BluetoothAdapter mBluetoothAdapter;
@@ -54,6 +54,7 @@ public class BluetoothService {
 	        // Keep listening until exception occurs or a socket is returned
 	        while (true) {
 	            try {
+	            	Log.d(TAG, "Waiting for incoming connection...");
 	                socket = mmServerSocket.accept();
 	            } catch (IOException e) {
 	            	Log.d(TAG, "Socket exception: " + e.getMessage());
@@ -73,7 +74,9 @@ public class BluetoothService {
 						e.printStackTrace();
 					}
 	                break;
-	            }
+	            } else {
+	            	Log.d(TAG, "Socket connection not accepted.");
+            	}
 	        }
 	    }
 	 
@@ -104,7 +107,9 @@ public class BluetoothService {
 	        try {
 	            // MY_UUID is the app's UUID string, also used by the server code
 	            tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
-	        } catch (IOException e) { }
+	        } catch (IOException e) {
+	        	Log.d(TAG, "Failed to set Socket service using UUID! " + e.getMessage());
+	        }
 	        mmSocket = tmp;
 	    }
 	 
@@ -112,6 +117,9 @@ public class BluetoothService {
 	    	Log.d(TAG, "Starting client thread.");
 	        // Cancel discovery because it will slow down the connection
 	        mBluetoothAdapter.cancelDiscovery();
+	        if (mmSocket != null) {
+	        	Log.d(TAG, "Connection OK.");
+	        }
 	 
 	        try {
 	            // Connect the device through the socket. This will block
@@ -119,7 +127,7 @@ public class BluetoothService {
 	            mmSocket.connect();
 	        } catch (IOException connectException) {
 	        	Log.d(TAG, "Failed to connect: " + connectException.getMessage());
-	            // Unable to connect; close the socket and get out
+	            // Unable to connect; close the socket and get clean up
 	            try {
 	            	Log.d(TAG, "Closing connection.");
 	                mmSocket.close();
