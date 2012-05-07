@@ -160,12 +160,13 @@ public class MainActivity extends Activity {
 			case KeyEvent.KEYCODE_VOLUME_UP:
 				am.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, 0);
 				volumeBar.setProgress(am.getStreamVolume(AudioManager.STREAM_MUSIC));
-			break;
+				return true;
 			case KeyEvent.KEYCODE_VOLUME_DOWN:
 				am.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, 0);
 				volumeBar.setProgress(am.getStreamVolume(AudioManager.STREAM_MUSIC));
-				break;
-		}
-		return true;
+				return true;
+			default:
+				return super.onKeyDown(keyCode, event);
+		}		
 	}
 }
