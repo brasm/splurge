@@ -8,5 +8,7 @@
     <string name="disc_string">Start Device Discovery!</string>
     <string name="discover_enable">Enable Device Discovery!</string>
     <string name="showbut">Show discovered devices</string>
+    <string name="serv">Start Server</string>
+    <string name="client">Start Client</string>
 
 </resources>

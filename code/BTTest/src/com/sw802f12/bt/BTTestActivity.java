@@ -1,11 +1,16 @@
 package com.sw802f12.bt;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.UUID;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothClass.Device;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothServerSocket;
+import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -23,8 +28,10 @@ public class BTTestActivity extends Activity {
 	private static final String TAG = "sw8.BT";
 	private BluetoothAdapter mBluetoothAdapter;
 
-	private ArrayList<String> discoveredPeers;
+	private ArrayList<BluetoothDevice> discoveredPeers;
 	private ArrayAdapter<String> pairArrayAdapter;
+	
+	protected UUID MY_UUID = new UUID(40000, 800000);
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +42,7 @@ public class BTTestActivity extends Activity {
 			// Device does not support Bluetooth
 		}
 		
-		discoveredPeers = new ArrayList<String>();
+		discoveredPeers = new ArrayList<BluetoothDevice>();
 
 		final Button BluOn = (Button) findViewById(R.id.bt_on);
 		BluOn.setOnClickListener(new View.OnClickListener() {
@@ -91,8 +98,8 @@ public class BTTestActivity extends Activity {
 				String peerlist = "You can see the following devices: ";
 				int counter = 1;
 				if (discoveredPeers != null) {
-					for (String m : discoveredPeers) {
-						peerlist = peerlist + counter + " - " + m + "   ";
+					for (BluetoothDevice m : discoveredPeers) {
+						peerlist = peerlist + counter + " - " + m.getName() + "   ";
 						counter++;
 					}
 				} else{
@@ -100,6 +107,22 @@ public class BTTestActivity extends Activity {
 				}
 				Toast.makeText(getApplicationContext(), peerlist,
 						Toast.LENGTH_SHORT).show();
+			}
+		});
+		
+		final Button serverButton = (Button) findViewById(R.id.serv_button);
+		serverButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				AcceptThread aThread = new AcceptThread();
+				aThread.run();
+			}
+		});
+		
+		final Button clientButton = (Button) findViewById(R.id.client_button);
+		clientButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				ConnectThread cThread = new ConnectThread(discoveredPeers.get(0));
+				cThread.run();
 			}
 		});
 
@@ -130,7 +153,7 @@ public class BTTestActivity extends Activity {
 				String devicename = device.getName();
 				// ListView
 				Log.d(TAG, devicename);
-				discoveredPeers.add(devicename);
+				discoveredPeers.add(device);
 				Log.d(TAG, "Added to list");
 			}
 		}
@@ -188,5 +211,107 @@ public class BTTestActivity extends Activity {
 		super.onDestroy();
 		unregisterReceiver(mReceiver);
 	}
+	
+	 
+	private class AcceptThread extends Thread {
+	    private final BluetoothServerSocket mmServerSocket;
+	 
+	    public AcceptThread() {
+	        // Use a temporary object that is later assigned to mmServerSocket,
+	        // because mmServerSocket is final
+	        BluetoothServerSocket tmp = null;
+	        try {
+	            // MY_UUID is the app's UUID string, also used by the client code
+	            tmp = mBluetoothAdapter.listenUsingRfcommWithServiceRecord("ServerTest", MY_UUID);
+	        } catch (IOException e) { }
+	        mmServerSocket = tmp;
+	    }
+	 
+	    public void run() {
+	        BluetoothSocket socket = null;
+	        // Keep listening until exception occurs or a socket is returned
+	        while (true) {
+	            try {
+	                socket = mmServerSocket.accept();
+	            } catch (IOException e) {
+	                break;
+	            }
+	            // If a connection was accepted
+	            if (socket != null) {
+	                // Do work to manage the connection (in a separate thread)
+	                manageConnectedSocket(socket);
+	                try {
+						mmServerSocket.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+	                break;
+	            }
+	        }
+	    }
+	 
+	    private void manageConnectedSocket(BluetoothSocket socket) {
+			// TODO Auto-generated method stub
+	    	Toast.makeText(getApplicationContext(), "Jeg er server.", Toast.LENGTH_SHORT).show();
+		}
 
+		/** Will cancel the listening socket, and cause the thread to finish */
+	    public void cancel() {
+	        try {
+	            mmServerSocket.close();
+	        } catch (IOException e) { }
+	    }
+	}
+
+	private class ConnectThread extends Thread {
+	    private final BluetoothSocket mmSocket;
+	    private final BluetoothDevice mmDevice;
+	 
+	    public ConnectThread(BluetoothDevice device) {
+	        // Use a temporary object that is later assigned to mmSocket,
+	        // because mmSocket is final
+	        BluetoothSocket tmp = null;
+	        mmDevice = device;
+	 
+	        // Get a BluetoothSocket to connect with the given BluetoothDevice
+	        try {
+	            // MY_UUID is the app's UUID string, also used by the server code
+	            tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
+	        } catch (IOException e) { }
+	        mmSocket = tmp;
+	    }
+	 
+	    public void run() {
+	        // Cancel discovery because it will slow down the connection
+	        mBluetoothAdapter.cancelDiscovery();
+	 
+	        try {
+	            // Connect the device through the socket. This will block
+	            // until it succeeds or throws an exception
+	            mmSocket.connect();
+	        } catch (IOException connectException) {
+	            // Unable to connect; close the socket and get out
+	            try {
+	                mmSocket.close();
+	            } catch (IOException closeException) { }
+	            return;
+	        }
+	 
+	        // Do work to manage the connection (in a separate thread)
+	        manageConnectedSocket(mmSocket);
+	    }
+	 
+	    private void manageConnectedSocket(BluetoothSocket mmSocket2) {
+			// TODO Auto-generated method stub
+	    	Toast.makeText(getApplicationContext(), "Jeg er client.", Toast.LENGTH_SHORT).show();
+		}
+
+		/** Will cancel an in-progress connection, and close the socket */
+	    public void cancel() {
+	        try {
+	            mmSocket.close();
+	        } catch (IOException e) { }
+	    }
+	}
 }

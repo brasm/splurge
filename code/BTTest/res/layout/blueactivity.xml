@@ -55,4 +55,23 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/linearLayout4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <Button
+            android:id="@+id/serv_button"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="@string/serv" />
+
+        <Button
+            android:id="@+id/client_button"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="@string/client" />
+
+    </LinearLayout>
+
 </LinearLayout>
