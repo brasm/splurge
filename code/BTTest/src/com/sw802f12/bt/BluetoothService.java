@@ -56,13 +56,17 @@ public class BluetoothService {
 	            try {
 	                socket = mmServerSocket.accept();
 	            } catch (IOException e) {
+	            	Log.d(TAG, "Socket exception: " + e.getMessage());
 	                break;
 	            }
+	            
 	            // If a connection was accepted
 	            if (socket != null) {
+	            	Log.d(TAG, "BT connection OK. Starting worker.");
 	                // Do work to manage the connection (in a separate thread)
 	                manageConnectedSocket(socket);
 	                try {
+	                	Log.d(TAG, "Closing connection...");
 						mmServerSocket.close();
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
@@ -114,13 +118,16 @@ public class BluetoothService {
 	            // until it succeeds or throws an exception
 	            mmSocket.connect();
 	        } catch (IOException connectException) {
+	        	Log.d(TAG, "Failed to connect: " + connectException.getMessage());
 	            // Unable to connect; close the socket and get out
 	            try {
+	            	Log.d(TAG, "Closing connection.");
 	                mmSocket.close();
 	            } catch (IOException closeException) { }
 	            return;
 	        }
-	 
+	        
+	        Log.d(TAG, "Managing connection, yes...");
 	        // Do work to manage the connection (in a separate thread)
 	        manageConnectedSocket(mmSocket);
 	    }
