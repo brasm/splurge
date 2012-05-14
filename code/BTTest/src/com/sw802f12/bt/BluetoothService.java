@@ -109,7 +109,9 @@ public class BluetoothService {
 	            // until it succeeds or throws an exception
 	        	Log.d(TAG, "Connecting to BT peer.");
 	            mmSocket.connect();
+	            Log.d(TAG, "Connection OK");
 	        } catch (IOException connectException) {
+	        	Log.d(TAG, "Failed to connect" + connectException.getMessage());
 	            // Unable to connect; close the socket and get out
 	            try {
 	                mmSocket.close();
