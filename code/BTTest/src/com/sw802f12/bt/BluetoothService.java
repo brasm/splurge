@@ -1,6 +1,8 @@
 package com.sw802f12.bt;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.UUID;
 
 import android.bluetooth.BluetoothAdapter;
@@ -8,8 +10,8 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.os.Handler;
 import android.util.Log;
-import android.widget.Toast;
 
 public class BluetoothService {
 	private static final String TAG = "sw8.BT";
@@ -31,6 +33,7 @@ public class BluetoothService {
 
 	public synchronized void connect(BluetoothDevice bd) {
 		ConnectThread cThread = new ConnectThread(bd);
+		Log.d(TAG, "Starting thread.");
 		cThread.start();
 	}
 
@@ -88,6 +91,11 @@ public class BluetoothService {
 
 		private void manageConnectedSocket(BluetoothSocket socket) {
 			Log.d(TAG, "Connection as server OK - transmitting data");
+			ConnectedThread ct = new ConnectedThread(socket);
+			ct.start();
+			String in = "testingStr";
+			ct.write(in.getBytes());
+			Log.d(TAG, "Written " + in);
 		}
 
 		/** Will cancel the listening socket, and cause the thread to finish */
@@ -103,6 +111,7 @@ public class BluetoothService {
 		private final BluetoothSocket mmSocket;
 
 		public ConnectThread(BluetoothDevice device) {
+			Log.d(TAG, "ConnectThread started.");
 			// Use a temporary object that is later assigned to mmSocket,
 			// because mmSocket is final
 			BluetoothSocket tmp = null;
@@ -111,10 +120,13 @@ public class BluetoothService {
 			try {
 				// MY_UUID is the app's UUID string, also used by the server
 				// code
+				Log.d(TAG, "Trying to create socket.");
 				tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
 			} catch (IOException e) {
+				Log.d(TAG, "Could not create socket.");
 			}
 			mmSocket = tmp;
+			Log.d(TAG, "CONNECTHREAD created.");
 		}
 
 		public void run() {
@@ -143,6 +155,8 @@ public class BluetoothService {
 
 		private void manageConnectedSocket(BluetoothSocket socket) {
 			Log.d(TAG, "Connected.");
+			ConnectedThread ct = new ConnectedThread(socket);
+			ct.start();
 		}
 
 		/** Will cancel an in-progress connection, and close the socket */
@@ -152,5 +166,59 @@ public class BluetoothService {
 			} catch (IOException e) {
 			}
 		}
+	}
+	
+	private class ConnectedThread extends Thread {
+	    private final BluetoothSocket mmSocket;
+	    private final InputStream mmInStream;
+	    private final OutputStream mmOutStream;
+	 
+	    public ConnectedThread(BluetoothSocket socket) {
+	        mmSocket = socket;
+	        InputStream tmpIn = null;
+	        OutputStream tmpOut = null;
+	 
+	        // Get the input and output streams, using temp objects because
+	        // member streams are final
+	        try {
+	            tmpIn = socket.getInputStream();
+	            tmpOut = socket.getOutputStream();
+	        } catch (IOException e) { }
+	 
+	        mmInStream = tmpIn;
+	        mmOutStream = tmpOut;
+	    }
+	 
+	    public void run() {
+	        byte[] buffer = new byte[1024];  // buffer store for the stream
+	        int bytes; // bytes returned from read()
+	 
+	        // Keep listening to the InputStream until an exception occurs
+	        while (true) {
+	            try {
+	                // Read from the InputStream
+	                bytes = mmInStream.read(buffer);
+	                // Send the obtained bytes to the UI activity
+	                Log.d(TAG, new String(buffer));
+	                
+	            } catch (IOException e) {
+	                break;
+	            }
+	        }
+	    }
+	 
+	    /* Call this from the main activity to send data to the remote device */
+	    public void write(byte[] bytes) {
+	        try {
+	            mmOutStream.write(bytes);
+	        } catch (IOException e) { }
+	    }
+	 
+	    /* Call this from the main activity to shutdown the connection */
+	    public void cancel() {
+	        try {
+	            mmSocket.close();
+	        } catch (IOException e) { }
+	    }
 	}
 }

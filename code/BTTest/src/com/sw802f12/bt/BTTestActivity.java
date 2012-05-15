@@ -124,11 +124,12 @@ public class BTTestActivity extends Activity {
 				BluetoothService bts = new BluetoothService(getApplicationContext(), mBluetoothAdapter);
 				Log.d(TAG, "trying to connect-client");
 				for(BluetoothDevice device: discoveredPeers){
-					if (device.getName() == "GT-I9100"){
+					Log.d(TAG, "DEVICE NAME: " + device.getName());
+					if (device.getName().equals("GT-I9100")) {
+						Log.d(TAG, "Discovered, OK.");
 						bts.connect(device);
 					}
 				}
-				
 			}
 		});
 
