@@ -199,7 +199,7 @@ public class BluetoothService {
 	                // Read from the InputStream
 	                bytes = mmInStream.read(buffer);
 	                // Send the obtained bytes to the UI activity
-	                Log.d(TAG, new String(buffer));
+	                Log.d(TAG, new String(buffer, 0, bytes));
 	                
 	            } catch (IOException e) {
 	                break;
