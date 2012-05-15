@@ -113,6 +113,7 @@ public class BTTestActivity extends Activity {
 		serverButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				BluetoothService bts = new BluetoothService(getApplicationContext(), mBluetoothAdapter);
+				Log.d(TAG, "trying to connect-server");
 				bts.start();
 			}
 		});
@@ -121,7 +122,13 @@ public class BTTestActivity extends Activity {
 		clientButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				BluetoothService bts = new BluetoothService(getApplicationContext(), mBluetoothAdapter);
-				bts.connect(discoveredPeers.get(0));
+				Log.d(TAG, "trying to connect-client");
+				for(BluetoothDevice device: discoveredPeers){
+					if (device.getName() == "GT-I9100"){
+						bts.connect(device);
+					}
+				}
+				
 			}
 		});
 
