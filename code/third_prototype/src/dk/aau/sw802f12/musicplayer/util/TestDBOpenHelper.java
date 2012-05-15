@@ -3,6 +3,7 @@ package dk.aau.sw802f12.musicplayer.util;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import android.content.ContentValues;
@@ -562,9 +563,16 @@ class TestDBOpenHelper extends SQLiteOpenHelper {
 		
 		if (!c.moveToFirst()) return null;
 		
-		Artist a = mf.getArtist(c.getLong(0));
-		User u = mf.getUser(c.getLong(2));
-		Song s = new Song(c.getString(1), a, u, c.getString(3), songTags(songId));
+		long aId = c.getLong(0);
+		long uId = c.getLong(2);
+		String sTitle = c.getString(1);
+		String sLoc = c.getString(3);
+		
+		c.close();
+		
+		Artist a = mf.getArtist(aId);
+		User u = mf.getUser(uId);
+		Song s = new Song(sTitle, a, u, sLoc, songTags(songId));
 		s.setId(songId);
 		return s;
 	}
@@ -580,7 +588,10 @@ class TestDBOpenHelper extends SQLiteOpenHelper {
 		Cursor c = db.query(DB.TB_ARTIST, cols, "rowid = " + artistId, null, null, null, null);
 		
 		if (!c.moveToFirst()) return null;
-		Artist a = new Artist(c.getString(0), artistTags(artistId));
+		String aName = c.getString(0);
+		c.close();
+		
+		Artist a = new Artist(aName, artistTags(artistId));
 		return a;
 	}
 	
@@ -595,7 +606,10 @@ class TestDBOpenHelper extends SQLiteOpenHelper {
 		Cursor c = db.query(DB.TB_TAG, cols, "rowid = " + tagId, null, null, null, null);
 		
 		if (!c.moveToFirst()) return null;
-		Tag t = new Tag(c.getString(0));
+		String tName = c.getString(0);
+		c.close();
+		
+		Tag t = new Tag(tName);
 		return t;
 	}
 	
@@ -604,7 +618,10 @@ class TestDBOpenHelper extends SQLiteOpenHelper {
 		Cursor c = db.query(DB.TB_USER, cols, "rowid = " + userId, null, null, null, null);
 		
 		if (!c.moveToFirst()) return null;
-		User u = new User(c.getString(0));
+		String uAddr = c.getString(0);
+		c.close();
+		
+		User u = new User(uAddr);
 		return u;
 	}
 
@@ -620,10 +637,16 @@ class TestDBOpenHelper extends SQLiteOpenHelper {
 		String selection = DB.SONGTAG_SONG + " = " + songId;
 		Cursor cu = db.query(DB.TB_SONGTAGS, cols, selection, null, null, null, null);
 		
-		while (cu.moveToNext()) {
-			c.add(mf.getTag(cu.getLong(0)));
-		}		
+		ArrayList<Long> tagIds = new ArrayList<Long>();
 		
+		while (cu.moveToNext()) {
+			tagIds.add(cu.getLong(0));
+		}
+		cu.close();
+		
+		for (Long tagid : tagIds)
+			c.add(mf.getTag(tagid));
+
 		return c;
 	}
 	
@@ -639,9 +662,16 @@ class TestDBOpenHelper extends SQLiteOpenHelper {
 		String selection = DB.ARTISTTAG_ARTIST + " = " + artistId;
 		Cursor cu = db.query(DB.TB_ARTISTTAGS, cols, selection, null, null, null, null);
 		
+		ArrayList<Long> tagIds = new ArrayList<Long>();
+		
 		while (cu.moveToNext()) {
-			c.add(mf.getTag(cu.getLong(0)));
+			tagIds.add(cu.getLong(0));
 		}
+		
+		cu.close();
+		
+		for (Long tagId : tagIds)
+			c.add(mf.getTag(tagId));
 		
 		return c;
 	}
@@ -657,9 +687,16 @@ class TestDBOpenHelper extends SQLiteOpenHelper {
 		String selection = DB.USERARTIST_USER + " = " + userId;
 		Cursor cu = db.query(DB.TB_USERARTIST, cols, selection, null, null, null, null);
 		
+		ArrayList<Long> artistIds = new ArrayList<Long>();
+		
 		while (cu.moveToNext()) {
-			a.add(mf.getArtist(cu.getLong(0)));
+			artistIds.add(cu.getLong(0));
 		}
+		
+		cu.close();
+		
+		for (Long artistId : artistIds)
+			a.add(mf.getArtist(artistId));
 		
 		return a;
 	}
@@ -673,18 +710,34 @@ class TestDBOpenHelper extends SQLiteOpenHelper {
 		String[] cols = {DB.SONG_ARTIST, DB.SONG_TITLE, DB.SONG_HOST, DB.SONG_LOCATION, "rowid"};
 		Cursor cu = db.query(DB.TB_SONG, cols, null, null, null, null, null);
 		
+		ArrayList<Long> songIds = new ArrayList<Long>();
+		
+		HashMap<Long, Long> artistIds 	= new HashMap<Long, Long>();
+		HashMap<Long, Long> userIds 	= new HashMap<Long, Long>();
+		HashMap<Long, String> titles 	= new HashMap<Long, String>();
+		HashMap<Long, String> locations = new HashMap<Long, String>();
+		
 		while (cu.moveToNext()) {
-			Song s = mf.songLoaded(cu.getLong(4));
+			Long l = cu.getLong(4);
+			Song s = mf.songLoaded(l);
 			if (s == null) {
-				Artist artist = mf.getArtist(cu.getLong(0));
-				User user = mf.getUser(cu.getLong(2));
-				Collection<Tag> tags = songTags(cu.getLong(4));
-				s = new Song(cu.getString(1), artist, user, cu.getString(3), tags);
-				s.setId(cu.getLong(4));
+				songIds.add(l);
+				artistIds.put(l, cu.getLong(0));
+				userIds.put(l, cu.getLong(2));
+				titles.put(l, cu.getString(1));
+				locations.put(l, cu.getString(3));
+			} else {
+				songs.add(s);
 			}
-			songs.add(s);
 		}
-		Log.d(TAG, "Loaded songs.");
+		
+		cu.close();
+		
+		for (Long sid : songIds) {
+			songs.add(new Song(titles.get(sid), mf.getArtist(artistIds.get(sid)), 
+					mf.getUser(userIds.get(sid)), locations.get(sid), songTags(sid)));
+		}
+		
 		return songs;
 	}
 	
@@ -705,6 +758,10 @@ class TestDBOpenHelper extends SQLiteOpenHelper {
 			}
 			artists.add(artist);
 		}
+		//If other entities should be loaded during the above loop. 
+		//Load data to temporary storage first, then close cursor, THEN assign to new Artist objects!
+		
+		cu.close();
 		
 		return artists;
 	}
@@ -718,14 +775,25 @@ class TestDBOpenHelper extends SQLiteOpenHelper {
 		String[] cols = {DB.USER_ADDRESS, "rowid"};
 		Cursor cu = db.query(DB.TB_USER, cols, null, null, null, null, null);
 		
+		ArrayList<Long> userIds = new ArrayList<Long>();
+		ArrayList<String> userLocs = new ArrayList<String>();
+		
 		while (cu.moveToNext()) {
-			User user = mf.userLoaded(cu.getLong(1));
-			if (user == null) {
-				Collection<Artist> sugg = userArtists(cu.getLong(1));
-				user = new User(cu.getString(0), sugg);
-				user.setId(cu.getLong(1));
+			Long uId = cu.getLong(1);
+			User u = mf.getUser(uId);
+			if (u != null) users.add(u);
+			else {
+				userIds.add(cu.getLong(1));
+				userLocs.add(cu.getString(0));
 			}
-			users.add(user);
+		}
+		cu.close();
+		
+		for (int i = 0, s = userIds.size(); i < s; ++i) {
+			long sid = userIds.get(i);
+			User u = new User(userLocs.get(i), userArtists(sid));
+			u.setId(sid);
+			users.add(u);
 		}
 		
 		return users;
