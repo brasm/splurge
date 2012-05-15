@@ -8,7 +8,7 @@ public class Settings {
 	private File localMusicFolder = new File("/sdcard/Music");
 	private String deviceName = "MyAndroidDevice";
 	private int userInterfaceUpdateInterval = 500;
-
+	private int httpThreads = 10;
 		
 	public int getLibraryUpdateInterval() {
 		return libraryUpdateInterval;
@@ -54,4 +54,11 @@ public class Settings {
 		this.userInterfaceUpdateInterval = userInterfaceUpdateInterval;
 	}
 
+	public int getHttpThreads() {
+		return httpThreads;
+	}
+
+	public void setHttpThreads(int httpThreads) {
+		this.httpThreads = httpThreads;
+	}
 }

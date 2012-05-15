@@ -67,7 +67,7 @@ public class Song {
 	
 	private void init(File f) throws IllegalArgumentException{
 		mId3 = new HashMap<Song.ID3, String>();
-		String fileTypeRegex = ".*\\.(flac|ogg|oga|mp3|wma)";
+		String fileTypeRegex = ".*\\.(flac|ogg|oga|mp3|wma|m4a)";
 		if (f.getName().toLowerCase().matches(fileTypeRegex))
 			song = f.getAbsoluteFile();
 		else
