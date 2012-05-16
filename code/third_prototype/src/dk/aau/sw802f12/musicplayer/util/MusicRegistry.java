@@ -4,19 +4,18 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import android.content.Context;
-import android.util.Log;
 
-public class MusicFactory {
+public class MusicRegistry {
 	HashMap<Long, Artist> artists;
 	HashMap<Long, Song> songs;
 	HashMap<Long, Tag> tags;
 	HashMap<Long, User> users;
 	private static TestDBOpenHelper db;
-	private static MusicFactory instance = null;
+	private static MusicRegistry instance = null;
 	
-	public static MusicFactory getInstance(Context context) {
+	public static MusicRegistry getInstance(Context context) {
 		if (instance == null) {
-			instance = new MusicFactory(context);
+			instance = new MusicRegistry(context);
 			db = new TestDBOpenHelper(context);
 			db.getWritableDatabase();
 		}
@@ -24,10 +23,10 @@ public class MusicFactory {
 	}
 	
 	/**
-	 * Create new MusicFactory, for loading {@link Artist}s, {@link Song}s, and {@link Tag}s from the database.
+	 * Create new MusicRegistry, for loading {@link Artist}s, {@link Song}s, and {@link Tag}s from the database.
 	 * @param context
 	 */
-	private MusicFactory(Context context) {
+	private MusicRegistry(Context context) {
 		artists = new HashMap<Long, Artist>();
 		songs = new HashMap<Long, Song>();
 		tags = new HashMap<Long, Tag>();

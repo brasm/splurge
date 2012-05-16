@@ -175,11 +175,11 @@ class TestDBOpenHelper extends SQLiteOpenHelper {
 	}
 		
 	private SQLiteDatabase db;
-	private MusicFactory mf;
+	private MusicRegistry mf;
 	
 	public TestDBOpenHelper(Context context) {
 		super(context, DB.NAME, null, DB.VERSION);
-		mf = MusicFactory.getInstance(context);
+		mf = MusicRegistry.getInstance(context);
 	}
 
 	private void create() throws SQLException {
