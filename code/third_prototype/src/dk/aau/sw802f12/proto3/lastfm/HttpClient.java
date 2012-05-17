@@ -47,6 +47,7 @@ public class HttpClient{
 			db = dbf.newDocumentBuilder();
 			return db.parse(url);
 		} catch( Exception e){
+			Log.d("LASTFM","EXCEPTION " + e.getMessage());
 			return null;
 		}
 	}
