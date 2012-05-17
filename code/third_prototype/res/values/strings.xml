@@ -9,5 +9,7 @@
     <string name="volume">Volume</string>
     <string name="defaultnotrack">No track currently playing.</string>
     <string name="nextsong_text">Next songs:</string>
+    <string name="con_set">Connection Settings</string>
+    <string name="con_start">Start Connection</string>
 
 </resources>
