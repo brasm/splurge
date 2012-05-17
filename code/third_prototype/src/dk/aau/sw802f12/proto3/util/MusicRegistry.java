@@ -236,8 +236,126 @@ public class MusicRegistry {
 		return users.get(userId);
 	}
 	
-	public Artist searchArtist(String name) {
+	/**
+	 * Retrieve an {@link Artist} from the database, or, should it not exist, create it.
+	 * Note that the provided name must match exactly, or else a new Artist will be created.
+	 * @param name The name of the Artist to get.
+	 * @return The Artist with the provided name.
+	 */
+	public Artist createArtist(String name) {
+		Artist a = db.searchArtist(name);
+		if (a != null) return a;
+
+		a = new Artist(name);
+		updateDB(a);
+		return a;
+	}
+	
+	/**
+	 * Retrieve a {@link Song} from the database, or, should it not exist, create it.
+	 * Note that the provided attributes must match exactly, or else a new Song will be created.
+	 * @param title The title of the Song.
+	 * @param artist The name of the {@link Artist} of the Song.
+	 * @param host The bluetooth MAC address of the {@link User} hosting the Song.
+	 * @param location The path to the Song.
+	 * @return The Song with the parameters passed.
+	 */
+	public Song createSong(String title, String artist, String host, String location) {
+		Song s = db.searchSong(title, artist, host, location);
 		
-		return null;
+		if (s == null) {
+			User u = new User(host);
+			db.updateDB(u);
+			s = new Song(title, createArtist(artist), u, location);
+			db.updateDB(s);
+		}
+		return s;
+	}
+	
+	/**
+	 * Retrieve a {@link Song} from the database, or, should it not exist, create it.
+	 * Note that the provided attributes must match exactly, or else a new Song will be created.
+	 * @param title The title of the Song.
+	 * @param artist The {@link Artist} of the Song.
+	 * @param host The bluetooth MAC address of the {@link User} hosting the Song.
+	 * @param location The path to the Song.
+	 * @return The Song with the parameters passed.
+	 */
+	public Song createSong(String title, Artist artist, String host, String location) {
+		Song s = db.searchSong(title, artist, host, location);
+		if (s == null) {
+			User u = new User(host);
+			db.updateDB(u);
+			s = new Song(title, artist, u, location);
+			db.updateDB(s);
+		}
+		return s;
+	}
+	
+	/**
+	 * Retrieve a {@link Song} from the database, or, should it not exist, create it.
+	 * Note that the provided attributes must match exactly, or else a new Song will be created.
+	 * @param title The title of the Song.
+	 * @param artist The {@link Artist} of the Song.
+	 * @param host The {@link User} hosting the Song.
+	 * @param location The path to the Song.
+	 * @return The Song with the parameters passed.
+	 */
+	public Song createSong(String title, Artist artist, User host, String location) {
+		Song s = db.searchSong(title, artist, host, location);
+		if (s == null) {
+			s = new Song(title, artist, host, location);
+			db.updateDB(s);
+		}
+		return s;
+	}
+	
+	/**
+	 * Retrieve a {@link Song} from the database, or, should it not exist, create it.
+	 * Note that the provided attributes must match exactly, or else a new Song will be created.
+	 * @param title The title of the Song.
+	 * @param artist The name of the {@link Artist} of the Song.
+	 * @param host The {@link User} hosting the Song.
+	 * @param location The path to the Song.
+	 * @return The Song with the parameters passed.
+	 */
+	public Song createSong(String title, String artist, User host, String location) {
+		Song s = db.searchSong(title, artist, host, location);
+		if (s == null) {
+			s = new Song(title, createArtist(artist), host, location);
+			db.updateDB(s);
+		}
+		return s;
+	}
+	
+	/**
+	 * Retrieve a {@link User} from the database, or, should it not exist, create it.
+	 * Note that the provided bluetooth address must match exactly - though casing is not important.
+	 * @param btAddress The Bluetooth address of the User.
+	 * @return The User with the Bluetooth address passed.
+	 */
+	public User createUser(String btAddress) {
+		btAddress = btAddress.toUpperCase();
+		User u = db.searchUser(btAddress);
+		if (u == null) {
+			u = new User(btAddress);
+			db.updateDB(u);
+		}
+		return u;
+	}
+	
+	/**
+	 * Retrieve a {@link Tag} from the database, or, should it not exist, create it.
+	 * Note that the provided tag name must match exactly, or else, a new tag will be created.
+	 * @param tagName The Tag name to search for.
+	 * @return The matching tag.
+	 */
+	public Tag createTag(String tagName) {
+		Tag t = db.searchTag(tagName);
+		if (t == null) {
+			t = new Tag(tagName);
+			db.updateDB(t);
+		}
+		return t;
 	}
 }

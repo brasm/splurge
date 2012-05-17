@@ -461,7 +461,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @param tag The Tag to add.
 	 * @return The database id of the added relation.
 	 */
-	void add(Song song, Tag tag) {
+	private void add(Song song, Tag tag) {
 		//TODO: CHECK WHAT HAPPENS IF ATTEMPTING TO INSERT EXISTING RELATION
 		if (song.getId() == -1) add(song);
 		if (tag.getId() == -1) add(tag);
@@ -474,7 +474,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @param tag The Tag to add.
 	 * @return The database id of the added relation.
 	 */
-	void add(Artist artist, Tag tag) {
+	private void add(Artist artist, Tag tag) {
 		//TODO: CHECK WHAT HAPPENS IF ATTEMPTING TO INSERT EXISTING RELATION
 		if (artist.getId() == -1) add(artist);
 		if (tag.getId() == -1) add(tag);
@@ -487,7 +487,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @param user The User of the Artist-User relation.
 	 * @param rating The rating of the Artist-User relation
 	 */
-	void add(Artist artist, User user, short rating) {
+	private void add(Artist artist, User user, short rating) {
 		//TODO: CHECK WHAT HAPPENS IF ATTEMPTING TO INSERT EXISTING RELATION
 		if (artist.getId() == -1) add(artist);
 		if (user.getId() == -1) add(user);
@@ -991,7 +991,14 @@ class DBHelper extends SQLiteOpenHelper {
 		db.delete(DB.TB_SONGTAGS, DB.SONGTAG_SONG + "=" + song.getId(), null);
 	}
 	
-	Artist searchName(String name) {
+	/**
+	 * Search the database for an {@link Artist} with the provided name.
+	 * Currently only does a "stupid search", ie. strings must be exactly equal.
+	 * Returns null if no Artist with the provided attributes exist.
+	 * @param name The name to search for.
+	 * @return The first Artist matching the provided name.
+	 */
+	Artist searchArtist(String name) {
 		String[] cols = {"rowid"};
 		String[] selectionArg = {name};
 		Cursor c = db.query(DB.TB_ARTIST, cols, DB.ARTIST_NAME + "= ?", selectionArg, null, null, null, null);
@@ -1003,5 +1010,145 @@ class DBHelper extends SQLiteOpenHelper {
 		c.close();
 		
 		return mf.getArtist(aId);		
+	}
+	
+	/**
+	 * Search the database for a {@link Song} with the provided attributes.
+	 * Currently only does a "stupid search", ie. strings must be exactly equal.
+	 * Returns null if no Song with the provided attributes exist.
+	 * @param title The title to search for.
+	 * @param artist The name of the artist to search for.
+	 * @param host The host, the Song is at (can be null).
+	 * @param location The location of the Song.
+	 * @return The first Song matching the provided attributes.
+	 */
+	Song searchSong(String title, String artist, String host, String location) {
+		if (host == null) return searchSong(title, searchArtist(artist).getId(), location);
+		return searchSong(title, searchArtist(artist).getId(), searchUser(host).getId(), location);
+	}
+	
+	/**
+	 * Search the database for a {@link Song} with the provided attributes.
+	 * Currently only does a "stupid search", ie. strings must be exactly equal.
+	 * Returns null if no Song with the provided attributes exist.
+	 * @param title The title to search for.
+	 * @param artist The {@link Artist} to search.
+	 * @param host The host, the Song is at (can be null).
+	 * @param location The location of the Song.
+	 * @return The Song matching the provided attributes.
+	 */
+	Song searchSong(String title, Artist artist, String host, String location) {
+		if (host == null) return searchSong(title, artist.getId(), location);
+		return searchSong(title, artist.getId(), searchUser(host).getId(), location);
+	}
+	
+	/**
+	 * Search the database for a {@link Song} with the provided attributes.
+	 * Currently only does a "stupid search", ie. strings must be exactly equal.
+	 * @param title The title to search for.
+	 * @param artist The Artist name to search for.
+	 * @param host The {@link User} that hosts the Song (can be null).
+	 * @param location The path of the Song.
+	 * @return The Song matching the provided attributes.
+	 */
+	Song searchSong(String title, String artist, User host, String location) {
+		if (host == null) return searchSong(title, searchArtist(artist).getId(), location);
+		return searchSong(title, searchArtist(artist).getId(), host.getId(), location);
+	}
+	
+	/**
+	 * Search the database for a {@link Song} with the provided attributes.
+	 * Currently only does a "stupid search", ie. strings must be exactly equal.
+	 * Returns null if no Song with the provided attributes exist.
+	 * @param title The title to search for.
+	 * @param artist The {@link Artist} to search for.
+	 * @param host The {@link User} that hosts the Song (can be null).
+	 * @param location The path of the song.
+	 * @return The Song matching the provided attributes.
+	 */
+	Song searchSong(String title, Artist artist, User host, String location) {
+		if (host == null) return searchSong(title, artist.getId(), location);
+		return searchSong(title, artist.getId(), host.getId(), location);
+	}
+	
+	/**
+	 * Search the database for a {@link Song} with the provided attributes.
+	 * Currently only does a "stupid search", ie. strings must be exactly equal.
+	 * Returns null if no Song with the provided attributes exist.
+	 * @param title The title to search for.
+	 * @param artist The id of the Artist to search for.
+	 * @param location The path of the song.
+	 * @return The Song matching the provided attributes.
+	 */
+	private Song searchSong(String title, long artist, String location) {
+		String[] cols = {"rowid"};
+		long sId = -1;
+		String selection = DB.SONG_TITLE + " = ? " + DB.SONG_ARTIST + " = ? " + DB.SONG_LOCATION + " = ? ";
+		String[] selArg = {title, "" + artist, location};
+		
+		Cursor c = db.query(DB.TB_SONG, cols, selection, selArg, null, null, null);
+		if (c.moveToFirst()) sId = c.getLong(0);
+		c.close();
+		
+		return mf.getSong(sId);		
+	}
+	
+	/**
+	 * Search the database for a {@link Song} with the provided attributes.
+	 * Currently only does a "stupid search", ie. strings must be exactly equal.
+	 * Returns null if no Song with the provided attributes exist.
+	 * @param title The title to search for.
+	 * @param artist The id of the {@link Artist} to search for.
+	 * @param host The id of the {@link Host} to search for.
+	 * @param location The path of the song.
+	 * @return The Song matching the provided attributes.
+	 */
+	private Song searchSong(String title, long artist, long host, String location) {
+		String[] cols = {"rowid"};
+		long sId = -1;
+		
+		String selection = DB.SONG_TITLE + " = ? " + DB.SONG_ARTIST + " = ? " + DB.SONG_LOCATION + " = ?" + DB.SONG_HOST + " = ?";
+		String[] selArg = {title, "" + artist, location, "" + host};
+		
+		Cursor c = db.query(DB.TB_SONG, cols, selection, selArg, null, null, null);
+		if (c.moveToFirst()) sId = c.getLong(0);
+		c.close();
+		
+		return mf.getSong(sId);
+	}
+	
+	/**
+	 * Search the database for a {@link User} with the provided bluetooth MAC address.
+	 * Currently only does a "stupid search", ie. strings must be exactly equal.
+	 * Returns null if no user with the provided address exist has been added to the database.
+	 * @param location The bluetooth address of the user to search for.
+	 * @return The User matching the Bluetooth address.
+	 */
+	User searchUser(String location) {
+		String[] cols = {"rowid"};
+		long uId = -1;
+		String[] selectionArgs = {location};
+		
+		Cursor c = db.query(DB.TB_USER, cols, DB.USER_ADDRESS + " = ?", selectionArgs, null, null, null);
+		if (c.moveToFirst()) uId = c.getLong(0);
+		return mf.getUser(uId);
+	}
+	
+	/**
+	 * Search the database for a {@link Tag} with the provided name.
+	 * Currently only does a "stupid search", ie. strings must be exactly equal.
+	 * Returns null if no user with the provided address exist has been added to the database.
+	 * @param tagName The Tag name to search for.
+	 * @return The Tag matching the provided Tag name.
+	 */
+	Tag searchTag(String tagName) {
+		String[] cols = {"rowid"};
+		long tId = -1;
+		String[] selectionArgs = {tagName};
+		
+		Cursor c = db.query(DB.TB_TAG, cols, DB.TAG_NAME + " = ? ", selectionArgs, null, null, null);
+		
+		if (c.moveToFirst()) tId = c.getLong(0);
+		return mf.getTag(tId);
 	}
 }
