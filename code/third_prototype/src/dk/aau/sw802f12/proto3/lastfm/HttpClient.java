@@ -14,7 +14,11 @@ public class HttpClient{
 	
 	// limit the amount of concurrent http requests to a number specified by
 	// this semaphore. 
-	private Semaphore _pool;
+	private Object _mutex = new Object();
+	private long _lastRequestTimestamp = 0;
+ 
+	//last.fm api does allows 5 request/sec
+	private long _requestInterval = 1000/5;
 
 	private static HttpClient _instance = null;
 	public static final HttpClient getInstance(){
@@ -23,10 +27,7 @@ public class HttpClient{
 		return _instance;
 	}
 	
-	private HttpClient(){
-		int numThreads = Settings.getInstance().getHttpThreads();
-		_pool = new Semaphore(numThreads, true);
-	}
+	private HttpClient(){}
 	
 	/**
 	 * Spawn new request thread
@@ -64,17 +65,26 @@ public class HttpClient{
 		
 		@Override
 		public void run() {
-			
 			try {
-				_pool.acquire();
+				requestQueue();
 			} catch (InterruptedException e) {
-				_query.setResponse(null);
 				return;
 			}
-			
 			Document xmlDocument = sendHttpRequest(_query.getRequest());
 			_query.setResponse(xmlDocument);
-			_pool.release();
+		}
+		
+		private void requestQueue() throws InterruptedException{
+			synchronized (_mutex) {
+				long now = System.currentTimeMillis();
+				long diff = now - _lastRequestTimestamp;
+				long timewait = _requestInterval - diff;
+				if (timewait > 0){
+					Log.d("LASTFM", "wait for " + timewait + "ms");
+					_mutex.wait(timewait);
+				}
+				_lastRequestTimestamp = now;
+			}			
 		}
 	}
 }

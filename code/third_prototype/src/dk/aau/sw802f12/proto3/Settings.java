@@ -9,7 +9,18 @@ public class Settings {
 	private String deviceName = "MyAndroidDevice";
 	private int userInterfaceUpdateInterval = 500;
 	private int httpThreads = 10;
+	private double similarArtistThreshold = 0.4;
+	private int maximumArtistTags = 3;
 		
+	private static Settings mInstance = null;
+	public static Settings getInstance(){
+		if( mInstance == null)
+			mInstance = new Settings();
+		return mInstance;
+	}
+	private Settings(){}
+
+	
 	public int getLibraryUpdateInterval() {
 		return libraryUpdateInterval;
 	}
@@ -36,15 +47,6 @@ public class Settings {
 	public void setDeviceName(String deviceName) {
 		this.deviceName = deviceName;
 	}
-	
-	// Constructor ////////////////////////////////////////////////////////////
-	private static Settings mInstance = null;
-	public static Settings getInstance(){
-		if( mInstance == null)
-			mInstance = new Settings();
-		return mInstance;
-	}
-	private Settings(){}
 
 	public int getUserInterfaceUpdateInterval() {
 		return userInterfaceUpdateInterval;
@@ -60,5 +62,21 @@ public class Settings {
 
 	public void setHttpThreads(int httpThreads) {
 		this.httpThreads = httpThreads;
+	}
+
+	public double getSimilarArtistThreshold() {
+		return similarArtistThreshold;
+	}
+
+	public void setSimilarArtistThreshold(double similarArtistThreshold) {
+		this.similarArtistThreshold = similarArtistThreshold;
+	}
+
+	public int getMaximumArtistTags() {
+		return maximumArtistTags;
+	}
+
+	public void setMaximumArtistTags(int maximumArtistTags) {
+		this.maximumArtistTags = maximumArtistTags;
 	}
 }
