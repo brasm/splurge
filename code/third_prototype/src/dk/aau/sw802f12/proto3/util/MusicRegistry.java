@@ -4,8 +4,10 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import android.content.Context;
+import android.util.Log;
 
 public class MusicRegistry {
+	private static final String TAG = DBHelper.TAG;
 	HashMap<Long, Artist> artists;
 	HashMap<Long, Song> songs;
 	HashMap<Long, Tag> tags;
@@ -243,9 +245,14 @@ public class MusicRegistry {
 	 * @return The Artist with the provided name.
 	 */
 	public Artist createArtist(String name) {
+		Log.d(TAG, "Search for artist " + name);
 		Artist a = db.searchArtist(name);
-		if (a != null) return a;
-
+		if (a != null) {
+			Log.d(TAG, "Found artist.");
+			return a;
+		}
+		
+		Log.d(TAG, "Creating artist.");
 		a = new Artist(name);
 		updateDB(a);
 		return a;
@@ -302,11 +309,13 @@ public class MusicRegistry {
 	 * @return The Song with the parameters passed.
 	 */
 	public Song createSong(String title, Artist artist, User host, String location) {
+		Log.d(TAG, "Received title: " + title);
 		Song s = db.searchSong(title, artist, host, location);
 		if (s == null) {
+			Log.d(TAG, "NOT FOUND.");
 			s = new Song(title, artist, host, location);
 			db.updateDB(s);
-		}
+		} else Log.d(TAG, "FOUND");
 		return s;
 	}
 	
@@ -321,9 +330,13 @@ public class MusicRegistry {
 	 */
 	public Song createSong(String title, String artist, User host, String location) {
 		Song s = db.searchSong(title, artist, host, location);
+		Log.d(TAG, "Received " + title);
 		if (s == null) {
+			Log.d(TAG, "Not found");
 			s = new Song(title, createArtist(artist), host, location);
 			db.updateDB(s);
+		} else {
+			Log.d(TAG, "FOUND");
 		}
 		return s;
 	}

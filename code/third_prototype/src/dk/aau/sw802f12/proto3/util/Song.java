@@ -34,8 +34,9 @@ public class Song {
 		setArtist(artist);
 		setHost(host);
 		setLocation(location);
+		id = -1;
 		
-		new HashSet<Tag>();
+		tags = new HashSet<Tag>();
 	}
 	
 	/**

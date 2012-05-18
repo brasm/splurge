@@ -1,6 +1,5 @@
 package dk.aau.sw802f12.proto3.util;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -182,13 +181,32 @@ class DBHelper extends SQLiteOpenHelper {
 	private SQLiteDatabase db;
 	private MusicRegistry mf;
 	
+	private void openDB() {
+		if (db != null && !db.isOpen()) {
+			db.close();
+			db = null;
+		}
+		
+		if (db == null) 
+			db = getWritableDatabase();
+	}
+	
+	private void closeDB() {
+		db.close();
+		db = null;
+	}
+	
 	public DBHelper(Context context) {
 		super(context, DB.NAME, null, DB.VERSION);
 		mf = MusicRegistry.getInstance(context);
 	}
+	
+	protected void finalize() {
+		closeDB();
+	}
 
 	private void create() throws SQLException {
-		Log.d(TAG, "CREATING TABLES.");
+		openDB();
 		db.execSQL(DB.SQL_ARTIST);
 		db.execSQL(DB.SQL_SONG);
 		db.execSQL(DB.SQL_TAG);
@@ -197,58 +215,25 @@ class DBHelper extends SQLiteOpenHelper {
 		db.execSQL(DB.SQL_USER);
 		db.execSQL(DB.SQL_USERARTIST);
 	}
-	
-	private void sampleData() throws IOException {
-		Log.d(TAG, "LOADING SAMPLE DATA.");
-		ContentValues cvA = new ContentValues(1);
-		cvA.put(DB.ARTIST_NAME, "testArtist");
-		long iId = db.insert(DB.TB_ARTIST, null, cvA);
-		if (iId == -1) throw new IOException("DB failure.");
 		
-		User u = new User("local");
-		long hostId = db.insert(DB.TB_USER, null, getCV(u));
-		
-		for (int i = 0; i < 1000; ++i) {
-			ContentValues cvS = new ContentValues(4);
-			cvS.put(DB.SONG_ARTIST, iId);
-			cvS.put(DB.SONG_TITLE, "SampleTitle " + i);
-			cvS.put(DB.SONG_HOST, hostId);
-			cvS.put(DB.SONG_LOCATION, "none");
-			db.insert(DB.TB_SONG, null, cvS);
-		}
-	}
-	
 	@Override
 	public void onCreate(SQLiteDatabase dbs) {
-		Log.d(TAG, "ONCREATE");
 		db = dbs;
-		
 		//Create database skeleton
 		db.beginTransaction();
 		try {
 			create();
 			db.setTransactionSuccessful();
-			Log.d(TAG, "Database created.");
 		} catch (SQLException e) {
 			Log.d(TAG, "Failed creating database.");
-		} finally {
-			db.endTransaction();
-		}
-		
-		//Insert sample data
-		db.beginTransaction();
-		try {
-			sampleData();
-			db.setTransactionSuccessful();
-			Log.d(TAG, "Sample data inserted...");
-		} catch (IOException e) {
 		} finally {
 			db.endTransaction();
 		}
 	}
 	
 	@Override
-	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+	public void onUpgrade(SQLiteDatabase dbs, int oldVersion, int newVersion) {
+		db = dbs;
 		db.execSQL("drop table if exists " + DB.TB_ARTIST);
 		db.execSQL("drop table if exists " + DB.TB_SONG);
 		db.execSQL("drop table if exists " + DB.TB_TAG);
@@ -260,7 +245,8 @@ class DBHelper extends SQLiteOpenHelper {
 	}
 	
 	@Override
-	public void onOpen(SQLiteDatabase db) {
+	public void onOpen(SQLiteDatabase dbs) {
+		db = dbs;
 		//onUpgrade(db, 0,0);
 	}
 	
@@ -268,6 +254,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * Empty the database (when the library is no longer up to date).
 	 */
 	public void clearDB() {
+		openDB();
 		String truncate = "truncate table if exists ";
 		db.execSQL(truncate + DB.TB_ARTIST);
 		db.execSQL(truncate + DB.TB_SONG);
@@ -288,7 +275,11 @@ class DBHelper extends SQLiteOpenHelper {
 	long updateDB(Song song) {
 		removeRelations(song);
 		long ret = -1;
-		if (song.getId() == -1) ret = add(song);
+		Log.d(TAG, "Id of song: " + song.getId());
+		if (song.getId() == -1) {
+			Log.d(TAG, "ADDING.");
+			ret = add(song);
+		}
 		else ret = update(song);
 		
 		for (Tag tag : song.getTags()) {
@@ -367,82 +358,36 @@ class DBHelper extends SQLiteOpenHelper {
 	}
 	
 	/**
-	 * Add a {@link Song} to the database.
-	 * Also updates the id of the Song.
-	 * @param song The Song to add.
-	 * @return The id, the Song has been assigned.
-	 */
-	private long add(Song song) {
-		long res = db.insert(DB.TB_SONG, null, getCV(song));
-		song.setId(res);
-		mf.add(song);
-		return res;
-	}
-	
-	/**
 	 * Update the {@link Song} in the database.
 	 * @param song The Song to update.
 	 * @return The id of the Song.
 	 */
 	private long update(Song song) {
+		openDB();
 		String whereClause = "rowid = " + song.getId();
 		return db.update(DB.TB_SONG, getCV(song), whereClause, null);
 	}
 	
-	/**
-	 * Add the {@link Artist} to the database.
-	 * @param artist The Artist to insert.
-	 * @return The id, the Artist has been assigned.
-	 */
-	private long add(Artist artist) {
-		long res = db.insert(DB.TB_ARTIST, null, getCV(artist));
-		artist.setId(res);
-		mf.add(artist);
-		return res;
-	}
-
 	/**
 	 * Update the {@link Artist} in the database.
 	 * @param artist The Artist to update.
 	 * @return The id of the Artist.
 	 */
 	private long update(Artist artist) {
+		openDB();
 		String whereClause = "rowid = " + artist.getId();	
 		return db.update(DB.TB_ARTIST, getCV(artist), whereClause, null);
 	}
 	
-	/**
-	 * Add the {@link Tag} to the database.
-	 * @param tag The Tag to insert.
-	 * @return The id, the Tag has been assigned.
-	 */
-	private long add(Tag tag) {
-		long res = db.insert(DB.TB_TAG, null, getCV(tag));
-		tag.setId(res);
-		mf.add(tag);
-		return res;
-	}
-
 	/**
 	 * Update the {@link Tag} in the database.
 	 * @param tag The Tag to update.
 	 * @return The id of the Tag.
 	 */
 	private long update(Tag tag) {
+		openDB();
 		String whereClause = "rowid = " + tag.getId();
 		return db.update(DB.TB_TAG, getCV(tag), whereClause, null);
-	}
-	
-	/**
-	 * Add the {@link User} to the database.
-	 * @param user The User to insert.
-	 * @return The id, the User has been assigned.
-	 */
-	private long add(User user) {
-		long res = db.insert(DB.TB_USER, null, getCV(user));
-		user.setId(res);
-		mf.add(user);
-		return res;
 	}
 	
 	/**
@@ -451,8 +396,63 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return The id of the User.
 	 */
 	private long update(User user) {
+		openDB();
 		String whereClause = "rowid = " + user.getId();
 		return db.update(DB.TB_USER, getCV(user), whereClause, null);
+	}
+	
+	/**
+	 * Add a {@link Song} to the database.
+	 * Also updates the id of the Song.
+	 * @param song The Song to add.
+	 * @return The id, the Song has been assigned.
+	 */
+	private long add(Song song) {
+		openDB();
+		Log.d(TAG, "ADDING " + song.getTitle());
+		long res = db.insert(DB.TB_SONG, null, getCV(song));
+		song.setId(res);
+		mf.add(song);
+		return res;
+	}
+	
+	/**
+	 * Add the {@link Artist} to the database.
+	 * @param artist The Artist to insert.
+	 * @return The id, the Artist has been assigned.
+	 */
+	private long add(Artist artist) {
+		openDB();
+		long res = db.insert(DB.TB_ARTIST, null, getCV(artist));
+		artist.setId(res);
+		mf.add(artist);
+		return res;
+	}
+
+	/**
+	 * Add the {@link Tag} to the database.
+	 * @param tag The Tag to insert.
+	 * @return The id, the Tag has been assigned.
+	 */
+	private long add(Tag tag) {
+		openDB();
+		long res = db.insert(DB.TB_TAG, null, getCV(tag));
+		tag.setId(res);
+		mf.add(tag);
+		return res;
+	}
+
+	/**
+	 * Add the {@link User} to the database.
+	 * @param user The User to insert.
+	 * @return The id, the User has been assigned.
+	 */
+	private long add(User user) {
+		openDB();
+		long res = db.insert(DB.TB_USER, null, getCV(user));
+		user.setId(res);
+		mf.add(user);
+		return res;
 	}
 	
 	/**
@@ -462,6 +462,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return The database id of the added relation.
 	 */
 	private void add(Song song, Tag tag) {
+		openDB();
 		//TODO: CHECK WHAT HAPPENS IF ATTEMPTING TO INSERT EXISTING RELATION
 		if (song.getId() == -1) add(song);
 		if (tag.getId() == -1) add(tag);
@@ -475,6 +476,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return The database id of the added relation.
 	 */
 	private void add(Artist artist, Tag tag) {
+		openDB();
 		//TODO: CHECK WHAT HAPPENS IF ATTEMPTING TO INSERT EXISTING RELATION
 		if (artist.getId() == -1) add(artist);
 		if (tag.getId() == -1) add(tag);
@@ -488,6 +490,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @param rating The rating of the Artist-User relation
 	 */
 	private void add(Artist artist, User user, short rating) {
+		openDB();
 		//TODO: CHECK WHAT HAPPENS IF ATTEMPTING TO INSERT EXISTING RELATION
 		if (artist.getId() == -1) add(artist);
 		if (user.getId() == -1) add(user);
@@ -590,6 +593,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return The Song with matching id.
 	 */
 	Song getSong(long songId) {
+		openDB();
 		String[] cols = {DB.SONG_ARTIST, DB.SONG_TITLE, DB.SONG_HOST, DB.SONG_LOCATION};
 		Cursor c = db.query(DB.TB_SONG, cols, "rowid = " + songId, null, null, null, null);
 		
@@ -617,7 +621,10 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return Artist with matching id.
 	 */
 	Artist getArtist(long artistId) {
+		openDB();
+		
 		String[] cols = {DB.ARTIST_NAME};
+		
 		Cursor c = db.query(DB.TB_ARTIST, cols, "rowid = " + artistId, null, null, null, null);
 		
 		if (!c.moveToFirst()) return null;
@@ -636,6 +643,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return The Tag matching the provided id.
 	 */
 	Tag getTag(long tagId) {
+		openDB();
 		String[] cols = {DB.TAG_NAME};
 		Cursor c = db.query(DB.TB_TAG, cols, "rowid = " + tagId, null, null, null, null);
 		
@@ -656,6 +664,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return The User matching the provided id.
 	 */
 	User getUser(long userId) {
+		openDB();
 		String[] cols = {DB.USER_ADDRESS, "rowid"};
 		Cursor c = db.query(DB.TB_USER, cols, "rowid = " + userId, null, null, null, null);
 		
@@ -676,6 +685,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return The Tags applied to the provided Song.
 	 */
 	private void songTags(Song s) {
+		openDB();
 		Collection<Tag> c = new HashSet<Tag>();
 		
 		String[] cols = {DB.SONGTAG_TAG};
@@ -700,6 +710,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @param artist The Artist to find Tags for.
 	 */
 	private void artistTags(Artist artist) {
+		openDB();
 		Collection<Tag> c = new HashSet<Tag>();
 		
 		String[] cols = {DB.ARTISTTAG_TAG};
@@ -725,6 +736,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @param user The User to find Artists for.
 	 */
 	private void userArtists(User user) {
+		openDB();
 		HashMap<Artist, Short> hm = new HashMap<Artist, Short>();
 		String[] cols = {DB.USERARTIST_ARTIST, DB.USERARTIST_RATING};
 		String selection = DB.USERARTIST_USER + " = " + user.getId();
@@ -751,6 +763,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @param tag The Tag to add Songs to.
 	 */
 	private void taggedSongs(Tag tag) {
+		openDB();
 		Collection<Song> songs = new HashSet<Song>();
 		
 		String[] cols = {DB.SONGTAG_SONG};
@@ -774,6 +787,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @param tag The Tag to retrieve Artists for.
 	 */
 	private void taggedArtists(Tag tag) {
+		openDB();
 		Collection<Artist> artists = new HashSet<Artist>();
 		
 		String[] cols = {DB.ARTISTTAG_ARTIST};
@@ -798,6 +812,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return A HashMap of Users and the User's rating of the Artist.
 	 */
 	private void userArtists(Artist artist) {
+		openDB();
 		HashMap<User, Short> urat = new HashMap<User, Short>();
 		String[] cols = {DB.USERARTIST_USER, DB.USERARTIST_RATING};
 		String select = DB.USERARTIST_ARTIST + "=" + artist.getId();
@@ -822,9 +837,11 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return All Songs stored in the database.
 	 */
 	ArrayList<Song> getSongs() {
+		openDB();
 		ArrayList<Song> songs = new ArrayList<Song>();
-		String[] cols = {DB.SONG_ARTIST, DB.SONG_TITLE, DB.SONG_HOST, DB.SONG_LOCATION, "rowid"};
-		Cursor cu = db.query(DB.TB_SONG, cols, null, null, null, null, null);
+		
+		String query = "SELECT " + DB.SONG_ARTIST + "," + DB.SONG_TITLE + "," + DB.SONG_HOST + "," + DB.SONG_LOCATION + ", rowid FROM " + DB.TB_SONG;
+		Cursor cu = db.rawQuery(query, null);
 		
 		ArrayList<Long> songIds = new ArrayList<Long>();
 		
@@ -862,6 +879,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return Artists from the database.
 	 */
 	ArrayList<Artist> getArtists() {
+		openDB();
 		ArrayList<Artist> artists = new ArrayList<Artist>();
 		String[] cols = {DB.ARTIST_NAME, "rowid"};
 		Cursor cu = db.query(DB.TB_ARTIST, cols, null, null, null, null, null);
@@ -893,6 +911,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return Users from the database.
 	 */
 	ArrayList<User> getUsers() {
+		openDB();
 		ArrayList<User> users = new ArrayList<User>();
 		String[] cols = {DB.USER_ADDRESS, "rowid"};
 		Cursor cu = db.query(DB.TB_USER, cols, null, null, null, null, null);
@@ -929,6 +948,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return Tags stored in the database.
 	 */
 	ArrayList<Tag> getTags() {
+		openDB();
 		ArrayList<Tag> tags = new ArrayList<Tag>();
 		String[] cols = {"rowid", DB.TAG_NAME};
 		Cursor cu = db.query(DB.TB_TAG, cols, null, null, null, null, null);
@@ -959,6 +979,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @param user The User to clear relations on.
 	 */
 	private void removeRelations(User user) {
+		openDB();
 		db.delete(DB.TB_USERARTIST, DB.USERARTIST_USER + "=" + user.getId(), null);
 	}
 	
@@ -968,6 +989,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @param artist The Artist to clear relations on.
 	 */
 	private void removeRelations(Artist artist) {
+		openDB();
 		db.delete(DB.TB_ARTISTTAGS, DB.ARTISTTAG_ARTIST + "=" + artist.getId(), null);
 		db.delete(DB.TB_USERARTIST, DB.USERARTIST_ARTIST + "=" + artist.getId(), null);
 	}
@@ -978,6 +1000,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @param tag The Tag to clear relations on.
 	 */
 	private void removeRelations(Tag tag) {
+		openDB();
 		db.delete(DB.TB_ARTISTTAGS, DB.ARTISTTAG_TAG + "=" + tag.getId(), null);
 		db.delete(DB.TB_SONGTAGS, DB.SONGTAG_TAG + "=" + tag.getId(), null);
 	}
@@ -988,6 +1011,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @param song The Song to clear relations on.
 	 */
 	private void removeRelations(Song song) {
+		openDB();
 		db.delete(DB.TB_SONGTAGS, DB.SONGTAG_SONG + "=" + song.getId(), null);
 	}
 	
@@ -999,16 +1023,19 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return The first Artist matching the provided name.
 	 */
 	Artist searchArtist(String name) {
-		String[] cols = {"rowid"};
-		String[] selectionArg = {name};
-		Cursor c = db.query(DB.TB_ARTIST, cols, DB.ARTIST_NAME + "= ?", selectionArg, null, null, null, null);
+		openDB();
+		Log.d(TAG, "Received " + name + " to search for.");
+		
+		String query = "SELECT rowid FROM " + DB.TB_ARTIST + " WHERE " + DB.ARTIST_NAME + " = '" + name + "'";
+		Log.d(TAG, query);
+		Cursor c = db.rawQuery(query, null);
 		
 		long aId = -1;
 		if (c.moveToFirst()) {
 			aId = c.getLong(0);
 		}
 		c.close();
-		
+		db.close();
 		return mf.getArtist(aId);		
 	}
 	
@@ -1023,6 +1050,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return The first Song matching the provided attributes.
 	 */
 	Song searchSong(String title, String artist, String host, String location) {
+		openDB();
 		if (host == null) return searchSong(title, searchArtist(artist).getId(), location);
 		return searchSong(title, searchArtist(artist).getId(), searchUser(host).getId(), location);
 	}
@@ -1038,8 +1066,11 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return The Song matching the provided attributes.
 	 */
 	Song searchSong(String title, Artist artist, String host, String location) {
-		if (host == null) return searchSong(title, artist.getId(), location);
-		return searchSong(title, artist.getId(), searchUser(host).getId(), location);
+		openDB();
+		User searchUserRes = searchUser(host);
+		
+		if (searchUserRes == null) return searchSong(title, artist.getId(), location);
+		return searchSong(title, artist.getId(), searchUserRes.getId(), location);
 	}
 	
 	/**
@@ -1052,6 +1083,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return The Song matching the provided attributes.
 	 */
 	Song searchSong(String title, String artist, User host, String location) {
+		openDB();
 		if (host == null) return searchSong(title, searchArtist(artist).getId(), location);
 		return searchSong(title, searchArtist(artist).getId(), host.getId(), location);
 	}
@@ -1067,6 +1099,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return The Song matching the provided attributes.
 	 */
 	Song searchSong(String title, Artist artist, User host, String location) {
+		openDB();
 		if (host == null) return searchSong(title, artist.getId(), location);
 		return searchSong(title, artist.getId(), host.getId(), location);
 	}
@@ -1081,12 +1114,13 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return The Song matching the provided attributes.
 	 */
 	private Song searchSong(String title, long artist, String location) {
-		String[] cols = {"rowid"};
+		openDB();
 		long sId = -1;
-		String selection = DB.SONG_TITLE + " = ? " + DB.SONG_ARTIST + " = ? " + DB.SONG_LOCATION + " = ? ";
-		String[] selArg = {title, "" + artist, location};
 		
-		Cursor c = db.query(DB.TB_SONG, cols, selection, selArg, null, null, null);
+		String query = "SELECT rowid FROM " + DB.TB_SONG + " WHERE " + DB.SONG_TITLE + " = '" + title + "' AND " + DB.SONG_ARTIST + " = '" + artist 
+				+ "' AND " + DB.SONG_LOCATION + " = '" + location + "'";
+		
+		Cursor c = db.rawQuery(query, null);
 		if (c.moveToFirst()) sId = c.getLong(0);
 		c.close();
 		
@@ -1104,13 +1138,13 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return The Song matching the provided attributes.
 	 */
 	private Song searchSong(String title, long artist, long host, String location) {
-		String[] cols = {"rowid"};
+		openDB();
 		long sId = -1;
 		
-		String selection = DB.SONG_TITLE + " = ? " + DB.SONG_ARTIST + " = ? " + DB.SONG_LOCATION + " = ?" + DB.SONG_HOST + " = ?";
-		String[] selArg = {title, "" + artist, location, "" + host};
+		String query = "SELECT rowid FROM " + DB.TB_SONG + " WHERE " + DB.SONG_TITLE + " = '" + title + "' AND " + DB.SONG_ARTIST + " = '" + artist 
+											+ "' AND " + DB.SONG_LOCATION + " = '" + location + "' AND " + DB.SONG_HOST + " = '" + host + "'";
 		
-		Cursor c = db.query(DB.TB_SONG, cols, selection, selArg, null, null, null);
+		Cursor c = db.rawQuery(query, null);
 		if (c.moveToFirst()) sId = c.getLong(0);
 		c.close();
 		
@@ -1125,11 +1159,11 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return The User matching the Bluetooth address.
 	 */
 	User searchUser(String location) {
-		String[] cols = {"rowid"};
+		openDB();
 		long uId = -1;
-		String[] selectionArgs = {location};
+		String query = "SELECT rowid FROM " + DB.TB_USER + " WHERE " + DB.USER_ADDRESS + " = '" + location + "'";
 		
-		Cursor c = db.query(DB.TB_USER, cols, DB.USER_ADDRESS + " = ?", selectionArgs, null, null, null);
+		Cursor c = db.rawQuery(query , null);
 		if (c.moveToFirst()) uId = c.getLong(0);
 		return mf.getUser(uId);
 	}
@@ -1142,11 +1176,11 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return The Tag matching the provided Tag name.
 	 */
 	Tag searchTag(String tagName) {
-		String[] cols = {"rowid"};
+		openDB();
+		String query = "SELECT rowid FROM " + DB.TB_TAG + " WHERE " + DB.TAG_NAME + " = '" + tagName + "'";
 		long tId = -1;
-		String[] selectionArgs = {tagName};
 		
-		Cursor c = db.query(DB.TB_TAG, cols, DB.TAG_NAME + " = ? ", selectionArgs, null, null, null);
+		Cursor c = db.rawQuery(query, null);
 		
 		if (c.moveToFirst()) tId = c.getLong(0);
 		return mf.getTag(tId);
