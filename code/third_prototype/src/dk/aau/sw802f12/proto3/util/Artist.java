@@ -17,6 +17,7 @@ public class Artist {
 	private long id;
 	HashSet<Tag> tags;
 	HashMap<User, Short> userRates;
+	HashMap<Artist, Short> similarArtists;
 	
 	/**
 	 * Create a new Artist with the Artist name.
@@ -146,5 +147,53 @@ public class Artist {
 	public void removeTag(Tag tag) {
 		tag.artists.remove(this);
 		tags.remove(tag);
+	}
+	
+	/**
+	 * Retrieve Artists similar to this artist.
+	 * @return The similar Artists, and the similarity with this Artist.
+	 */
+	public HashMap<Artist, Short> getSimilarArtists() {
+		if (similarArtists == null) {
+			MusicRegistry mr = MusicRegistry.getInstance();
+			initiateSimilar();
+			
+			mr.loadSimilarArtists(this);
+			
+			if (mr.existsSongsByArtist(this) && similarArtists.size() == 0) {
+				// TODO: If DB load was empty, request from Last.FM and add.
+			}
+		}
+		
+		return similarArtists;
+	}
+	
+	/**
+	 * Add an Artist similar to this.
+	 * @param artist The Artist to add as similar.
+	 * @param similarity The similarity between this and the provided Artist.
+	 */
+	public void addSimilarArtist(Artist artist, Short similarity) {
+		initiateSimilar();
+		MusicRegistry.instance.addSimilarArtist(this, artist, similarity);
+		similarArtists.put(artist, similarity);
+	}
+	
+	private void initiateSimilar() {
+		if (similarArtists == null) similarArtists = new HashMap<Artist, Short>();
+	}
+
+
+	public void addSimilarArtists(HashMap<Artist, Short> similarArtists) {
+		initiateSimilar();
+		MusicRegistry.instance.addSimilarArtist(this, similarArtists);
+		for (Artist artist : similarArtists.keySet()) {
+			similarArtists.put(artist, similarArtists.get(artist));
+		}
+	}
+	
+	public void removeSimilarArtist(Artist artist) {
+		MusicRegistry.instance.removeSimilarArtist(this, artist);
+		similarArtists.remove(artist);
 	}
 }

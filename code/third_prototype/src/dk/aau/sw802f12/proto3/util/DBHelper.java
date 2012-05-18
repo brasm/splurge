@@ -11,12 +11,11 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 /**
  * The database helper to interact with the database.
  * 
- * @author sw802f12 (Michael)
+ * @author sw802f12 (mlisby)
  *
  */
 class DBHelper extends SQLiteOpenHelper {
@@ -124,12 +123,18 @@ class DBHelper extends SQLiteOpenHelper {
 		 * Rating column of the UserArtist relation table.
 		 */
 		private static final String USERARTIST_RATING = "rating";
+		
+		private static final String TB_SIMILARARTIST = "similar_artist";
+		private static final String SIMILARARTIST_FIRST_ARTIST = "simart1";
+		private static final String SIMILARARTIST_SECOND_ARTIST = "simart2";
+		private static final String SIMILARARTIST_RATING = "simartsimilarity";
+		
 		/**
 		 * Create artist table.
 		 */
 		private static final String SQL_ARTIST
-									= "CREATE TABLE " + DB.TB_ARTIST + " ("
-									+ DB.ARTIST_NAME + " TEXT)";
+									= "create table " + DB.TB_ARTIST + " ("
+									+ DB.ARTIST_NAME + " text)";
 		
 		/**
 		 * Create song table.
@@ -152,7 +157,7 @@ class DBHelper extends SQLiteOpenHelper {
 		 * Create SongTag relation table.
 		 */
 		private static final String SQL_SONGTAG
-									= "CREATE TABLE " + DB.TB_SONGTAGS + "("
+									= "CREATE TABLE " + DB.TB_SONGTAGS + " ("
 									+ DB.SONGTAG_SONG + " INTEGER, "
 									+ DB.SONGTAG_TAG + " INTEGER,"
 									+ "PRIMARY KEY(" + DB.SONGTAG_SONG + ", " + DB.SONGTAG_TAG + "))";
@@ -161,7 +166,7 @@ class DBHelper extends SQLiteOpenHelper {
 		 * Create ArtistTag relation table.
 		 */
 		private static final String SQL_ARTISTTAG
-									= "CREATE TABLE " + DB.TB_ARTISTTAGS + "("	
+									= "CREATE TABLE " + DB.TB_ARTISTTAGS + " ("	
 									+ DB.ARTISTTAG_ARTIST + " INTEGER, " 
 									+ DB.ARTISTTAG_TAG + " INTEGER, "
 									+ " PRIMARY KEY(" + DB.ARTISTTAG_ARTIST + "," + DB.ARTISTTAG_TAG + "))";
@@ -171,11 +176,17 @@ class DBHelper extends SQLiteOpenHelper {
 									+ DB.USER_ADDRESS + " STRING)";
 		
 		private static final String SQL_USERARTIST
-									= "CREATE TABLE " + DB.TB_USERARTIST + "("
+									= "CREATE TABLE " + DB.TB_USERARTIST + " ("
 									+ DB.USERARTIST_ARTIST + " INTEGER, "
 									+ DB.USERARTIST_USER + " INTEGER, "
-									+ DB.USERARTIST_RATING + "INTEGER, "
+									+ DB.USERARTIST_RATING + " INTEGER, "
 									+ "PRIMARY KEY(" + DB.USERARTIST_ARTIST + "," + DB.USERARTIST_USER + "))";
+		
+		private static final String SQL_SIMILARARTIST
+									= "CREATE TABLE " + DB.TB_SIMILARARTIST + " ("
+									+ DB.SIMILARARTIST_FIRST_ARTIST + " INTEGER, "
+									+ DB.SIMILARARTIST_SECOND_ARTIST + " INTEGER, "
+									+ DB.SIMILARARTIST_RATING + " INTEGER)";
 	}
 		
 	private SQLiteDatabase db;
@@ -214,6 +225,7 @@ class DBHelper extends SQLiteOpenHelper {
 		db.execSQL(DB.SQL_ARTISTTAG);
 		db.execSQL(DB.SQL_USER);
 		db.execSQL(DB.SQL_USERARTIST);
+		db.execSQL(DB.SQL_SIMILARARTIST);
 	}
 		
 	@Override
@@ -225,7 +237,6 @@ class DBHelper extends SQLiteOpenHelper {
 			create();
 			db.setTransactionSuccessful();
 		} catch (SQLException e) {
-			Log.d(TAG, "Failed creating database.");
 		} finally {
 			db.endTransaction();
 		}
@@ -241,6 +252,7 @@ class DBHelper extends SQLiteOpenHelper {
 		db.execSQL("drop table if exists " + DB.TB_ARTISTTAGS);
 		db.execSQL("drop table if exists " + DB.TB_USER);
 		db.execSQL("drop table if exists " + DB.TB_USERARTIST);
+		db.execSQL("drop table if exists " + DB.TB_SIMILARARTIST);
 		onCreate(db);
 	}
 	
@@ -275,9 +287,7 @@ class DBHelper extends SQLiteOpenHelper {
 	long updateDB(Song song) {
 		removeRelations(song);
 		long ret = -1;
-		Log.d(TAG, "Id of song: " + song.getId());
 		if (song.getId() == -1) {
-			Log.d(TAG, "ADDING.");
 			ret = add(song);
 		}
 		else ret = update(song);
@@ -409,7 +419,6 @@ class DBHelper extends SQLiteOpenHelper {
 	 */
 	private long add(Song song) {
 		openDB();
-		Log.d(TAG, "ADDING " + song.getTitle());
 		long res = db.insert(DB.TB_SONG, null, getCV(song));
 		song.setId(res);
 		mf.add(song);
@@ -579,10 +588,25 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return The ContentValues object holding the values.
 	 */
 	private ContentValues getCV(Artist artist, User user, short rating) {
-		ContentValues cv = new ContentValues(2);
+		ContentValues cv = new ContentValues(3);
 		cv.put(DB.USERARTIST_ARTIST, artist.getId());
 		cv.put(DB.USERARTIST_USER, user.getId());
 		cv.put(DB.USERARTIST_RATING, rating);
+		return cv;
+	}
+	
+	/**
+	 * Generate {@link ContentValues} (for insertion and update) for similar {@link Artist}s.
+	 * @param artist1 Artist1 of the Artist pair to set similarity for.
+	 * @param artist2 Artist2 of the Artist pair to set similarity for.
+	 * @param similarity The similarity between the provided artists.
+	 * @return
+	 */
+	private ContentValues getCV(Artist artist1, Artist artist2, Short similarity) {
+		ContentValues cv = new ContentValues(3);
+		cv.put(DB.SIMILARARTIST_FIRST_ARTIST, artist1.getId());
+		cv.put(DB.SIMILARARTIST_SECOND_ARTIST, artist2.getId());
+		cv.put(DB.SIMILARARTIST_RATING, similarity);
 		return cv;
 	}
 	
@@ -633,6 +657,7 @@ class DBHelper extends SQLiteOpenHelper {
 		
 		Artist a = new Artist(aName);
 		artistTags(a);
+		a.setId(artistId);
 		return a;
 	}
 	
@@ -738,9 +763,10 @@ class DBHelper extends SQLiteOpenHelper {
 	private void userArtists(User user) {
 		openDB();
 		HashMap<Artist, Short> hm = new HashMap<Artist, Short>();
-		String[] cols = {DB.USERARTIST_ARTIST, DB.USERARTIST_RATING};
-		String selection = DB.USERARTIST_USER + " = " + user.getId();
-		Cursor cu = db.query(DB.TB_USERARTIST, cols, selection, null, null, null, null);
+		String query 	= "SELECT " + DB.USERARTIST_ARTIST + ", " + DB.USERARTIST_RATING 
+						+ " FROM " + DB.TB_USERARTIST 
+						+ " WHERE " + DB.USERARTIST_USER + " = '" + user.getId() + "'";
+		Cursor cu = db.rawQuery(query, null);
 		
 		ArrayList<Long> artistIds = new ArrayList<Long>();
 		ArrayList<Short> ratings = new ArrayList<Short>();
@@ -990,8 +1016,10 @@ class DBHelper extends SQLiteOpenHelper {
 	 */
 	private void removeRelations(Artist artist) {
 		openDB();
-		db.delete(DB.TB_ARTISTTAGS, DB.ARTISTTAG_ARTIST + "=" + artist.getId(), null);
-		db.delete(DB.TB_USERARTIST, DB.USERARTIST_ARTIST + "=" + artist.getId(), null);
+		db.delete(DB.TB_ARTISTTAGS, DB.ARTISTTAG_ARTIST + " = '" + artist.getId() + "'", null);
+		db.delete(DB.TB_USERARTIST, DB.USERARTIST_ARTIST + " = '" + artist.getId() + "'", null);
+		db.delete(DB.TB_SIMILARARTIST, DB.SIMILARARTIST_FIRST_ARTIST + "= '" + artist.getId() + "'" , null);
+		db.delete(DB.TB_SIMILARARTIST, DB.SIMILARARTIST_SECOND_ARTIST + "= '" + artist.getId() + "'" , null);
 	}
 	
 	/**
@@ -1024,10 +1052,8 @@ class DBHelper extends SQLiteOpenHelper {
 	 */
 	Artist searchArtist(String name) {
 		openDB();
-		Log.d(TAG, "Received " + name + " to search for.");
 		
 		String query = "SELECT rowid FROM " + DB.TB_ARTIST + " WHERE " + DB.ARTIST_NAME + " = '" + name + "'";
-		Log.d(TAG, query);
 		Cursor c = db.rawQuery(query, null);
 		
 		long aId = -1;
@@ -1184,5 +1210,88 @@ class DBHelper extends SQLiteOpenHelper {
 		
 		if (c.moveToFirst()) tId = c.getLong(0);
 		return mf.getTag(tId);
+	}
+	
+	/**
+	 * Check whether the provided {@link Artist} name has any {@link Song}s in the library.
+	 * @param artist The Artist name to check.
+	 * @return Whether the Artist has any Songs in the library.
+	 */
+	boolean existSongsWithArtist(String artist) {
+		return existSongsWithArtist(searchArtist(artist).getId());
+	}
+	
+	/**
+	 * Check whether the provided {@link Artist} has any {@link Song}s in the library.
+	 * @param artist The Artist to check.
+	 * @return Whether the Artist has any Songs in the library.
+	 */
+	boolean existSongsWithArtist(Artist artist) {
+		return existSongsWithArtist(artist.getId());
+	}
+	
+	/**
+	 * Check whether the {@link Artist} with the provided id has any {@link Song}s in the library.
+	 * @param artist The Artist id to check.
+	 * @return Whether the Artist has any Songs in the library.
+	 */
+	boolean existSongsWithArtist(long artist) {
+		String query = "SELECT rowid FROM " + DB.TB_SONG + " WHERE " + DB.SONG_ARTIST + " = '" + artist + "'";
+		openDB();
+		Cursor c = db.rawQuery(query, null);
+		
+		boolean ret = c.getCount() > 0;
+		c.close();
+		return ret;
+	}
+	
+	/**
+	 * Load {@link Artist}s similar to the provided Artist, and update the provided Artist's list of similar Artists.
+	 * Note that the relation is NOT updated the other way - this is due to the lazy load property of similar artists. 
+	 * @param artist The Artist to retrieve similar Artists for.
+	 */
+	void loadSimilarArtists(Artist artist) {
+		openDB();
+		String query 	= "SELECT " + DB.SIMILARARTIST_FIRST_ARTIST + ", " + DB.SIMILARARTIST_RATING 
+						+ " FROM " + DB.TB_SIMILARARTIST 
+						+ " WHERE " + DB.SIMILARARTIST_SECOND_ARTIST + " = '" + artist.getId() + "'"
+						+ " UNION SELECT " + DB.SIMILARARTIST_SECOND_ARTIST + ", " + DB.SIMILARARTIST_RATING 
+						+ " FROM " + DB.TB_SIMILARARTIST 
+						+ " WHERE " + DB.SIMILARARTIST_FIRST_ARTIST + " = '" + artist.getId() + "'";
+		Cursor cu = db.rawQuery(query, null);
+		
+		HashMap<Long, Short> idToRating = new HashMap<Long,Short>();
+		while (cu.moveToNext()) {
+			idToRating.put(cu.getLong(0), cu.getShort(0));
+		}
+		cu.close();
+		for (Long id : idToRating.keySet()) {
+			artist.similarArtists.put(mf.getArtist(id), idToRating.get(id));
+		}
+	}
+
+	/**
+	 * Add a similar {@link Artist} relation to the database.
+	 * @param artist1 First Artist of the relation.
+	 * @param artist2 Second Artist of the problem.
+	 * @param similarity The similarity of the artists.
+	 */
+	void addSimilarArtist(Artist artist1, Artist artist2, Short similarity) {
+		db.insert(DB.TB_SIMILARARTIST, null, getCV(artist1, artist2, similarity));
+	}
+
+	/**
+	 * Remove the similarity between the provided {@link Artist}s.
+	 * @param artist First Artist of the pair to remove similarity from.
+	 * @param artist2 Second Artist of the pair to remove similarity from.
+	 */
+	void removeSimilarArtist(Artist artist, Artist artist2) {
+		String query 	= "DELETE FROM " + DB.TB_SIMILARARTIST + " WHERE " 
+						+ DB.SIMILARARTIST_FIRST_ARTIST + " = " + artist.getId() 
+						+ " AND " + DB.SIMILARARTIST_SECOND_ARTIST + " = " + artist2.getId() 
+						+ " OR " + DB.SIMILARARTIST_FIRST_ARTIST + " = " + artist2.getId()
+						+ " AND " + DB.SIMILARARTIST_SECOND_ARTIST + " = " + artist.getId();
+		db.execSQL(query);
+		
 	}
 }

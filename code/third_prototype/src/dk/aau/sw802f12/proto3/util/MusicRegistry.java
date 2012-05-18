@@ -4,16 +4,14 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import android.content.Context;
-import android.util.Log;
 
 public class MusicRegistry {
-	private static final String TAG = DBHelper.TAG;
 	HashMap<Long, Artist> artists;
 	HashMap<Long, Song> songs;
 	HashMap<Long, Tag> tags;
 	HashMap<Long, User> users;
 	private static DBHelper db;
-	private static MusicRegistry instance = null;
+	static MusicRegistry instance = null;
 	
 	public static MusicRegistry getInstance(Context context) {
 		if (instance == null) {
@@ -21,6 +19,15 @@ public class MusicRegistry {
 			db = new DBHelper(context);
 			db.getWritableDatabase();
 		}
+		return instance;
+	}
+	
+	/**
+	 * Package protected version of getInstance(). 
+	 * The MusicRegistry must be instantiated somewhere else, before this will work.
+	 * @return The MusicRegistry instance, if already instantiated, or null.
+	 */
+	static MusicRegistry getInstance() {
 		return instance;
 	}
 	
@@ -37,7 +44,7 @@ public class MusicRegistry {
 	
 	/**
 	 * Retrieve the {@link Artist} with the provided id from the Database.
-	 * @param artist Id The id to search for.
+	 * @param artistId The id to search for.
 	 * @return The Artist with the provided id.
 	 */
 	public Artist getArtist(long artistId) {
@@ -245,16 +252,12 @@ public class MusicRegistry {
 	 * @return The Artist with the provided name.
 	 */
 	public Artist createArtist(String name) {
-		Log.d(TAG, "Search for artist " + name);
 		Artist a = db.searchArtist(name);
-		if (a != null) {
-			Log.d(TAG, "Found artist.");
-			return a;
+		if (a == null) {
+			a = new Artist(name);
+			updateDB(a);
 		}
 		
-		Log.d(TAG, "Creating artist.");
-		a = new Artist(name);
-		updateDB(a);
 		return a;
 	}
 	
@@ -309,13 +312,11 @@ public class MusicRegistry {
 	 * @return The Song with the parameters passed.
 	 */
 	public Song createSong(String title, Artist artist, User host, String location) {
-		Log.d(TAG, "Received title: " + title);
 		Song s = db.searchSong(title, artist, host, location);
 		if (s == null) {
-			Log.d(TAG, "NOT FOUND.");
 			s = new Song(title, artist, host, location);
 			db.updateDB(s);
-		} else Log.d(TAG, "FOUND");
+		}
 		return s;
 	}
 	
@@ -330,13 +331,9 @@ public class MusicRegistry {
 	 */
 	public Song createSong(String title, String artist, User host, String location) {
 		Song s = db.searchSong(title, artist, host, location);
-		Log.d(TAG, "Received " + title);
 		if (s == null) {
-			Log.d(TAG, "Not found");
 			s = new Song(title, createArtist(artist), host, location);
 			db.updateDB(s);
-		} else {
-			Log.d(TAG, "FOUND");
 		}
 		return s;
 	}
@@ -370,5 +367,52 @@ public class MusicRegistry {
 			db.updateDB(t);
 		}
 		return t;
+	}
+
+	/**
+	 * Add similar {@link Artist}s to the database.
+	 * @param artist1 First Artist of the relation. 
+	 * @param artist2 Second Artist of the relation.
+	 * @param similarity Similarity between the provided Artists.
+	 */
+	void addSimilarArtist(Artist artist1, Artist artist2, Short similarity) {
+		db.addSimilarArtist(artist1, artist2, similarity);
+	}
+
+	/**
+	 * Add a HashMap of {@link Artist}s similar to one other Artist to the database.
+	 * @param artist The single Artist, the HashMap Artists are related to.
+	 * @param similarArtists HashMap of Artists and their similarity with the single provided artist.
+	 */
+	void addSimilarArtist(Artist artist, HashMap<Artist, Short> similarArtists) {
+		for (Artist a : similarArtists.keySet()) {
+			db.addSimilarArtist(artist, a, similarArtists.get(a));
+		}	
+	}
+	
+	/**
+	 * Load {@link Artist}s similar to the provided Artist, as well as the similarity rating.
+	 * @param artist The artist to find Artists similar to.
+	 */
+	void loadSimilarArtists(Artist artist) {
+		db.loadSimilarArtists(artist);
+	}
+	
+	/**
+	 * Whether {@link Song}s by the provided {@link Artist} exists.
+	 * @param artist The Artist to check.
+	 * @return Whether the provided Artist has any Songs in the database.
+	 */
+	boolean existsSongsByArtist(Artist artist) {
+		return db.existSongsWithArtist(artist);
+	}
+
+	/**
+	 * Remove the similarity pairing between the provided artists. 
+	 * @param artist First Artist to unpair.
+	 * @param artist2 Second Artist to unpair.
+	 */
+	void removeSimilarArtist(Artist artist, Artist artist2) {
+		db.removeSimilarArtist(artist, artist2);		
 	}
 }
