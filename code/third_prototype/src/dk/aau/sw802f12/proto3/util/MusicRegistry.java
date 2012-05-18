@@ -338,6 +338,17 @@ public class MusicRegistry {
 		return s;
 	}
 	
+	public Song createSong(String location) {
+		Song s = db.searchSong(location);
+		
+		if (s == null) {
+			s = new Song(location);
+			db.updateDB(s);
+		}
+		
+		return s;
+	}
+	
 	/**
 	 * Retrieve a {@link User} from the database, or, should it not exist, create it.
 	 * Note that the provided bluetooth address must match exactly - though casing is not important.
@@ -368,7 +379,8 @@ public class MusicRegistry {
 		}
 		return t;
 	}
-
+	
+	
 	/**
 	 * Add similar {@link Artist}s to the database.
 	 * @param artist1 First Artist of the relation. 

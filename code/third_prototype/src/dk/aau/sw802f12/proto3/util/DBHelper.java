@@ -1076,8 +1076,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return The first Song matching the provided attributes.
 	 */
 	Song searchSong(String title, String artist, String host, String location) {
-		openDB();
-		if (host == null) return searchSong(title, searchArtist(artist).getId(), location);
+		if (host == null) return searchSong(title, searchArtist(artist).getId(), -1, location);
 		return searchSong(title, searchArtist(artist).getId(), searchUser(host).getId(), location);
 	}
 	
@@ -1092,10 +1091,9 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return The Song matching the provided attributes.
 	 */
 	Song searchSong(String title, Artist artist, String host, String location) {
-		openDB();
 		User searchUserRes = searchUser(host);
 		
-		if (searchUserRes == null) return searchSong(title, artist.getId(), location);
+		if (searchUserRes == null) return searchSong(title, artist.getId(), -1, location);
 		return searchSong(title, artist.getId(), searchUserRes.getId(), location);
 	}
 	
@@ -1109,8 +1107,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return The Song matching the provided attributes.
 	 */
 	Song searchSong(String title, String artist, User host, String location) {
-		openDB();
-		if (host == null) return searchSong(title, searchArtist(artist).getId(), location);
+		if (host == null) return searchSong(title, searchArtist(artist).getId(), -1, location);
 		return searchSong(title, searchArtist(artist).getId(), host.getId(), location);
 	}
 	
@@ -1125,32 +1122,12 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return The Song matching the provided attributes.
 	 */
 	Song searchSong(String title, Artist artist, User host, String location) {
-		openDB();
-		if (host == null) return searchSong(title, artist.getId(), location);
+		if (host == null) return searchSong(title, artist.getId(), -1, location);
 		return searchSong(title, artist.getId(), host.getId(), location);
 	}
 	
-	/**
-	 * Search the database for a {@link Song} with the provided attributes.
-	 * Currently only does a "stupid search", ie. strings must be exactly equal.
-	 * Returns null if no Song with the provided attributes exist.
-	 * @param title The title to search for.
-	 * @param artist The id of the Artist to search for.
-	 * @param location The path of the song.
-	 * @return The Song matching the provided attributes.
-	 */
-	private Song searchSong(String title, long artist, String location) {
-		openDB();
-		long sId = -1;
-		
-		String query = "SELECT rowid FROM " + DB.TB_SONG + " WHERE " + DB.SONG_TITLE + " = '" + title + "' AND " + DB.SONG_ARTIST + " = '" + artist 
-				+ "' AND " + DB.SONG_LOCATION + " = '" + location + "'";
-		
-		Cursor c = db.rawQuery(query, null);
-		if (c.moveToFirst()) sId = c.getLong(0);
-		c.close();
-		
-		return mf.getSong(sId);		
+	Song searchSong(String location) {
+		return searchSong(null, -1, -1, location);
 	}
 	
 	/**
@@ -1167,8 +1144,14 @@ class DBHelper extends SQLiteOpenHelper {
 		openDB();
 		long sId = -1;
 		
-		String query = "SELECT rowid FROM " + DB.TB_SONG + " WHERE " + DB.SONG_TITLE + " = '" + title + "' AND " + DB.SONG_ARTIST + " = '" + artist 
-											+ "' AND " + DB.SONG_LOCATION + " = '" + location + "' AND " + DB.SONG_HOST + " = '" + host + "'";
+		String query = "SELECT rowid FROM " + DB.TB_SONG + " WHERE ";
+		
+		if (title != null) query += DB.SONG_TITLE + " = '" + title + "' AND ";
+		if (artist != -1) query += DB.SONG_ARTIST + " = '" + artist + "' AND ";
+		if (location != null) query += DB.SONG_LOCATION + " = '" + location + "' AND ";
+		if (host != -1) query += DB.SONG_HOST + " = '" + host + "' AND ";
+		
+		query = query.substring(0, query.length() - 5);
 		
 		Cursor c = db.rawQuery(query, null);
 		if (c.moveToFirst()) sId = c.getLong(0);

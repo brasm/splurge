@@ -1,7 +1,10 @@
 package dk.aau.sw802f12.proto3.util;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.HashSet;
+
+import android.media.MediaMetadataRetriever;
 
 /**
  * A Song is a playable track, the Media Player can Play. 
@@ -20,6 +23,7 @@ public class Song {
 	private String location;
 	HashSet<Tag> tags;
 	private long id;
+	private File song;
 	
 	/**
 	 * Create new Song Instance.
@@ -29,7 +33,7 @@ public class Song {
 	 * @param location The file path to the song.
 	 * @param tags A list of {@link Tag}s associated with the Song.
 	 */
-	public Song(String title, Artist artist, User host, String location) {
+	Song(String title, Artist artist, User host, String location) {
 		setTitle(title);
 		setArtist(artist);
 		setHost(host);
@@ -37,6 +41,35 @@ public class Song {
 		id = -1;
 		
 		tags = new HashSet<Tag>();
+	}
+	
+	Song(String path) throws IllegalArgumentException {
+		this(new File(path));
+	}
+	
+	Song(File f) throws IllegalArgumentException {
+		String fileTypeRegex = ".*\\.(flac|ogg|oga|mp3|wma|m4a)";
+		if (f.getName().toLowerCase().matches(fileTypeRegex))
+			song = f.getAbsoluteFile();
+		else
+			throw new IllegalArgumentException();
+		
+		MusicRegistry mr = MusicRegistry.getInstance();
+		setLocation(f.getAbsolutePath());
+		MediaMetadataRetriever mmdr = new MediaMetadataRetriever();
+		mmdr.setDataSource(location);
+		setTitle(mmdr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE));
+		setArtist(mr.createArtist(
+				mmdr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)));		
+		setHost(mr.createUser("local")); //TODO: Currently ignores unit, song is located at!!!
+		tags = new HashSet<Tag>();
+	}
+	
+	public File getFile() {
+		if (song == null) {
+			song = new File(location);
+		}
+		return song;
 	}
 	
 	/**

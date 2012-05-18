@@ -47,7 +47,7 @@ public class Song {
 		MediaMetadataRetriever mmdr = new MediaMetadataRetriever();
 		mmdr.setDataSource(song.getAbsolutePath());
 		
-		String artist = mmdr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+		String artist = mmdr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_AUTHOR);
 		String album = mmdr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
 		String title = mmdr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
 		
