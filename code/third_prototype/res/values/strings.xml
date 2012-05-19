@@ -18,5 +18,8 @@
     <string name="server_dialog_msg">Enter the desired name for your SMP-Server:</string>
     <string name="input_client">Client Setup</string>
     <string name="client_dialog_msg">Enter the name of the SMP-Server you wish to connect to:</string>
+    <string name="input_lastfm">Set Last.FM Account</string>
+    <string name="lastfm_dialog_msg">Enter your Last.FM username:</string>
+    <string name="set_lastfm_button">Set Last.FM Account</string>
 
 </resources>

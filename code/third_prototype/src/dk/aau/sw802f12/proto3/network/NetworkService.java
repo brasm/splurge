@@ -3,6 +3,7 @@ package dk.aau.sw802f12.proto3.network;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import android.bluetooth.BluetoothAdapter;
@@ -19,6 +20,8 @@ public class NetworkService {
 
 	private Context context;
 	private BluetoothAdapter mBluetoothAdapter;
+	private String lastFMUser;
+	private ArrayList<String> users;
 
 	public NetworkService(Context context, BluetoothAdapter btAdapter) {
 		this.context = context;
@@ -30,8 +33,9 @@ public class NetworkService {
 		aThread.start();
 	}
 
-	public synchronized void connect(BluetoothDevice bd) {
+	public synchronized void connect(BluetoothDevice bd, String user) {
 		ConnectThread cThread = new ConnectThread(bd);
+		lastFMUser = user;
 		Log.d(TAG, "Starting thread.");
 		cThread.start();
 	}
@@ -156,6 +160,8 @@ public class NetworkService {
 			Log.d(TAG, "Connected.");
 			ConnectedThread ct = new ConnectedThread(socket);
 			ct.start();
+			ct.write(lastFMUser.getBytes());
+			Log.d(TAG, "Client wrote " + lastFMUser);
 		}
 
 		/** Will cancel an in-progress connection, and close the socket */
@@ -197,8 +203,9 @@ public class NetworkService {
 	            try {
 	                // Read from the InputStream
 	                bytes = mmInStream.read(buffer);
+	                users.add(new String(buffer, 0, bytes));
 	                // Send the obtained bytes to the UI activity
-	                Log.d(TAG, new String(buffer, 0, bytes));
+	                Log.d(TAG, "Server read: " + new String(buffer, 0, bytes));
 	                
 	            } catch (IOException e) {
 	                break;

@@ -28,6 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import dk.aau.sw802f12.proto3.R.id;
 import dk.aau.sw802f12.proto3.network.NetworkService;
+import dk.aau.sw802f12.proto3.util.MusicRegistry;
 
 public class MainActivity extends Activity {
 	
@@ -40,10 +41,12 @@ public class MainActivity extends Activity {
 	private AudioManager am;
 	private AlertDialog serverDialog;
 	private AlertDialog clientDialog;
+	private AlertDialog lastFMDialog;
 	EditText input_serverName;
 	EditText input_clientServerName;
+	EditText input_LastFM;
 	private String clientServerName;
-
+    private MusicRegistry mr;
 	
 	BluetoothAdapter mBluetoothAdapter;
 	private PlayService player;
@@ -56,8 +59,10 @@ public class MainActivity extends Activity {
 	private TextView song3;
 	private TextView song4;
 	private Button toggleButton;
+	private Button nextButton;
 	private Button startServerButton;
 	private Button startClientButton;
+	private Button lastFMButton;
     
 	private Intent intent = new Intent();
 	
@@ -89,6 +94,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.player);
         mContext = this;
+        mr = MusicRegistry.getInstance(mContext);
         
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		if (mBluetoothAdapter == null) {
@@ -109,8 +115,10 @@ public class MainActivity extends Activity {
         progressBar = (ProgressBar) findViewById(R.id.songprogressbar);
     	serverDialog = new AlertDialog.Builder(this).create();
     	clientDialog = new AlertDialog.Builder(this).create();
+    	lastFMDialog = new AlertDialog.Builder(this).create();
     	input_serverName = new EditText(this);
     	input_clientServerName = new EditText(this);
+    	input_LastFM = new EditText(this);
         
         discoveredPeers = new ArrayList<BluetoothDevice>();
         
@@ -121,10 +129,14 @@ public class MainActivity extends Activity {
 		
 		toggleButton = (Button) findViewById(id.toggleplayerstatus);
 		toggleButton.setOnClickListener(toggleListener);
+		nextButton = (Button) findViewById(id.next_button);
+		nextButton.setOnClickListener(nextSongListener);
 		startServerButton = (Button) findViewById(id.start_server_button);
 		startServerButton.setOnClickListener(startServerListener);
 		startClientButton = (Button) findViewById(id.start_client_button);
 		startClientButton.setOnClickListener(startClientListener);
+		lastFMButton = (Button) findViewById(id.lastfm_button);
+		lastFMButton.setOnClickListener(lastFMListener);		
 		
 		currentSongText = (TextView) findViewById(id.trackName);
 		song1 = (TextView) findViewById(id.song1_text);
@@ -132,15 +144,11 @@ public class MainActivity extends Activity {
 		song3 = (TextView) findViewById(id.song3_text);
 		song4 = (TextView) findViewById(id.song4_text);
 		
-		
-		
     }
     @Override
 	protected void onResume() {
 		// TODO Auto-generated method stub
 		super.onResume();
-		
-		
 	}
     
     @Override
@@ -155,9 +163,7 @@ public class MainActivity extends Activity {
     
     private class SeekbarListener implements SeekBar.OnSeekBarChangeListener {
 		public void onStopTrackingTouch(SeekBar seekBar) { }
-		
 		public void onStartTrackingTouch(SeekBar seekBar) { }
-		
 		public void onProgressChanged(SeekBar seekBar, int progress,
 				boolean fromUser) {
 			if (fromUser) {
@@ -303,6 +309,13 @@ public class MainActivity extends Activity {
 		}
 	};
 	
+	private OnClickListener nextSongListener = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			player.next();
+		}
+	};
+	
 	private OnClickListener startServerListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
@@ -368,6 +381,28 @@ public class MainActivity extends Activity {
 			    	  clientDialog.cancel();
 			       } });
 			clientDialog.show();
+		}
+	};
+	
+	private OnClickListener lastFMListener = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			lastFMDialog.setTitle(R.string.input_lastfm);
+			lastFMDialog.setView(input_LastFM);
+			lastFMDialog.setMessage(mContext.getText(R.string.client_dialog_msg));
+			lastFMDialog.setCancelable(false);
+			lastFMDialog.setButton(DialogInterface.BUTTON_POSITIVE , mContext.getText(R.string.set_lastfm_button), new DialogInterface.OnClickListener() {
+			      public void onClick(DialogInterface dialog, int which) {
+			    	  Log.d(tag, "Last.FM account set to: " + input_LastFM.getText());
+			    	  //Set account for user here.
+			    	  mr.createUser(mBluetoothAdapter.getAddress(), input_LastFM.getText().toString());
+			       } });
+			
+			lastFMDialog.setButton(DialogInterface.BUTTON_NEGATIVE , mContext.getText(R.string.cancel_button), new DialogInterface.OnClickListener() {
+			      public void onClick(DialogInterface dialog, int which) {
+			    	  clientDialog.cancel();
+			       } });
+			lastFMDialog.show();
 		}
 	};
 
