@@ -3,32 +3,48 @@ package dk.aau.sw802f12.proto3;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
+import java.util.Vector;
+
+import android.util.Log;
+
+import dk.aau.sw802f12.proto3.util.Artist;
+import dk.aau.sw802f12.proto3.util.Song;
 
 public class SongList {
 	public final boolean LOCAL;
 	public final String NAME;
 	
-	private Map<String,Song> byArtist;
-	private Map<String,Song> byAlbum;
-	private Map<String,Song> byPath;
 	private List<Song> asList;
+	private HashMap<Artist,List<Song>> artistMap;
 	
 	public SongList(boolean local,String listname){
 		LOCAL = local;
 		NAME = listname;
-		byArtist = new HashMap<String, Song>();
-		byAlbum = new HashMap<String, Song>();
-		byPath = new HashMap<String, Song>();
 		asList = new ArrayList<Song>();
+		artistMap = new HashMap<Artist, List<Song>>();
 	}
 	
 	public void put(Song s){
-		byArtist.put(s.getArtist(), s);
-		byAlbum.put(s.getAlbum(), s);
-		byPath.put(s.getPath(), s);
+		Log.d("LASTFM", "Adding song to list: " + s.getLocation());
+		
+		
 		asList.add(s);
+		List<Song> songs = artistMap.get(s.getArtist());
+		if(songs == null) songs = new Vector<Song>();
+		songs.add(s);
+			
+		artistMap.put(s.getArtist(), songs);
+	}
+	
+	public Song getRandom(Artist a){
+		List<Song> songs = artistMap.get(a);
+		if(songs == null) return null;
+		
+		int size = songs.size() - 1;
+		Random r = new Random();
+		int index = r.nextInt(size);
+		return songs.get(index);
 	}
 	
 	public Song getRandom(){
@@ -36,8 +52,12 @@ public class SongList {
 		int size = asList.size();
 		if(size == 0){
 			return null;
-		}
-			
+		}	
 		return asList.get(r.nextInt(size));
+	}
+	
+	public boolean containsArtist(Artist a){
+		List<Song> s = artistMap.get(a);
+		return s != null ? true : false;
 	}
 }

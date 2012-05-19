@@ -10,15 +10,23 @@ import dk.aau.sw802f12.proto3.Settings;
 
 import android.util.Log;
 
+
+/**
+ * This class is responsible for HTTP communication with last.fm 
+ * , or any other rest service that returns XML 
+ * 
+ * @author brian
+ *
+ */
 public class HttpClient{
 	
-	// limit the amount of concurrent http requests to a number specified by
-	// this semaphore. 
+	// limit the amount of concurrent http request threads
 	private Object _mutex = new Object();
-	private long _lastRequestTimestamp = 0;
- 
-	//last.fm api does allows 5 request/sec
+	private Semaphore _pool = new Semaphore(10, true);
+	
+	// The last.fm api allows 5 request/sec
 	private long _requestInterval = 1000/5;
+	private long _lastRequestTimestamp = 0;
 
 	private static HttpClient _instance = null;
 	public static final HttpClient getInstance(){
@@ -48,7 +56,6 @@ public class HttpClient{
 			db = dbf.newDocumentBuilder();
 			return db.parse(url);
 		} catch( Exception e){
-			Log.d("LASTFM","EXCEPTION " + e.getMessage());
 			return null;
 		}
 	}
@@ -65,15 +72,22 @@ public class HttpClient{
 		
 		@Override
 		public void run() {
+			
 			try {
+				_pool.acquire();
 				requestQueue();
-			} catch (InterruptedException e) {
-				return;
+			} 
+			catch (InterruptedException e) {}
+			finally {
+				_pool.release();
 			}
+			
 			Document xmlDocument = sendHttpRequest(_query.getRequest());
 			_query.setResponse(xmlDocument);
 		}
 		
+		
+		// park thread until requestinterval adheres to last.fm api rules
 		private void requestQueue() throws InterruptedException{
 			synchronized (_mutex) {
 				long now = System.currentTimeMillis();

@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import dk.aau.sw802f12.proto3.lastfm.LastFmData;
+
 /**
  * Wraps Artist info from the Database, as well as holds {@link Tag}s related to the Artist.
  * The id of the Artist is the Database id, it is assigned at database insertion. 
@@ -120,6 +122,9 @@ public class Artist {
 	 * @return Set of Tag of the Artist.
 	 */
 	public HashSet<Tag> getTags() {
+		try {
+			if (tags.isEmpty())	new LastFmData().getTags(this);
+		} catch (InstantiationException e) { }
 		return tags;
 	}
 
@@ -161,8 +166,10 @@ public class Artist {
 			
 			mr.loadSimilarArtists(this);
 			
+			// only request similar artists if artist is in library
 			if (mr.existsSongsByArtist(this) && similarArtists.size() == 0) {
-				// TODO: If DB load was empty, request from Last.FM and add.
+				new LastFmData().getSimilarArtists(this);
+				return new HashMap<Artist, Short>();
 			}
 		}
 		return similarArtists;

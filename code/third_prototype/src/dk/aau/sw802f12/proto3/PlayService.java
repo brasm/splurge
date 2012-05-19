@@ -10,6 +10,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 import dk.aau.sw802f12.proto3.api.Playback;
+import dk.aau.sw802f12.proto3.util.Song;
 
 public class PlayService extends Service implements OnCompletionListener, Playback {
 	public static final String UPDATESTATE = PlayService.class.getCanonicalName(); 
@@ -49,7 +50,7 @@ public class PlayService extends Service implements OnCompletionListener, Playba
 	public void play() {
 		try {
 			mPlayer.reset();
-			mPlayer.setDataSource(mSong.getPath());
+			mPlayer.setDataSource(mSong.getLocation());
 			mPlayer.prepare();
 			mPlayer.start();
 			mPaused = false;
@@ -149,7 +150,7 @@ public class PlayService extends Service implements OnCompletionListener, Playba
 	
 	private void updatedState(){
 		Intent intent = new Intent(UPDATESTATE);
-		String artist = mSong.getArtist();
+		String artist = mSong.getArtist().getName();
 		String title = mSong.getTitle();
 		if (artist == null) artist = "Unknown Artist";
 		if (title == null) title = "Unknown Title";

@@ -11,6 +11,7 @@ public class Settings {
 	private int httpThreads = 10;
 	private double similarArtistThreshold = 0.4;
 	private int maximumArtistTags = 3;
+	private int recentlyPlayedBlacklist = 10;
 		
 	private static Settings mInstance = null;
 	public static Settings getInstance(){
@@ -79,4 +80,11 @@ public class Settings {
 	public void setMaximumArtistTags(int maximumArtistTags) {
 		this.maximumArtistTags = maximumArtistTags;
 	}
+	public int getRecentlyPlayedBlacklist() {
+		return recentlyPlayedBlacklist;
+	}
+	public void setRecentlyPlayedBlacklist(int recentlyPlayedBlacklist) {
+		this.recentlyPlayedBlacklist = recentlyPlayedBlacklist;
+	}
+
 }

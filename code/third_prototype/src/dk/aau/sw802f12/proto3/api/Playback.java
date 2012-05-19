@@ -1,9 +1,10 @@
 package dk.aau.sw802f12.proto3.api;
 
-import dk.aau.sw802f12.proto3.Song;
+import dk.aau.sw802f12.proto3.util.Song;
+
 
 public interface Playback {
-	// Playback Controls //////////////////////////////////////////////////////
+	// Playback Controls
 	public abstract void play();
 
 	public abstract void stop();
@@ -16,7 +17,7 @@ public interface Playback {
 
 	public abstract void toggle();
 
-	// Playback Info //////////////////////////////////////////////////////////
+	// Playback Info 
 	public abstract Song nowPlaying();
 
 	public abstract int getDuration();

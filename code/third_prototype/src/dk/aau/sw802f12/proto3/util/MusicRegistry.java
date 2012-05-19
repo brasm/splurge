@@ -263,6 +263,14 @@ public class MusicRegistry {
 		if (a == null) {
 			a = new Artist(name);
 			updateDB(a);
+			try {
+				a.getSimilarArtists();
+			} 
+			catch (InstantiationException e) {
+				// if this happens, programming is wierd
+				// and I should do something else with
+				// my life				
+			}
 		}
 		
 		return a;

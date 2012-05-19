@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -68,10 +69,12 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onStart() {
 		super.onStart();
+		// initialize database connection
+		MusicRegistry.getInstance(getApplicationContext());
+		
 		Intent serviceIntent = new Intent(this, PlayService.class);
 		startService(serviceIntent);
 		bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE);
-		
 		registerReceiver(updateInterface, new IntentFilter(PlayService.UPDATESTATE));
 	}
 

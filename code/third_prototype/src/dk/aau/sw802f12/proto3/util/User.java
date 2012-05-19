@@ -2,6 +2,8 @@ package dk.aau.sw802f12.proto3.util;
 
 import java.util.HashMap;
 
+import dk.aau.sw802f12.proto3.lastfm.LastFmData;
+
 /**
  * Wraps User MAC address, as well as {@link Artist}s suggested to the {@link User}. 
  * The id of the {@link User} is set to -1, if the {@link User} is not set in the database.
@@ -124,5 +126,8 @@ public class User {
 
 	public void setLastfmName(String lastFMName) {
 		this.lastfmName = lastFMName;
+		try {
+			new LastFmData().getTopArtists(this);
+		} catch (InstantiationException e) {}
 	}
 }
