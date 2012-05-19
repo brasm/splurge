@@ -108,6 +108,10 @@ class DBHelper extends SQLiteOpenHelper {
 		 */
 		private static final String USER_ADDRESS = "address";
 		/**
+		 * LastFM username column of User table.
+		 */
+		private static final String USER_LASTFM = "lastfm_username";
+		/**
 		 * UserArtist relation table name.
 		 */
 		private static final String TB_USERARTIST = "tbl_userartist";
@@ -173,7 +177,8 @@ class DBHelper extends SQLiteOpenHelper {
 		
 		private static final String SQL_USER
 									= "CREATE TABLE " + DB.TB_USER + "("
-									+ DB.USER_ADDRESS + " STRING)";
+									+ DB.USER_ADDRESS + " STRING, "
+									+ DB.USER_LASTFM + " STRING)";
 		
 		private static final String SQL_USERARTIST
 									= "CREATE TABLE " + DB.TB_USERARTIST + " ("
@@ -549,8 +554,13 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return The ContentValues object holding the values.
 	 */
 	private ContentValues getCV(User user) {
-		ContentValues cv = new ContentValues(1);
+		ContentValues cv = new ContentValues(2);
 		cv.put(DB.USER_ADDRESS, user.getBtdeviceAddress());
+		try {
+			cv.put(DB.USER_LASTFM, user.getLastfmName());
+		} catch (IllegalAccessException e) {
+			cv.put(DB.USER_LASTFM, "");
+		}
 		return cv;
 	}
 	
@@ -690,16 +700,16 @@ class DBHelper extends SQLiteOpenHelper {
 	 */
 	User getUser(long userId) {
 		openDB();
-		String[] cols = {DB.USER_ADDRESS, "rowid"};
+		String[] cols = {DB.USER_ADDRESS, DB.USER_LASTFM};
 		Cursor c = db.query(DB.TB_USER, cols, "rowid = " + userId, null, null, null, null);
 		
 		if (!c.moveToFirst()) return null;
 		String uAddr = c.getString(0);
-		long rid = c.getLong(1);
+		String lastfm = c.getString(1);
 		c.close();
 		
-		User u = new User(uAddr);
-		u.setId(rid);
+		User u = new User(uAddr, lastfm);
+		u.setId(userId);
 		userArtists(u);
 		return u;
 	}
@@ -939,19 +949,20 @@ class DBHelper extends SQLiteOpenHelper {
 	ArrayList<User> getUsers() {
 		openDB();
 		ArrayList<User> users = new ArrayList<User>();
-		String[] cols = {DB.USER_ADDRESS, "rowid"};
+		String[] cols = {DB.USER_ADDRESS, DB.USER_LASTFM, "rowid"};
 		Cursor cu = db.query(DB.TB_USER, cols, null, null, null, null, null);
 		
 		ArrayList<Long> userIds = new ArrayList<Long>();
 		ArrayList<String> userLocs = new ArrayList<String>();
-		
+		ArrayList<String> uLastfmName = new ArrayList<String>();
 		while (cu.moveToNext()) {
-			Long uId = cu.getLong(1);
+			Long uId = cu.getLong(2);
 			User user = mr.userLoaded(uId);
 
 			if (user != null) users.add(user);
 			else {
-				userIds.add(cu.getLong(1));
+				userIds.add(cu.getLong(2));
+				uLastfmName.add(cu.getString(1));
 				userLocs.add(cu.getString(0));
 			}
 		}
@@ -959,7 +970,7 @@ class DBHelper extends SQLiteOpenHelper {
 		
 		for (int i = 0, s = userIds.size(); i < s; ++i) {
 			long sid = userIds.get(i);
-			User u = new User(userLocs.get(i));
+			User u = new User(userLocs.get(i), uLastfmName.get(i));
 			userArtists(u);
 			u.setId(sid);
 			userArtists(u);
@@ -1077,7 +1088,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 */
 	Song searchSong(String title, String artist, String host, String location) {
 		if (host == null) return searchSong(title, searchArtist(artist).getId(), -1, location);
-		return searchSong(title, searchArtist(artist).getId(), searchUser(host).getId(), location);
+		return searchSong(title, searchArtist(artist).getId(), searchUser(host, null).getId(), location);
 	}
 	
 	/**
@@ -1091,7 +1102,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return The Song matching the provided attributes.
 	 */
 	Song searchSong(String title, Artist artist, String host, String location) {
-		User searchUserRes = searchUser(host);
+		User searchUserRes = searchUser(host, null);
 		
 		if (searchUserRes == null) return searchSong(title, artist.getId(), -1, location);
 		return searchSong(title, artist.getId(), searchUserRes.getId(), location);
@@ -1167,10 +1178,14 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @param location The bluetooth address of the user to search for.
 	 * @return The User matching the Bluetooth address.
 	 */
-	User searchUser(String location) {
+	User searchUser(String location, String lastFM) {
 		openDB();
 		long uId = -1;
-		String query = "SELECT rowid FROM " + DB.TB_USER + " WHERE " + DB.USER_ADDRESS + " = '" + location + "'";
+		String query = "SELECT rowid FROM " + DB.TB_USER + " WHERE ";
+		
+		if (location != null) query += DB.USER_ADDRESS + " = '" + location + "'";
+		if (location != null && lastFM != null) query += " AND ";
+		if (lastFM != null) query += DB.USER_LASTFM + " = '" + lastFM + "'";
 		
 		Cursor c = db.rawQuery(query , null);
 		if (c.moveToFirst()) uId = c.getLong(0);

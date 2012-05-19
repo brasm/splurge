@@ -33,8 +33,8 @@ public class MusicRegistry {
 	 * @return The MusicRegistry instance, if already instantiated, or null.
 	 * @throws Exception 
 	 */
-	public static MusicRegistry getInstance() throws IllegalStateException {
-		if (instance == null) throw new IllegalStateException("Music Registry not instantiated. Must be instantiated explicitly with Context.");
+	public static MusicRegistry getInstance() throws InstantiationException {
+		if (instance == null) throw new InstantiationException("Music Registry not instantiated. Must be instantiated explicitly with Context.");
 		return instance;
 	}
 	
@@ -281,9 +281,7 @@ public class MusicRegistry {
 		Song s = db.searchSong(title, artist, host, location);
 		
 		if (s == null) {
-			User u = new User(host);
-			db.updateDB(u);
-			s = new Song(title, createArtist(artist), u, location);
+			s = new Song(title, createArtist(artist), createUser(host), location);
 			db.updateDB(s);
 		}
 		return s;
@@ -301,9 +299,7 @@ public class MusicRegistry {
 	public Song createSong(String title, Artist artist, String host, String location) {
 		Song s = db.searchSong(title, artist, host, location);
 		if (s == null) {
-			User u = new User(host);
-			db.updateDB(u);
-			s = new Song(title, artist, u, location);
+			s = new Song(title, artist, createUser(host), location);
 			db.updateDB(s);
 		}
 		return s;
@@ -349,8 +345,9 @@ public class MusicRegistry {
 	 * Retrieve a {@link Song} from the database, or, should it not exist, create it.
 	 * @param location The path to the song.
 	 * @return The retrieved song.
+	 * @throws InstantiationException 
 	 */
-	public Song createSong(String location) {
+	public Song createSong(String location) throws InstantiationException {
 		Song s = db.searchSong(location);
 		
 		if (s == null) {
@@ -363,15 +360,26 @@ public class MusicRegistry {
 	
 	/**
 	 * Retrieve a {@link User} from the database, or, should it not exist, create it.
-	 * Note that the provided bluetooth address must match exactly - though casing is not important.
+	 * Note that the provided bluetooth address must match exactly - casing is not important.
 	 * @param btAddress The Bluetooth address of the User.
 	 * @return The User with the Bluetooth address passed.
 	 */
 	public User createUser(String btAddress) {
+		return createUser(btAddress, null);
+	}
+	
+	/**
+	 * Retrieve a {@link User} from the database, or, should it not exist, create it.
+	 * Note that the provided bluetooth address must match exactly - casing is not important.
+	 * @param btAddress The Bluetooth address of the User.
+	 * @param lastfmuser LastFM username of the User.
+	 * @return The User with the Bluetooth address passed.
+	 */
+	public User createUser(String btAddress, String lastfmuser) {
 		btAddress = btAddress.toUpperCase();
-		User u = db.searchUser(btAddress);
+		User u = db.searchUser(btAddress, lastfmuser);
 		if (u == null) {
-			u = new User(btAddress);
+			u = new User(btAddress, lastfmuser);
 			db.updateDB(u);
 		}
 		return u;

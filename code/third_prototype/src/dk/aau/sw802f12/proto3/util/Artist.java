@@ -154,7 +154,7 @@ public class Artist {
 	 * @return The similar Artists, and the similarity with this Artist.
 	 * @throws IllegalStateException If the Music registry was not instantiated with Context before calling.
 	 */
-	public HashMap<Artist, Short> getSimilarArtists() throws IllegalStateException {
+	public HashMap<Artist, Short> getSimilarArtists() throws InstantiationException {
 		if (similarArtists == null) {
 			MusicRegistry mr = MusicRegistry.getInstance();
 			initiateSimilar();

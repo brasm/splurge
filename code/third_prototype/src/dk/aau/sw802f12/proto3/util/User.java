@@ -15,6 +15,8 @@ public class User {
 	 * The address of the bluetooth device. (Bluetooth adapter can instantiate a BluetoothDevice from this.)
 	 */
 	private String btdeviceAddress;
+	
+	private String lastfmName;
 	/**
 	 * The {@link Artist}s that has been suggested to the user.
 	 */
@@ -29,9 +31,10 @@ public class User {
 	 * @param btda The Bluetooth device address of the device.
 	 * @param suggestedArtists {@link Artist}s suggested to the user.
 	 */
-	User(String btda) {
+	User(String btda, String lastfmName) {
 		setBtdeviceAddress(btda);
 		setId(-1);
+		setLastfmName(lastfmName);
 		ratedArtists = new HashMap<Artist, Short>();
 	}
 		
@@ -112,5 +115,14 @@ public class User {
 	 */
 	void setId(long id) {
 		this.id = id;
+	}
+
+	public String getLastfmName() throws IllegalAccessException {
+		if (lastfmName == null) throw new IllegalAccessException();
+		return lastfmName;
+	}
+
+	public void setLastfmName(String lastFMName) {
+		this.lastfmName = lastFMName;
 	}
 }

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import android.media.MediaMetadataRetriever;
+import android.util.Log;
 
 /**
  * A Song is a playable track, the Media Player can Play. 
@@ -48,7 +49,7 @@ public class Song {
 	 * @param path The path, the Song is located at.
 	 * @throws IllegalArgumentException If the provided path does not contain a file.
 	 */
-	Song(String path) throws IllegalArgumentException {
+	Song(String path) throws InstantiationException {
 		this(new File(path));
 	}
 	
@@ -58,7 +59,7 @@ public class Song {
 	 * @throws IllegalArgumentException If the provided file does not contain a file.
 	 * @throws IllegalStateException If the Music Registry was not instantiated with context before calling.
 	 */
-	Song(File f) throws IllegalArgumentException, IllegalStateException {
+	Song(File f) throws IllegalArgumentException, InstantiationException {
 		String fileTypeRegex = ".*\\.(flac|ogg|oga|mp3|wma|m4a)";
 		if (f.getName().toLowerCase().matches(fileTypeRegex))
 			song = f.getAbsoluteFile();
@@ -69,6 +70,16 @@ public class Song {
 		setLocation(f.getAbsolutePath());
 		MediaMetadataRetriever mmdr = new MediaMetadataRetriever();
 		mmdr.setDataSource(location);
+		
+		if (mmdr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST) == null)
+			Log.d(DBHelper.TAG, "Nop1");
+		if (mmdr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_AUTHOR) == null)
+			Log.d(DBHelper.TAG, "Nop2");
+		if (mmdr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE) == null)
+			Log.d(DBHelper.TAG, "Nop3");
+		if (mmdr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER) == null)
+			Log.d(DBHelper.TAG, "Nop4");
+		
 		String title = mmdr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
 		setTitle((title != null) ? title : "Unknown");
 		
