@@ -7,27 +7,43 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import dk.aau.sw802f12.proto3.R.id;
+import dk.aau.sw802f12.proto3.network.NetworkService;
 
 public class MainActivity extends Activity {
+	
+	Context mContext;
+	
 	public static String tag = "SW8PLAYER";
 	private static final int REQUEST_ENABLE_BT = 1;
 	private SeekBar volumeBar;
 	private ProgressBar progressBar;
 	private AudioManager am;
+	private AlertDialog serverDialog;
+	private AlertDialog clientDialog;
+	EditText input_serverName;
+	EditText input_clientServerName;
+	private String clientServerName;
+
 	
 	BluetoothAdapter mBluetoothAdapter;
 	private PlayService player;
@@ -40,7 +56,8 @@ public class MainActivity extends Activity {
 	private TextView song3;
 	private TextView song4;
 	private Button toggleButton;
-	private Button connectionSettingButton;
+	private Button startServerButton;
+	private Button startClientButton;
     
 	private Intent intent = new Intent();
 	
@@ -71,15 +88,25 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.player);
+        mContext = this;
         
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		if (mBluetoothAdapter == null) {
 			// Device does not support Bluetooth
 		}
+		
+		IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+		Log.d(tag, "Registering mReceiver");
+		registerReceiver(mReceiver, filter); // Don't forget to unregister
+												// during onDestroy
      
         am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         volumeBar = (SeekBar) findViewById(R.id.volume);
         progressBar = (ProgressBar) findViewById(R.id.songprogressbar);
+    	serverDialog = new AlertDialog.Builder(this).create();
+    	clientDialog = new AlertDialog.Builder(this).create();
+    	input_serverName = new EditText(this);
+    	input_clientServerName = new EditText(this);
         
         discoveredPeers = new ArrayList<BluetoothDevice>();
         
@@ -90,30 +117,33 @@ public class MainActivity extends Activity {
 		
 		toggleButton = (Button) findViewById(id.toggleplayerstatus);
 		toggleButton.setOnClickListener(toggleListener);
+		startServerButton = (Button) findViewById(id.start_server_button);
+		startServerButton.setOnClickListener(startServerListener);
+		startClientButton = (Button) findViewById(id.start_client_button);
+		startClientButton.setOnClickListener(startClientListener);
 		
 		currentSongText = (TextView) findViewById(id.trackName);
 		song1 = (TextView) findViewById(id.song1_text);
 		song2 = (TextView) findViewById(id.song2_text);
 		song3 = (TextView) findViewById(id.song3_text);
 		song4 = (TextView) findViewById(id.song4_text);
+		
+		
+		
     }
-    
-    public void onResume(Bundle savedInstanceState) {
-    	super.onResume();
-    	// Register the BroadcastReceiver
-		IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-		registerReceiver(mReceiver, filter); // Don't forget to unregister
-												// during onDestroy
-    }
-    
-    public void onPause(Bundle savedInstanceState) {
-    	super.onPause();
-    }
+    @Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		
+		
+	}
     
     @Override
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
+		Log.d(tag, "Unregistering mReceiver");
 		unregisterReceiver(mReceiver);
 	}
     
@@ -191,6 +221,18 @@ public class MainActivity extends Activity {
 					Log.d(tag, "Failed adding device to device list.");
 				}
 			}
+			if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)){
+				NetworkService netService = new NetworkService(getApplicationContext(), mBluetoothAdapter);
+		    	  Log.d(tag, "Trying to connect as client.");
+		    	  
+		    	  for(BluetoothDevice device: discoveredPeers){
+						Log.d(tag, "DEVICE NAME: " + device.getName());
+						if (device.getName().equals(clientServerName)) {
+							Log.d(tag, "Discovered, OK.");
+							netService.connect(device);
+						}
+					}
+			}
 		}
 	};
 	
@@ -233,29 +275,74 @@ public class MainActivity extends Activity {
 		}
 	};
 	
-	private OnClickListener connectionSettingListener = new OnClickListener() {
+	private OnClickListener startServerListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			if (playerBound) player.toggle();
-			else Toast.makeText(getApplicationContext(), "Player not bound yet", Toast.LENGTH_SHORT);
+			serverDialog.setTitle(R.string.input_server);
+			serverDialog.setView(input_serverName);
+			serverDialog.setMessage(mContext.getText(R.string.server_dialog_msg));
+			serverDialog.setCancelable(false);
+			serverDialog.setButton(DialogInterface.BUTTON_POSITIVE , mContext.getText(R.string.set_server_button), new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					if (!mBluetoothAdapter.isEnabled()) {
+						Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+						startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+			    	  	}
+		    	  	Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+		    	  	discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 0);
+					startActivity(discoverableIntent);
+					Toast.makeText(getApplicationContext(), input_serverName.getText(), Toast.LENGTH_SHORT).show();
+					String bName = input_serverName.getText().toString();
+					Log.d(tag, "Setting name to: " + bName);
+					mBluetoothAdapter.setName(bName);
+		    	  	Log.d(tag, "Bluetooth name set to: " + mBluetoothAdapter.getName());
+		    	  	NetworkService netService = new NetworkService(getApplicationContext(), mBluetoothAdapter);
+		    	  	Log.d(tag, "Starting server.");
+		    	  	netService.start();
+		       } });
+			
+			serverDialog.setButton(DialogInterface.BUTTON_NEGATIVE , mContext.getText(R.string.cancel_button), new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					serverDialog.cancel();
+				} });
+			serverDialog.show();
 		}
 	};
 	
-	AlertDialog.Builder builder = new AlertDialog.Builder(this);
-	builder.setMessage("Are you sure you want to exit?");
-	builder.setCancelable(false);
-	builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-	           public void onClick(DialogInterface dialog, int id) {
-	                MyActivity.this.finish();
-	           }
-	       });
-	builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-	           public void onClick(DialogInterface dialog, int id) {
-	                dialog.cancel();
-	           }
-	       });
-	AlertDialog alert = builder.create();
-	
+	private OnClickListener startClientListener = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			clientDialog.setTitle(R.string.input_client);
+			clientDialog.setView(input_clientServerName);
+			clientDialog.setMessage(mContext.getText(R.string.client_dialog_msg));
+			clientDialog.setCancelable(false);
+			clientDialog.setButton(DialogInterface.BUTTON_POSITIVE , mContext.getText(R.string.set_client_button), new DialogInterface.OnClickListener() {
+			      public void onClick(DialogInterface dialog, int which) {
+			    	  Log.d(tag, "The server chosen was: " + input_clientServerName.getText());
+			    	  if (!mBluetoothAdapter.isEnabled()) {
+							Intent enableBtIntent = new Intent(
+									BluetoothAdapter.ACTION_REQUEST_ENABLE);
+							startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+			    	  }
+			    	  
+			    	  clientServerName = input_clientServerName.getText().toString();
+			    	  Log.d(tag, "clientServerName is: " + clientServerName);
+			    	  mBluetoothAdapter.startDiscovery();
+			    	  while(mBluetoothAdapter.isDiscovering()){
+			    		  Log.d(tag, "Entering While-loop");
+			    		  //Insert Progress dialog here.
+			    	  }
+			    	  
+			       } });
+			
+			clientDialog.setButton(DialogInterface.BUTTON_NEGATIVE , mContext.getText(R.string.cancel_button), new DialogInterface.OnClickListener() {
+			      public void onClick(DialogInterface dialog, int which) {
+			    	  clientDialog.cancel();
+			       } });
+			clientDialog.show();
+		}
+	};
+
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		switch (keyCode) {

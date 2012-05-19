@@ -1,4 +1,4 @@
-package com.sw802f12.bt;
+package dk.aau.sw802f12.proto3.network;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,20 +10,17 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
-import android.os.Handler;
 import android.util.Log;
 
-public class BluetoothService {
+public class NetworkService {
 	private static final String TAG = "sw8.BT";
 	static final UUID MY_UUID = UUID
 			.fromString("99E67F40-9849-11E1-A8B0-0800200C9A66");
 
 	private Context context;
 	private BluetoothAdapter mBluetoothAdapter;
-	private String clientName;
-	private String serverName;
 
-	public BluetoothService(Context context, BluetoothAdapter btAdapter) {
+	public NetworkService(Context context, BluetoothAdapter btAdapter) {
 		this.context = context;
 		mBluetoothAdapter = btAdapter;
 	}
@@ -223,4 +220,6 @@ public class BluetoothService {
 	        } catch (IOException e) { }
 	    }
 	}
+	
+
 }

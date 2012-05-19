@@ -101,18 +101,18 @@
         android:gravity="center" >
 
         <Button
-            android:id="@+id/connect_sett"
+            android:id="@+id/start_server_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/con_set" />
+            android:text="@string/start_server" />
 
         
 
         <Button
-            android:id="@+id/connect_start"
+            android:id="@+id/start_client_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/con_start" />
+            android:text="@string/start_client" />
 
     </LinearLayout>
 
