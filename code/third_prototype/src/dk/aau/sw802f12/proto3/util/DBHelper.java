@@ -259,7 +259,7 @@ class DBHelper extends SQLiteOpenHelper {
 	@Override
 	public void onOpen(SQLiteDatabase dbs) {
 		db = dbs;
-		//onUpgrade(db, 0,0);
+		onUpgrade(db, 0,0);
 	}
 	
 	/**
