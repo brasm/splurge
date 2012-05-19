@@ -29,12 +29,11 @@ public class MusicRegistry {
 	}
 	
 	/**
-	 * Package protected version of getInstance(). 
 	 * The MusicRegistry must be instantiated somewhere else, before this will work.
 	 * @return The MusicRegistry instance, if already instantiated, or null.
 	 * @throws Exception 
 	 */
-	static MusicRegistry getInstance() throws IllegalStateException {
+	public static MusicRegistry getInstance() throws IllegalStateException {
 		if (instance == null) throw new IllegalStateException("Music Registry not instantiated. Must be instantiated explicitly with Context.");
 		return instance;
 	}
