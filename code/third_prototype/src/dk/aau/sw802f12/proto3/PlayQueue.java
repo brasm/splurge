@@ -7,6 +7,8 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Vector;
 
+import android.util.Log;
+
 import dk.aau.sw802f12.proto3.util.Artist;
 import dk.aau.sw802f12.proto3.util.Song;
 
@@ -73,11 +75,16 @@ public class PlayQueue {
 		// TODO: replace with fancy recommender system that makes the perfect desicion
 		
 		Random r = new Random();
-		int index = r.nextInt(candidates.size() - 1);
+		int size = candidates.size();
+		if (size == 0) return null;
+		
+		int index = r.nextInt(size - 1);
 		return candidates.get(index);
 	}
 	
 	public Song getNext(){
+		//return mLibrary.getRandom();
+		
 		Song nextSong = null;
 		Artist lastArtist;
 		Artist nextArtist;
@@ -90,8 +97,10 @@ public class PlayQueue {
 		} 
 		catch (NoSuchElementException e){}
 		
-		if (nextSong == null)
+		if (nextSong == null){
 			nextSong = mLibrary.getRandom();
+			Log.d("LASTFM", "no song, select random");
+		}
 
 		mArtistsPlayed.add(nextSong.getArtist());
 		mSongsPlayed.add(nextSong);
