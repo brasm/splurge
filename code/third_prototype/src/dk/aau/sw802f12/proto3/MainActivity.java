@@ -29,6 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import dk.aau.sw802f12.proto3.R.id;
 import dk.aau.sw802f12.proto3.network.NetworkService;
+import dk.aau.sw802f12.proto3.util.MusicRegistry;
 
 public class MainActivity extends Activity {
 	
@@ -376,7 +377,7 @@ public class MainActivity extends Activity {
 		public void onClick(View v) {
 			lastFMDialog.setTitle(R.string.input_lastfm);
 			lastFMDialog.setView(input_LastFM);
-			lastFMDialog.setMessage(mContext.getText(R.string.client_dialog_msg));
+			lastFMDialog.setMessage(mContext.getText(R.string.lastfm_dialog_msg));
 			lastFMDialog.setCancelable(false);
 			lastFMDialog.setButton(DialogInterface.BUTTON_POSITIVE , mContext.getText(R.string.set_lastfm_button), new DialogInterface.OnClickListener() {
 			      public void onClick(DialogInterface dialog, int which) {
