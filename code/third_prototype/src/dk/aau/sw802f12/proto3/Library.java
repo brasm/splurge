@@ -99,19 +99,30 @@ public class Library {
 	private boolean updateFolder(File dir) {
 		Log.d("LASTFM", "update folder");
 		if (!dir.isDirectory())	return false;
-		MusicRegistry registry;
+		MusicRegistry registry = null;
+		
 		try {
 			registry = MusicRegistry.getInstance();
-			for (File f : dir.listFiles()) {
-				if (f.isDirectory()) continue;
-				Log.d("LASTFM", "song is " + f.getAbsolutePath());
+		} catch (InstantiationException e) {
+			Log.d("LASTFM", "oh no, cannot instantiate musicregistry");
+		}
+			
+		for (File f : dir.listFiles()) {
+			if (f.isDirectory()) continue;
+			Log.d("LASTFM", "song is " + f.getAbsolutePath());
+			try {
 				Song s = registry.createSong(f.getAbsolutePath());
 				mLocal.put(s);
+			} catch (IllegalArgumentException e) {
+				Log.d("LASTFM", "not a valid audio file:" + f.getAbsolutePath() );
+			} catch (InstantiationException e) {
+				Log.d("LASTFM", "oh no, cannot instantiate musicregistry through song");
 			}
-		} catch (InstantiationException e) {
-			Log.d("LASTFM", "MusicRegistry instance exception");
-			return false;
+			
+			
 		}
+
+		
 		return true;
 	}
 }
