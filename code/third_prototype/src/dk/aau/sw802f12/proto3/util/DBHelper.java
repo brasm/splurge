@@ -1155,16 +1155,38 @@ class DBHelper extends SQLiteOpenHelper {
 		openDB();
 		long sId = -1;
 		
-		String query = "SELECT rowid FROM " + DB.TB_SONG + " WHERE ";
+		String selection = "";
+		ArrayList<String> selArgs = new ArrayList<String>();
+		if (title != null) 
+		{
+			selection += DB.SONG_TITLE + " = ? AND ";
+			selArgs.add(title);
+		}
 		
-		if (title != null) query += DB.SONG_TITLE + " = '" + title + "' AND ";
-		if (artist != -1) query += DB.SONG_ARTIST + " = '" + artist + "' AND ";
-		if (location != null) query += DB.SONG_LOCATION + " = '" + location + "' AND ";
-		if (host != -1) query += DB.SONG_HOST + " = '" + host + "' AND ";
+		if (artist != -1) {
+			selection += DB.SONG_ARTIST + " = ? AND ";
+			selArgs.add("" + artist);
+		}
 		
-		query = query.substring(0, query.length() - 5);
+		if (location != null) {
+			selection += DB.SONG_LOCATION + " = ? AND ";
+			selArgs.add(location);
+		}
 		
-		Cursor c = db.rawQuery(query, null);
+		if (host != -1) {
+			selection += DB.SONG_HOST + " = ? AND ";
+			selArgs.add(host + "");
+		}
+		
+		selection = selection.substring(0, selection.length() - 5);
+		int selSize = selArgs.size();
+		String[] selectionArgs = new String[selSize];
+		for (int i = 0; i < selSize; ++i) {
+			selectionArgs[i] = selArgs.get(i);
+		}
+				
+		Cursor c = db.query(DB.TB_SONG, new String[] {"rowid"}, selection, selectionArgs, null, null, null);
+		//Cursor c = db.rawQuery(query, null);
 		if (c.moveToFirst()) sId = c.getLong(0);
 		c.close();
 		
