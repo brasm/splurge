@@ -95,9 +95,13 @@ public class MainActivity extends Activity {
 			// Device does not support Bluetooth
 		}
 		
-		IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-		Log.d(tag, "Registering mReceiver");
-		registerReceiver(mReceiver, filter); // Don't forget to unregister
+		IntentFilter deviceFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+		Log.d(tag, "Registering deviceReceiver");
+		registerReceiver(deviceReceiver, deviceFilter); // Don't forget to unregister
+												// during onDestroy
+		IntentFilter adapterFilter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+		Log.d(tag, "Registering adapterReceiver");
+		registerReceiver(adapterReceiver, adapterFilter); // Don't forget to unregister
 												// during onDestroy
      
         am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
@@ -143,8 +147,10 @@ public class MainActivity extends Activity {
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
-		Log.d(tag, "Unregistering mReceiver");
-		unregisterReceiver(mReceiver);
+		Log.d(tag, "Unregistering deviceReceiver");
+		unregisterReceiver(deviceReceiver);
+		Log.d(tag, "Unregistering adapterReceiver");
+		unregisterReceiver(adapterReceiver);
 	}
     
     private class SeekbarListener implements SeekBar.OnSeekBarChangeListener {
@@ -201,7 +207,7 @@ public class MainActivity extends Activity {
 	};
 	
 	// Create a BroadcastReceiver for ACTION_FOUND
-	private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+	private final BroadcastReceiver deviceReceiver = new BroadcastReceiver() {
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
 			// When discovery finds a device
@@ -235,6 +241,28 @@ public class MainActivity extends Activity {
 			}
 		}
 	};
+	
+	// Create a BroadcastReceiver for ACTION_DISCOVERY
+		private final BroadcastReceiver adapterReceiver = new BroadcastReceiver() {
+			public void onReceive(Context context, Intent intent) {
+				String action = intent.getAction();
+				// When discovery finds a device
+				Log.d(tag, action);
+				
+				if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)){
+					NetworkService netService = new NetworkService(getApplicationContext(), mBluetoothAdapter);
+			    	  Log.d(tag, "Trying to connect as client.");
+			    	  
+			    	  for(BluetoothDevice device: discoveredPeers){
+							Log.d(tag, "DEVICE NAME: " + device.getName());
+							if (device.getName().equals(clientServerName)) {
+								Log.d(tag, "Discovered, OK.");
+								netService.connect(device);
+							}
+						}
+				}
+			}
+		};
 	
 	@Override
 	protected void onActivityResult(int request, int result, Intent intent) {
