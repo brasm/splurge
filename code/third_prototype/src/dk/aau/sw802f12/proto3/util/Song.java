@@ -43,11 +43,22 @@ public class Song {
 		tags = new HashSet<Tag>();
 	}
 	
+	/**
+	 * Create new Song Instance from the provided path.
+	 * @param path The path, the Song is located at.
+	 * @throws IllegalArgumentException If the provided path does not contain a file.
+	 */
 	Song(String path) throws IllegalArgumentException {
 		this(new File(path));
 	}
 	
-	Song(File f) throws IllegalArgumentException {
+	/**
+	 * Create new Song instance from the provided file.
+	 * @param f The file, the Song is located at.
+	 * @throws IllegalArgumentException If the provided file does not contain a file.
+	 * @throws IllegalStateException If the Music Registry was not instantiated with context before calling.
+	 */
+	Song(File f) throws IllegalArgumentException, IllegalStateException {
 		String fileTypeRegex = ".*\\.(flac|ogg|oga|mp3|wma|m4a)";
 		if (f.getName().toLowerCase().matches(fileTypeRegex))
 			song = f.getAbsoluteFile();
@@ -58,13 +69,23 @@ public class Song {
 		setLocation(f.getAbsolutePath());
 		MediaMetadataRetriever mmdr = new MediaMetadataRetriever();
 		mmdr.setDataSource(location);
-		setTitle(mmdr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE));
-		setArtist(mr.createArtist(
-				mmdr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)));		
+		String title = mmdr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+		setTitle((title != null) ? title : "Unknown");
+		
+		String artName = mmdr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+		setArtist(mr.createArtist((artName != null)? artName : "Unknown"));
+		
 		setHost(mr.createUser("local")); //TODO: Currently ignores unit, song is located at!!!
+		id = -1;
+		
 		tags = new HashSet<Tag>();
+		
 	}
 	
+	/**
+	 * Retrieve the {@link File}, the Song is represented by.	
+	 * @return
+	 */
 	public File getFile() {
 		if (song == null) {
 			song = new File(location);

@@ -29,7 +29,7 @@ public class User {
 	 * @param btda The Bluetooth device address of the device.
 	 * @param suggestedArtists {@link Artist}s suggested to the user.
 	 */
-	public User(String btda) {
+	User(String btda) {
 		setBtdeviceAddress(btda);
 		setId(-1);
 		ratedArtists = new HashMap<Artist, Short>();

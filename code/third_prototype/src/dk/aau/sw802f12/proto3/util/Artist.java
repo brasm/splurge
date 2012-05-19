@@ -23,7 +23,7 @@ public class Artist {
 	 * Create a new Artist with the Artist name.
 	 * @param name The name of the Artist.
 	 */
-	public Artist(String name) {
+	Artist(String name) {
 		setName(name);
 		setId(-1);
 		if (tags == null) tags = new HashSet<Tag>();
@@ -152,8 +152,9 @@ public class Artist {
 	/**
 	 * Retrieve Artists similar to this artist.
 	 * @return The similar Artists, and the similarity with this Artist.
+	 * @throws IllegalStateException If the Music registry was not instantiated with Context before calling.
 	 */
-	public HashMap<Artist, Short> getSimilarArtists() {
+	public HashMap<Artist, Short> getSimilarArtists() throws IllegalStateException {
 		if (similarArtists == null) {
 			MusicRegistry mr = MusicRegistry.getInstance();
 			initiateSimilar();
@@ -164,7 +165,6 @@ public class Artist {
 				// TODO: If DB load was empty, request from Last.FM and add.
 			}
 		}
-		
 		return similarArtists;
 	}
 	
@@ -179,11 +179,17 @@ public class Artist {
 		similarArtists.put(artist, similarity);
 	}
 	
+	/**
+	 * Instantiate the similarArtist map.
+	 */
 	private void initiateSimilar() {
 		if (similarArtists == null) similarArtists = new HashMap<Artist, Short>();
 	}
 
-
+	/**
+	 * Add a HashMap to the similar Artists.
+	 * @param similarArtists The similar artists to add.
+	 */
 	public void addSimilarArtists(HashMap<Artist, Short> similarArtists) {
 		initiateSimilar();
 		MusicRegistry.instance.addSimilarArtist(this, similarArtists);
@@ -192,6 +198,10 @@ public class Artist {
 		}
 	}
 	
+	/**
+	 * Remove an Artist from the list of similar Artists.
+	 * @param artist The Artist to remove.
+	 */
 	public void removeSimilarArtist(Artist artist) {
 		MusicRegistry.instance.removeSimilarArtist(this, artist);
 		similarArtists.remove(artist);

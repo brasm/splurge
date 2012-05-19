@@ -23,7 +23,7 @@ public class Tag {
 	 * Create new Tag instance. The Id is, by default, set to -1.
 	 * @param tag The name, the tag should carry.
 	 */
-	public Tag(String tag) {
+	Tag(String tag) {
 		setTagName(tag);
 		id = -1;
 		artists = new HashSet<Artist>();

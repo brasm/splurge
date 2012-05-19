@@ -190,7 +190,7 @@ class DBHelper extends SQLiteOpenHelper {
 	}
 		
 	private SQLiteDatabase db;
-	private MusicRegistry mf;
+	private MusicRegistry mr;
 	
 	private void openDB() {
 		if (db != null && !db.isOpen()) {
@@ -209,7 +209,7 @@ class DBHelper extends SQLiteOpenHelper {
 	
 	public DBHelper(Context context) {
 		super(context, DB.NAME, null, DB.VERSION);
-		mf = MusicRegistry.getInstance(context);
+		mr = MusicRegistry.getInstance(context);
 	}
 	
 	protected void finalize() {
@@ -259,7 +259,7 @@ class DBHelper extends SQLiteOpenHelper {
 	@Override
 	public void onOpen(SQLiteDatabase dbs) {
 		db = dbs;
-		onUpgrade(db, 0,0);
+		//onUpgrade(db, 0,0);
 	}
 	
 	/**
@@ -421,7 +421,7 @@ class DBHelper extends SQLiteOpenHelper {
 		openDB();
 		long res = db.insert(DB.TB_SONG, null, getCV(song));
 		song.setId(res);
-		mf.add(song);
+		mr.add(song);
 		return res;
 	}
 	
@@ -434,7 +434,7 @@ class DBHelper extends SQLiteOpenHelper {
 		openDB();
 		long res = db.insert(DB.TB_ARTIST, null, getCV(artist));
 		artist.setId(res);
-		mf.add(artist);
+		mr.add(artist);
 		return res;
 	}
 
@@ -447,7 +447,7 @@ class DBHelper extends SQLiteOpenHelper {
 		openDB();
 		long res = db.insert(DB.TB_TAG, null, getCV(tag));
 		tag.setId(res);
-		mf.add(tag);
+		mr.add(tag);
 		return res;
 	}
 
@@ -460,7 +460,7 @@ class DBHelper extends SQLiteOpenHelper {
 		openDB();
 		long res = db.insert(DB.TB_USER, null, getCV(user));
 		user.setId(res);
-		mf.add(user);
+		mr.add(user);
 		return res;
 	}
 	
@@ -630,8 +630,8 @@ class DBHelper extends SQLiteOpenHelper {
 		
 		c.close();
 		
-		Artist a = mf.getArtist(aId);
-		User u = mf.getUser(uId);
+		Artist a = mr.getArtist(aId);
+		User u = mr.getUser(uId);
 		Song s = new Song(sTitle, a, u, sLoc);
 		songTags(s);
 		s.setId(songId);
@@ -725,7 +725,7 @@ class DBHelper extends SQLiteOpenHelper {
 		cu.close();
 		
 		for (Long tagid : tagIds)
-			c.add(mf.getTag(tagid));
+			c.add(mr.getTag(tagid));
 
 		s.tag(c);
 	}
@@ -751,7 +751,7 @@ class DBHelper extends SQLiteOpenHelper {
 		cu.close();
 		
 		for (Long tagId : tagIds)
-			c.add(mf.getTag(tagId));
+			c.add(mr.getTag(tagId));
 		
 		artist.addTags(c);
 	}
@@ -779,7 +779,7 @@ class DBHelper extends SQLiteOpenHelper {
 		cu.close();
 		
 		for (int i = 0, s = artistIds.size(); i < s; ++i)
-			hm.put(mf.getArtist(artistIds.get(i)), ratings.get(i));
+			hm.put(mr.getArtist(artistIds.get(i)), ratings.get(i));
 		
 		user.addArtistRatings(hm);
 	}
@@ -803,7 +803,7 @@ class DBHelper extends SQLiteOpenHelper {
 		c.close();
 		
 		for (long l : songIds) {
-			songs.add(mf.getSong(l));
+			songs.add(mr.getSong(l));
 		}		
 		tag.tagSongs(songs);
 	}
@@ -827,7 +827,7 @@ class DBHelper extends SQLiteOpenHelper {
 		c.close();
 		
 		for (long l : artistIds) {
-			artists.add(mf.getArtist(l));
+			artists.add(mr.getArtist(l));
 		}
 		tag.tagArtists(artists);
 	}
@@ -851,7 +851,7 @@ class DBHelper extends SQLiteOpenHelper {
 		c.close();
 		
 		for (Long l : uIdRat.keySet()) {
-			User u = mf.getUser(l);
+			User u = mr.getUser(l);
 			urat.put(u, uIdRat.get(l));
 		}
 		
@@ -878,7 +878,7 @@ class DBHelper extends SQLiteOpenHelper {
 		
 		while (cu.moveToNext()) {
 			Long l = cu.getLong(4);
-			Song s = mf.songLoaded(l);
+			Song s = mr.songLoaded(l);
 			if (s == null) {
 				songIds.add(l);
 				artistIds.put(l, cu.getLong(0));
@@ -891,8 +891,8 @@ class DBHelper extends SQLiteOpenHelper {
 		cu.close();
 		
 		for (Long sid : songIds) {
-			Song s = new Song(titles.get(sid), mf.getArtist(artistIds.get(sid)), 
-					mf.getUser(userIds.get(sid)), locations.get(sid));
+			Song s = new Song(titles.get(sid), mr.getArtist(artistIds.get(sid)), 
+					mr.getUser(userIds.get(sid)), locations.get(sid));
 			songTags(s);
 			s.setId(sid);
 		}
@@ -912,7 +912,7 @@ class DBHelper extends SQLiteOpenHelper {
 		
 		HashMap<Long, String> hm = new HashMap<Long, String>();
 		while(cu.moveToNext()) {
-			Artist artist = mf.artistLoaded(cu.getLong(1));
+			Artist artist = mr.artistLoaded(cu.getLong(1));
 			if (artist == null) {
 				hm.put(cu.getLong(1), cu.getString(0));
 			} else {
@@ -947,7 +947,7 @@ class DBHelper extends SQLiteOpenHelper {
 		
 		while (cu.moveToNext()) {
 			Long uId = cu.getLong(1);
-			User user = mf.userLoaded(uId);
+			User user = mr.userLoaded(uId);
 
 			if (user != null) users.add(user);
 			else {
@@ -981,7 +981,7 @@ class DBHelper extends SQLiteOpenHelper {
 		
 		HashMap<Long, String> ids = new HashMap<Long, String>();
 		while (cu.moveToNext()) {
-			Tag t = mf.tagLoaded(cu.getLong(0));
+			Tag t = mr.tagLoaded(cu.getLong(0));
 			if (t == null) ids.put(cu.getLong(0), cu.getString(1));
 			else tags.add(t);
 			
@@ -1062,7 +1062,7 @@ class DBHelper extends SQLiteOpenHelper {
 		}
 		c.close();
 		db.close();
-		return mf.getArtist(aId);		
+		return mr.getArtist(aId);		
 	}
 	
 	/**
@@ -1157,7 +1157,7 @@ class DBHelper extends SQLiteOpenHelper {
 		if (c.moveToFirst()) sId = c.getLong(0);
 		c.close();
 		
-		return mf.getSong(sId);
+		return mr.getSong(sId);
 	}
 	
 	/**
@@ -1174,7 +1174,7 @@ class DBHelper extends SQLiteOpenHelper {
 		
 		Cursor c = db.rawQuery(query , null);
 		if (c.moveToFirst()) uId = c.getLong(0);
-		return mf.getUser(uId);
+		return mr.getUser(uId);
 	}
 	
 	/**
@@ -1192,7 +1192,7 @@ class DBHelper extends SQLiteOpenHelper {
 		Cursor c = db.rawQuery(query, null);
 		
 		if (c.moveToFirst()) tId = c.getLong(0);
-		return mf.getTag(tId);
+		return mr.getTag(tId);
 	}
 	
 	/**
@@ -1249,7 +1249,7 @@ class DBHelper extends SQLiteOpenHelper {
 		}
 		cu.close();
 		for (Long id : idToRating.keySet()) {
-			artist.similarArtists.put(mf.getArtist(id), idToRating.get(id));
+			artist.similarArtists.put(mr.getArtist(id), idToRating.get(id));
 		}
 	}
 

@@ -5,6 +5,12 @@ import java.util.HashMap;
 
 import android.content.Context;
 
+/**
+ * Registry/Factory for storing and creating entities ({@link Artist}, {@link Song}, {@link Tag} and {@link User}), 
+ * as well as creating relations inbetween them.
+ * @author mlisby
+ *
+ */
 public class MusicRegistry {
 	HashMap<Long, Artist> artists;
 	HashMap<Long, Song> songs;
@@ -26,8 +32,10 @@ public class MusicRegistry {
 	 * Package protected version of getInstance(). 
 	 * The MusicRegistry must be instantiated somewhere else, before this will work.
 	 * @return The MusicRegistry instance, if already instantiated, or null.
+	 * @throws Exception 
 	 */
-	static MusicRegistry getInstance() {
+	static MusicRegistry getInstance() throws IllegalStateException {
+		if (instance == null) throw new IllegalStateException("Music Registry not instantiated. Must be instantiated explicitly with Context.");
 		return instance;
 	}
 	
@@ -338,6 +346,11 @@ public class MusicRegistry {
 		return s;
 	}
 	
+	/**
+	 * Retrieve a {@link Song} from the database, or, should it not exist, create it.
+	 * @param location The path to the song.
+	 * @return The retrieved song.
+	 */
 	public Song createSong(String location) {
 		Song s = db.searchSong(location);
 		
