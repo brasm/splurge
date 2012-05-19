@@ -28,7 +28,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import dk.aau.sw802f12.proto3.R.id;
 import dk.aau.sw802f12.proto3.network.NetworkService;
-import dk.aau.sw802f12.proto3.util.MusicRegistry;
 
 public class MainActivity extends Activity {
 	
@@ -46,8 +45,8 @@ public class MainActivity extends Activity {
 	EditText input_clientServerName;
 	EditText input_LastFM;
 	private String clientServerName;
-    private MusicRegistry mr;
-	
+	private String lastFMUser;    
+    
 	BluetoothAdapter mBluetoothAdapter;
 	private PlayService player;
 	
@@ -63,9 +62,7 @@ public class MainActivity extends Activity {
 	private Button startServerButton;
 	private Button startClientButton;
 	private Button lastFMButton;
-    
-	private Intent intent = new Intent();
-	
+    	
 	private boolean playerBound = false;
 	
 	@Override
@@ -94,7 +91,6 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.player);
         mContext = this;
-        mr = MusicRegistry.getInstance(mContext);
         
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		if (mBluetoothAdapter == null) {
@@ -233,18 +229,6 @@ public class MainActivity extends Activity {
 					Log.d(tag, "Failed adding device to device list.");
 				}
 			}
-			if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)){
-				NetworkService netService = new NetworkService(getApplicationContext(), mBluetoothAdapter);
-		    	  Log.d(tag, "Trying to connect as client.");
-		    	  
-		    	  for(BluetoothDevice device: discoveredPeers){
-						Log.d(tag, "DEVICE NAME: " + device.getName());
-						if (device.getName().equals(clientServerName)) {
-							Log.d(tag, "Discovered, OK.");
-							netService.connect(device);
-						}
-					}
-			}
 		}
 	};
 	
@@ -263,7 +247,7 @@ public class MainActivity extends Activity {
 							Log.d(tag, "DEVICE NAME: " + device.getName());
 							if (device.getName().equals(clientServerName)) {
 								Log.d(tag, "Discovered, OK.");
-								netService.connect(device);
+								netService.connect(device, lastFMUser);
 							}
 						}
 				}
@@ -395,7 +379,7 @@ public class MainActivity extends Activity {
 			      public void onClick(DialogInterface dialog, int which) {
 			    	  Log.d(tag, "Last.FM account set to: " + input_LastFM.getText());
 			    	  //Set account for user here.
-			    	  mr.createUser(mBluetoothAdapter.getAddress(), input_LastFM.getText().toString());
+			    	  lastFMUser = input_LastFM.getText().toString();
 			       } });
 			
 			lastFMDialog.setButton(DialogInterface.BUTTON_NEGATIVE , mContext.getText(R.string.cancel_button), new DialogInterface.OnClickListener() {
