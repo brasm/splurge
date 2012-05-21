@@ -21,11 +21,70 @@ import dk.aau.sw802f12.proto3.util.User;
 
 import android.util.Log;
 
+/*
+ * Request data from last.fm, and write it to local database
+ */
 public class LastFmData{
 	private String _url = "http://ws.audioscrobbler.com/2.0/";
 	private String _api = "d9934b94a48ffbd994097060b96cda17";
 	private MusicRegistry _registry;
+
+	/**
+	 * Asynchronously, send request for users top artist to last.fm.
+	 * Callback to ArtistHandler
+	 * 
+	 * @param user
+	 */
+	public void getTopArtists(User user){
+		String u;
+		try {
+			u = urlencode(user.getLastfmName());
+		} catch (IllegalAccessException e) {
+			return;
+		}
+		String uri = String.format("%s?method=user.gettopartists&user=%s&api_key=%s",_url,u,_api);
+		new HttpRequest(uri, new ArtistHandler(user));
+	}
+
+	/**
+	 * Asynchronously, send request for an artists tags.
+	 * Callback to TagHandler
+	 * 
+	 * @param user
+	 */
+	public void getTags(Artist artist){
+		String a = urlencode(artist.getName());
+		String uri = String.format("%s?method=artist.gettoptags&artist=%s&api_key=%s&autocorrect=1",_url,a,_api);
+		new HttpRequest(uri, new TagHandler(artist));
+	}
 	
+
+	/**
+	 * Asynchronously, send request for similar artists.
+	 * Callback to SimilarArtistHandler
+	 * 
+	 * @param user
+	 */
+	public void getSimilarArtists(Artist artist){
+		String a = urlencode(artist.getName());
+		String uri = String.format("%s?method=artist.getsimilar&artist=%s&api_key=%s&autocorrect=1",_url,a,_api);
+		new HttpRequest(uri, new SimilarArtistHandler(artist));
+	}
+	
+	private String urlencode(String url){
+		try {
+			return URLEncoder.encode(url, "UTF-8");
+		} catch (UnsupportedEncodingException e) {}
+		return null;
+	}
+	
+	public LastFmData() throws InstantiationException {
+		_registry = MusicRegistry.getInstance();
+	}
+	
+	/*
+	 *  XmlResponseHandler's
+	 */
 	private class ArtistHandler implements XmlResponseHandler{
 		public final User lastfmuser;
 		
@@ -139,41 +198,6 @@ public class LastFmData{
 			_registry.updateDB(artist);
 		}
 	}
-	
-	public void getTopArtists(User user){
-		String u;
-		try {
-			u = urlencode(user.getLastfmName());
-		} catch (IllegalAccessException e) {
-			return;
-		}
-		String uri = String.format("%s?method=user.gettopartists&user=%s&api_key=%s",_url,u,_api);
-		new HttpRequest(uri, new ArtistHandler(user));
-	}
-
-	public void getTags(Artist artist){
-		String a = urlencode(artist.getName());
-		String uri = String.format("%s?method=artist.gettoptags&artist=%s&api_key=%s&autocorrect=1",_url,a,_api);
-		new HttpRequest(uri, new TagHandler(artist));
-	}
-	
-	public void getSimilarArtists(Artist artist){
-		String a = urlencode(artist.getName());
-		String uri = String.format("%s?method=artist.getsimilar&artist=%s&api_key=%s&autocorrect=1",_url,a,_api);
-		new HttpRequest(uri, new SimilarArtistHandler(artist));
-	}
-	
-	private String urlencode(String url){
-		try {
-			return URLEncoder.encode(url, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
-	public LastFmData() throws InstantiationException {
-		_registry = MusicRegistry.getInstance();
-	}
+		
 }
 
