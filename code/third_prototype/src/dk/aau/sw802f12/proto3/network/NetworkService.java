@@ -18,16 +18,11 @@ import android.util.Log;
 
 public class NetworkService {
 	private static final String TAG = "sw8.BT";
-	static final UUID MY_UUID = UUID
-			.fromString("99E67F40-9849-11E1-A8B0-0800200C9A66");
-
-	private Context context;
+	static final UUID MY_UUID = UUID.fromString("99E67F40-9849-11E1-A8B0-0800200C9A66");
 	private BluetoothAdapter mBluetoothAdapter;
 	private String lastFMUser;
-	private ArrayList<String> users;
-
+	
 	public NetworkService(Context context, BluetoothAdapter btAdapter) {
-		this.context = context;
 		mBluetoothAdapter = btAdapter;
 	}
 
@@ -64,19 +59,15 @@ public class NetworkService {
 
 		public void run() {
 			mBluetoothAdapter.cancelDiscovery();
-
 			Log.d(TAG, "AcceptThread started");
-
 			BluetoothSocket socket = null;
 			// Keep listening until exception occurs or a socket is returned
 			while (true) {
 				try {
 					Log.d(TAG, "Trying to accept connection");
-
 					socket = mmServerSocket.accept();
 				} catch (IOException e) {
 					Log.d(TAG, "Caught exception - breaking");
-
 					break;
 				}
 				// If a connection was accepted
@@ -99,9 +90,6 @@ public class NetworkService {
 			Log.d(TAG, "Connection as server OK - transmitting data");
 			ConnectedThread ct = new ConnectedThread(socket);
 			ct.start();
-			String in = "testingStr";
-			ct.write(in.getBytes());
-			Log.d(TAG, "Written " + in);
 		}
 
 		/** Will cancel the listening socket, and cause the thread to finish */
@@ -115,13 +103,11 @@ public class NetworkService {
 
 	private class ConnectThread extends Thread {
 		private final BluetoothSocket mmSocket;
-
 		public ConnectThread(BluetoothDevice device) {
 			Log.d(TAG, "ConnectThread started.");
 			// Use a temporary object that is later assigned to mmSocket,
 			// because mmSocket is final
 			BluetoothSocket tmp = null;
-
 			// Get a BluetoothSocket to connect with the given BluetoothDevice
 			try {
 				// MY_UUID is the app's UUID string, also used by the server
@@ -138,7 +124,6 @@ public class NetworkService {
 		public void run() {
 			// Cancel discovery because it will slow down the connection
 			mBluetoothAdapter.cancelDiscovery();
-
 			try {
 				// Connect the device through the socket. This will block
 				// until it succeeds or throws an exception
@@ -154,7 +139,6 @@ public class NetworkService {
 				}
 				return;
 			}
-
 			// Do work to manage the connection (in a separate thread)
 			manageConnectedSocket(mmSocket);
 		}
@@ -185,14 +169,12 @@ public class NetworkService {
 	        mmSocket = socket;
 	        InputStream tmpIn = null;
 	        OutputStream tmpOut = null;
-	 
 	        // Get the input and output streams, using temp objects because
 	        // member streams are final
 	        try {
 	            tmpIn = socket.getInputStream();
 	            tmpOut = socket.getOutputStream();
 	        } catch (IOException e) { }
-	 
 	        mmInStream = tmpIn;
 	        mmOutStream = tmpOut;
 	    }
@@ -200,7 +182,6 @@ public class NetworkService {
 	    public void run() {
 	        byte[] buffer = new byte[1024];  // buffer store for the stream
 	        int bytes; // bytes returned from read()
-	 
 	        // Keep listening to the InputStream until an exception occurs
 	        while (true) {
 	            try {
@@ -215,8 +196,7 @@ public class NetworkService {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-	                Log.d(TAG, "Server read: " + new String(buffer, 0, bytes));
-	                
+	                Log.d(TAG, "Server read: " + new String(buffer, 0, bytes));      
 	            } catch (IOException e) {
 	                break;
 	            }
