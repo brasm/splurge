@@ -6,6 +6,9 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import dk.aau.sw802f12.proto3.util.MusicRegistry;
+import dk.aau.sw802f12.proto3.util.User;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
@@ -203,8 +206,15 @@ public class NetworkService {
 	            try {
 	                // Read from the InputStream
 	                bytes = mmInStream.read(buffer);
-	                users.add(new String(buffer, 0, bytes));
-	                // Send the obtained bytes to the UI activity
+	                try {
+	                	MusicRegistry mr = MusicRegistry.getInstance();
+						User u = mr.createUser(mmSocket.getRemoteDevice().getAddress());
+						u.setLastfmName(new String(buffer, 0, bytes));
+						mr.updateDB(u);
+					} catch (InstantiationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 	                Log.d(TAG, "Server read: " + new String(buffer, 0, bytes));
 	                
 	            } catch (IOException e) {

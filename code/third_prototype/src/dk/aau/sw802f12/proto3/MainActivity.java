@@ -119,6 +119,7 @@ public class MainActivity extends Activity {
     	input_serverName = new EditText(this);
     	input_clientServerName = new EditText(this);
     	input_LastFM = new EditText(this);
+    	lastFMUser = null;
         
         discoveredPeers = new ArrayList<BluetoothDevice>();
         
@@ -347,6 +348,12 @@ public class MainActivity extends Activity {
 			clientDialog.setCancelable(false);
 			clientDialog.setButton(DialogInterface.BUTTON_POSITIVE , mContext.getText(R.string.set_client_button), new DialogInterface.OnClickListener() {
 			      public void onClick(DialogInterface dialog, int which) {
+			    	  if(lastFMUser == null){
+			    		  Log.d(tag, "The Last.FM user was not set.");
+			    		  Toast.makeText(mContext, "You have not yet set your Last.FM user account. Please do so before trying to connect.", Toast.LENGTH_LONG).show();
+			    		  return;
+			    	  }
+			    	  Log.d(tag, "The Last.FM user was: " + lastFMUser);
 			    	  Log.d(tag, "The server chosen was: " + input_clientServerName.getText());
 			    	  if (!mBluetoothAdapter.isEnabled()) {
 							Intent enableBtIntent = new Intent(
@@ -357,11 +364,6 @@ public class MainActivity extends Activity {
 			    	  clientServerName = input_clientServerName.getText().toString();
 			    	  Log.d(tag, "clientServerName is: " + clientServerName);
 			    	  mBluetoothAdapter.startDiscovery();
-			    	  while(mBluetoothAdapter.isDiscovering()){
-			    		  Log.d(tag, "Entering While-loop");
-			    		  //Insert Progress dialog here.
-			    	  }
-			    	  
 			       } });
 			
 			clientDialog.setButton(DialogInterface.BUTTON_NEGATIVE , mContext.getText(R.string.cancel_button), new DialogInterface.OnClickListener() {
