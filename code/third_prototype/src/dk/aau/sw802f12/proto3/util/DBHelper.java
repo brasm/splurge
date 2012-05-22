@@ -212,7 +212,7 @@ class DBHelper extends SQLiteOpenHelper {
 		db = null;
 	}
 	
-	public DBHelper(Context context) {
+	DBHelper(Context context) {
 		super(context, DB.NAME, null, DB.VERSION);
 		mr = MusicRegistry.getInstance(context);
 	}
@@ -270,7 +270,7 @@ class DBHelper extends SQLiteOpenHelper {
 	/**
 	 * Empty the database (when the library is no longer up to date).
 	 */
-	public void clearDB() {
+	void clearDB() {
 		openDB();
 		String truncate = "truncate table if exists ";
 		db.execSQL(truncate + DB.TB_ARTIST);
