@@ -1,4 +1,4 @@
-package dk.aau.sw802f12.proto3;
+package dk.aau.sw802f12.proto3.library;
 
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +9,7 @@ import java.util.Vector;
 
 import android.util.Log;
 
+import dk.aau.sw802f12.proto3.Settings;
 import dk.aau.sw802f12.proto3.util.Artist;
 import dk.aau.sw802f12.proto3.util.Song;
 

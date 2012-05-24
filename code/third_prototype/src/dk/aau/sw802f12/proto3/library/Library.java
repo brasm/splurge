@@ -1,10 +1,11 @@
-package dk.aau.sw802f12.proto3;
+package dk.aau.sw802f12.proto3.library;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import dk.aau.sw802f12.proto3.Settings;
 import dk.aau.sw802f12.proto3.util.Artist;
 import dk.aau.sw802f12.proto3.util.MusicRegistry;
 import dk.aau.sw802f12.proto3.util.Song;

@@ -1,4 +1,4 @@
-package dk.aau.sw802f12.proto3;
+package dk.aau.sw802f12.proto3.player;
 
 import java.io.IOException;
 
@@ -9,7 +9,8 @@ import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
-import dk.aau.sw802f12.proto3.api.Playback;
+import dk.aau.sw802f12.proto3.MainActivity;
+import dk.aau.sw802f12.proto3.library.PlayQueue;
 import dk.aau.sw802f12.proto3.util.Song;
 
 public class PlayService extends Service implements OnCompletionListener, Playback {
@@ -21,7 +22,7 @@ public class PlayService extends Service implements OnCompletionListener, Playba
 	private Song mSong;
 
 	public class LocalBinder extends Binder {
-		PlayService getService() {
+		public PlayService getService() {
 			return PlayService.this;
 		}
 	}

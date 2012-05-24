@@ -29,6 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import dk.aau.sw802f12.proto3.R.id;
 import dk.aau.sw802f12.proto3.network.NetworkService;
+import dk.aau.sw802f12.proto3.player.PlayService;
 import dk.aau.sw802f12.proto3.util.MusicRegistry;
 
 public class MainActivity extends Activity {

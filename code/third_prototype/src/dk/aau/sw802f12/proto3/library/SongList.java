@@ -1,4 +1,4 @@
-package dk.aau.sw802f12.proto3;
+package dk.aau.sw802f12.proto3.library;
 
 import java.util.ArrayList;
 import java.util.HashMap;
