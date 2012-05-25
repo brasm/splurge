@@ -1314,4 +1314,9 @@ class DBHelper extends SQLiteOpenHelper {
 		db.execSQL(query);
 		
 	}
+	
+	void removeUser(User user) {
+		db.delete(DB.TB_USER, "rowid = ?", new String[] {user.getId() + ""});
+		db.delete(DB.TB_USERARTIST, DB.USERARTIST_USER + " = ?", new String[] {user.getId() + ""});
+	}
 }

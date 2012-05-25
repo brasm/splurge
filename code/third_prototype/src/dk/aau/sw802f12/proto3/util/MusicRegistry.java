@@ -455,4 +455,21 @@ public class MusicRegistry {
 	void removeSimilarArtist(Artist artist, Artist artist2) {
 		db.removeSimilarArtist(artist, artist2);		
 	}
+	
+	/**
+	 * Remove the {@link User} with the provided address.
+	 * @param address The address of the User to remove.
+	 */
+	public void removeUser(String address) {
+		removeUser(createUser(address));
+	}
+	
+	/**
+	 * Remove the provided {@link User}.
+	 * @param user The User to remove.
+	 */
+	public void removeUser(User user) {
+		db.removeUser(user);
+		users.remove(user.getId());
+	}
 }
