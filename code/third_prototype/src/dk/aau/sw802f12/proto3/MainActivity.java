@@ -42,7 +42,9 @@ public class MainActivity extends Activity {
 	private ProgressBar progressBar;
 	private AudioManager am;
 	private AlertDialog serverDialog;
+	private AlertDialog stopServerDialog;
 	private AlertDialog clientDialog;
+	private AlertDialog discDialog;
 	private AlertDialog lastFMDialog;
 	EditText input_serverName;
 	EditText input_clientServerName;
@@ -118,6 +120,8 @@ public class MainActivity extends Activity {
     	serverDialog = new AlertDialog.Builder(this).create();
     	clientDialog = new AlertDialog.Builder(this).create();
     	lastFMDialog = new AlertDialog.Builder(this).create();
+    	stopServerDialog = new AlertDialog.Builder(this).create();
+    	discDialog = new AlertDialog.Builder(this).create();
     	input_serverName = new EditText(this);
     	input_clientServerName = new EditText(this);
     	input_LastFM = new EditText(this);
@@ -389,10 +393,10 @@ public class MainActivity extends Activity {
 	private OnClickListener stopServerListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			serverDialog.setTitle(R.string.stop_server);
-			serverDialog.setMessage(mContext.getText(R.string.input_stop_server_msg));
-			serverDialog.setCancelable(false);
-			serverDialog.setButton(DialogInterface.BUTTON_POSITIVE , mContext.getText(R.string.stop_server), new DialogInterface.OnClickListener() {
+			stopServerDialog.setTitle(R.string.stop_server);
+			stopServerDialog.setMessage(mContext.getText(R.string.input_stop_server_msg));
+			stopServerDialog.setCancelable(false);
+			stopServerDialog.setButton(DialogInterface.BUTTON_POSITIVE , mContext.getText(R.string.stop_server), new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
 					netService.stop();
 		    	  	startServerButton.setText(mContext.getText(R.string.start_server));
@@ -401,21 +405,21 @@ public class MainActivity extends Activity {
 		    	  	lastFMButton.setVisibility(View.VISIBLE);
 		       } });
 			
-			serverDialog.setButton(DialogInterface.BUTTON_NEGATIVE , mContext.getText(R.string.cancel_button), new DialogInterface.OnClickListener() {
+			stopServerDialog.setButton(DialogInterface.BUTTON_NEGATIVE , mContext.getText(R.string.cancel_button), new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
-					serverDialog.cancel();
+					stopServerDialog.cancel();
 				} });
-			serverDialog.show();
+			stopServerDialog.show();
 		}
 	};
 	
 	private OnClickListener disconnectListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			serverDialog.setTitle(R.string.disc_client);
-			serverDialog.setMessage(mContext.getText(R.string.disc_client_msg));
-			serverDialog.setCancelable(false);
-			serverDialog.setButton(DialogInterface.BUTTON_POSITIVE , mContext.getText(R.string.stop_server), new DialogInterface.OnClickListener() {
+			discDialog.setTitle(R.string.disc_client);
+			discDialog.setMessage(mContext.getText(R.string.disc_client_msg));
+			discDialog.setCancelable(false);
+			discDialog.setButton(DialogInterface.BUTTON_POSITIVE , mContext.getText(R.string.stop_server), new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
 					netService.stop();
 		    	  	startClientButton.setText(mContext.getText(R.string.start_client));
@@ -425,11 +429,11 @@ public class MainActivity extends Activity {
 		    	  	
 		       } });
 			
-			serverDialog.setButton(DialogInterface.BUTTON_NEGATIVE , mContext.getText(R.string.cancel_button), new DialogInterface.OnClickListener() {
+			discDialog.setButton(DialogInterface.BUTTON_NEGATIVE , mContext.getText(R.string.cancel_button), new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
-					serverDialog.cancel();
+					discDialog.cancel();
 				} });
-			serverDialog.show();
+			discDialog.show();
 		}
 	};
 	private OnClickListener startClientListener = new OnClickListener() {
@@ -479,6 +483,7 @@ public class MainActivity extends Activity {
 			    	  Log.d(tag, "Last.FM account set to: " + input_LastFM.getText());
 			    	  //Set account for user here.
 			    	  lastFMUser = input_LastFM.getText().toString();
+			    	  Toast.makeText(mContext, "last.FM account set to: " + lastFMUser, Toast.LENGTH_SHORT);
 			       } });
 			
 			lastFMDialog.setButton(DialogInterface.BUTTON_NEGATIVE , mContext.getText(R.string.cancel_button), new DialogInterface.OnClickListener() {
