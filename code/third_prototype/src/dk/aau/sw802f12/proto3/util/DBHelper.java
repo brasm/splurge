@@ -1261,10 +1261,9 @@ class DBHelper extends SQLiteOpenHelper {
 	 * @return Whether the Artist has any Songs in the library.
 	 */
 	boolean existSongsWithArtist(long artist) {
-		String query = "SELECT rowid FROM " + DB.TB_SONG + " WHERE " + DB.SONG_ARTIST + " = '" + artist + "'";
 		openDB();
 		String[] columns = {"rowid"};
-		String selection = DB.SONG_ARTIST;
+		String selection = DB.SONG_ARTIST + " = ?";
 		String[] selectionArgs = {artist + ""};
 		
 		Cursor c = db.query(DB.TB_SONG, columns, selection, selectionArgs, null, null, null);
