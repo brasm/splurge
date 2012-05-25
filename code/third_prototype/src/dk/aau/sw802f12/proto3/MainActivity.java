@@ -50,6 +50,7 @@ public class MainActivity extends Activity {
 	private String clientServerName;
 	private String lastFMUser;    
     
+	NetworkService netService;
 	BluetoothAdapter mBluetoothAdapter;
 	private PlayService player;
 	
@@ -252,16 +253,25 @@ public class MainActivity extends Activity {
 				Log.d(tag, action);
 				
 				if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)){
-					NetworkService netService = new NetworkService(getApplicationContext(), mBluetoothAdapter);
+					netService = new NetworkService(getApplicationContext(), mBluetoothAdapter);
 			    	  Log.d(tag, "Trying to connect as client.");
-			    	  
+			    	  boolean bo = false;
 			    	  for(BluetoothDevice device: discoveredPeers){
 							Log.d(tag, "DEVICE NAME: " + device.getName());
 							if (device.getName().equals(clientServerName)) {
 								Log.d(tag, "Discovered, OK.");
 								netService.connect(device, lastFMUser);
+								startClientButton.setText(mContext.getText(R.string.disc_client));
+					    	  	startServerButton.setVisibility(View.GONE);
+					    	  	lastFMButton.setVisibility(View.GONE);
+					    	  	startClientButton.setOnClickListener(disconnectListener);
+					    	  	bo = true;
 							}
 						}
+			    	  if(!bo){
+			    		  Toast.makeText(mContext, "Could not find server with name: " + clientServerName, Toast.LENGTH_SHORT);
+			    	  }
+			    	  
 				}
 			}
 		};
@@ -340,6 +350,12 @@ public class MainActivity extends Activity {
 			serverDialog.setCancelable(false);
 			serverDialog.setButton(DialogInterface.BUTTON_POSITIVE , mContext.getText(R.string.set_server_button), new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
+					if(lastFMUser == null){
+			    		  Log.d(tag, "The Last.FM user was not set.");
+			    		  Toast.makeText(mContext, "You have not yet set your Last.FM user account. Please do so before trying to host a server.", Toast.LENGTH_LONG).show();
+			    		  return;
+			    	  }
+			    	  Log.d(tag, "The Last.FM user was: " + lastFMUser);
 					if (!mBluetoothAdapter.isEnabled()) {
 						Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
 						startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
@@ -352,9 +368,13 @@ public class MainActivity extends Activity {
 					Log.d(tag, "Setting name to: " + bName);
 					mBluetoothAdapter.setName(bName);
 		    	  	Log.d(tag, "Bluetooth name set to: " + mBluetoothAdapter.getName());
-		    	  	NetworkService netService = new NetworkService(getApplicationContext(), mBluetoothAdapter);
+		    	  	netService = new NetworkService(getApplicationContext(), mBluetoothAdapter);
 		    	  	Log.d(tag, "Starting server.");
-		    	  	netService.start();
+		    	  	netService.start(bName, lastFMUser);
+		    	  	startServerButton.setText(mContext.getText(R.string.stop_server));
+		    	  	startServerButton.setOnClickListener(stopServerListener);
+		    	  	startClientButton.setVisibility(View.GONE);
+		    	  	lastFMButton.setVisibility(View.GONE);
 		       } });
 			
 			serverDialog.setButton(DialogInterface.BUTTON_NEGATIVE , mContext.getText(R.string.cancel_button), new DialogInterface.OnClickListener() {
@@ -365,6 +385,53 @@ public class MainActivity extends Activity {
 		}
 	};
 	
+	
+	private OnClickListener stopServerListener = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			serverDialog.setTitle(R.string.stop_server);
+			serverDialog.setMessage(mContext.getText(R.string.input_stop_server_msg));
+			serverDialog.setCancelable(false);
+			serverDialog.setButton(DialogInterface.BUTTON_POSITIVE , mContext.getText(R.string.stop_server), new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					netService.stop();
+		    	  	startServerButton.setText(mContext.getText(R.string.start_server));
+		    	  	startServerButton.setOnClickListener(startServerListener);
+		    	  	startClientButton.setVisibility(View.VISIBLE);
+		    	  	lastFMButton.setVisibility(View.VISIBLE);
+		       } });
+			
+			serverDialog.setButton(DialogInterface.BUTTON_NEGATIVE , mContext.getText(R.string.cancel_button), new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					serverDialog.cancel();
+				} });
+			serverDialog.show();
+		}
+	};
+	
+	private OnClickListener disconnectListener = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			serverDialog.setTitle(R.string.disc_client);
+			serverDialog.setMessage(mContext.getText(R.string.disc_client_msg));
+			serverDialog.setCancelable(false);
+			serverDialog.setButton(DialogInterface.BUTTON_POSITIVE , mContext.getText(R.string.stop_server), new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					netService.stop();
+		    	  	startClientButton.setText(mContext.getText(R.string.start_client));
+		    	  	startClientButton.setOnClickListener(startClientListener);
+		    	  	startServerButton.setVisibility(View.VISIBLE);
+		    	  	lastFMButton.setVisibility(View.VISIBLE);
+		    	  	
+		       } });
+			
+			serverDialog.setButton(DialogInterface.BUTTON_NEGATIVE , mContext.getText(R.string.cancel_button), new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					serverDialog.cancel();
+				} });
+			serverDialog.show();
+		}
+	};
 	private OnClickListener startClientListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {

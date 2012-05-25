@@ -21,5 +21,9 @@
     <string name="input_lastfm">Set Last.FM Account</string>
     <string name="lastfm_dialog_msg">Enter your Last.FM username:</string>
     <string name="set_lastfm_button">Set Last.FM Account</string>
+    <string name="stop_server">Stop Server</string>
+    <string name="disc_client">Disconnect from Server</string>
+    <string name="input_stop_server_msg">Do you really want to stop hosting the server?</string>
+    <string name="disc_client_msg">Do you really want to disconnect from the server?</string>
 
 </resources>
