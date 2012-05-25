@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import dk.aau.sw802f12.proto3.MainActivity;
@@ -15,11 +16,15 @@ import dk.aau.sw802f12.proto3.util.Song;
 
 public class PlayService extends Service implements OnCompletionListener, Playback {
 	public static final String UPDATESTATE = PlayService.class.getCanonicalName(); 
+	public static final String UPDATE_INFO = "com.sw802f12.playservice.update_info";
 	private final IBinder mBinder = new LocalBinder();
 	private MediaPlayer mPlayer;
 	private boolean mPaused = false;
 	private PlayQueue mPlayQueue;
 	private Song mSong;
+	private final Handler handler = new Handler();
+	Intent currentPositionIntent;
+
 
 	public class LocalBinder extends Binder {
 		public PlayService getService() {
@@ -33,6 +38,10 @@ public class PlayService extends Service implements OnCompletionListener, Playba
 		mPlayer = new MediaPlayer();
 		mPlayer.setOnCompletionListener(this);
 		mPlayQueue = PlayQueue.getInstance();
+		currentPositionIntent = new Intent(UPDATE_INFO);
+		
+		handler.removeCallbacks(sendUpdatesToUI);
+		handler.postDelayed(sendUpdatesToUI, 1000); // 1 second
 	}	
 
 	@Override
@@ -79,7 +88,6 @@ public class PlayService extends Service implements OnCompletionListener, Playba
 	public void pause() {
 		mPlayer.pause();
 		mPaused = true;
-		updatedState();
 	}
 
 	/* (non-Javadoc)
@@ -88,7 +96,6 @@ public class PlayService extends Service implements OnCompletionListener, Playba
 	public void resume() {
 		mPlayer.start();
 		mPaused = false;
-		updatedState();
 	}
 	
 	/* (non-Javadoc)
@@ -163,5 +170,23 @@ public class PlayService extends Service implements OnCompletionListener, Playba
 		intent.putExtra("song4", "Not available.");
 		Log.d(MainActivity.tag, intent.getStringExtra("current"));
 		sendBroadcast(intent);
+	}
+	
+	private Runnable sendUpdatesToUI = new Runnable() {
+		public void run() {
+			updateInfo();
+			handler.postDelayed(this, 1000); // 1 seconds
+		}
+	};
+	
+	private void updateInfo() {
+		if (mPlayer.isPlaying()) {
+			// Current progress
+			int cur = mPlayer.getCurrentPosition();
+			int max = mPlayer.getDuration();
+			currentPositionIntent.putExtra("progress", cur);
+			currentPositionIntent.putExtra("maxval", max);
+			sendBroadcast(currentPositionIntent);
+		}
 	}
 }

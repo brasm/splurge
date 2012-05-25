@@ -151,6 +151,12 @@ public class MainActivity extends Activity {
 	protected void onResume() {
 		// TODO Auto-generated method stub
 		super.onResume();
+		registerReceiver(bcr, new IntentFilter(PlayService.UPDATE_INFO));
+	}
+    
+	public void onPause() {
+		super.onPause();
+		unregisterReceiver(bcr);
 	}
     
     @Override
@@ -259,6 +265,25 @@ public class MainActivity extends Activity {
 				}
 			}
 		};
+		
+		private BroadcastReceiver bcr = new BroadcastReceiver() {
+	    	@Override
+	    	public void onReceive(Context context, Intent intent) {
+	    		updateUI(intent);
+	    	}
+	    };
+	    
+	    private void updateUI(Intent intent) {
+	    	
+	    	int maxVal = intent.getIntExtra("maxval", 1000000);
+	    	int progress = intent.getIntExtra("progress", 0);
+	    	if (progress > maxVal || progress < 0) {
+	    		progress = 0;
+	    	}
+	    	
+	    	if (progressBar.getMax() != maxVal) progressBar.setMax(maxVal);
+	    	progressBar.setProgress((int) progress);
+	    }
 	
 	@Override
 	protected void onActivityResult(int request, int result, Intent intent) {
