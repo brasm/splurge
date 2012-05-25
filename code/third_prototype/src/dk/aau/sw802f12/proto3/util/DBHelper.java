@@ -450,7 +450,8 @@ class DBHelper extends SQLiteOpenHelper {
 	 */
 	private long add(Tag tag) {
 		openDB();
-		long res = db.insert(DB.TB_TAG, null, getCV(tag));
+		ContentValues cv = getCV(tag);
+		long res = db.insert(DB.TB_TAG, null, cv);
 		tag.setId(res);
 		mr.add(tag);
 		return res;
@@ -773,10 +774,11 @@ class DBHelper extends SQLiteOpenHelper {
 	private void userArtists(User user) {
 		openDB();
 		HashMap<Artist, Short> hm = new HashMap<Artist, Short>();
-		String query 	= "SELECT " + DB.USERARTIST_ARTIST + ", " + DB.USERARTIST_RATING 
-						+ " FROM " + DB.TB_USERARTIST 
-						+ " WHERE " + DB.USERARTIST_USER + " = '" + user.getId() + "'";
-		Cursor cu = db.rawQuery(query, null);
+		String[] columns = {DB.USERARTIST_ARTIST, DB.USERARTIST_RATING};
+		String selection = DB.USERARTIST_USER + " = ?";
+		String[] selectionArgs = {user.getId() + ""};
+		
+		Cursor cu = db.query(DB.TB_USERARTIST, columns, selection, selectionArgs, null, null, null);
 		
 		ArrayList<Long> artistIds = new ArrayList<Long>();
 		ArrayList<Short> ratings = new ArrayList<Short>();
@@ -876,8 +878,8 @@ class DBHelper extends SQLiteOpenHelper {
 		openDB();
 		ArrayList<Song> songs = new ArrayList<Song>();
 		
-		String query = "SELECT " + DB.SONG_ARTIST + "," + DB.SONG_TITLE + "," + DB.SONG_HOST + "," + DB.SONG_LOCATION + ", rowid FROM " + DB.TB_SONG;
-		Cursor cu = db.rawQuery(query, null);
+		String[] columns = {DB.SONG_ARTIST, DB.SONG_TITLE, DB.SONG_HOST, DB.SONG_LOCATION, "rowid"};
+		Cursor cu = db.query(DB.TB_SONG, columns, null, null, null, null, null);
 		
 		ArrayList<Long> songIds = new ArrayList<Long>();
 		
@@ -1017,7 +1019,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 */
 	private void removeRelations(User user) {
 		openDB();
-		db.delete(DB.TB_USERARTIST, DB.USERARTIST_USER + "=" + user.getId(), null);
+		db.delete(DB.TB_USERARTIST, DB.USERARTIST_USER + "= '" + user.getId() + "'", null);
 	}
 	
 	/**
@@ -1040,8 +1042,8 @@ class DBHelper extends SQLiteOpenHelper {
 	 */
 	private void removeRelations(Tag tag) {
 		openDB();
-		db.delete(DB.TB_ARTISTTAGS, DB.ARTISTTAG_TAG + "=" + tag.getId(), null);
-		db.delete(DB.TB_SONGTAGS, DB.SONGTAG_TAG + "=" + tag.getId(), null);
+		db.delete(DB.TB_ARTISTTAGS, DB.ARTISTTAG_TAG + " = '" + tag.getId() + "'", null);
+		db.delete(DB.TB_SONGTAGS, DB.SONGTAG_TAG + " = '" + tag.getId() + "'", null);
 	}
 	
 	/**
@@ -1051,7 +1053,7 @@ class DBHelper extends SQLiteOpenHelper {
 	 */
 	private void removeRelations(Song song) {
 		openDB();
-		db.delete(DB.TB_SONGTAGS, DB.SONGTAG_SONG + "=" + song.getId(), null);
+		db.delete(DB.TB_SONGTAGS, DB.SONGTAG_SONG + " = '" + song.getId() + "'", null);
 	}
 	
 	/**
@@ -1063,16 +1065,17 @@ class DBHelper extends SQLiteOpenHelper {
 	 */
 	Artist searchArtist(String name) {
 		openDB();
+		String[] columns = {"rowid"};
+		String selection = DB.ARTIST_NAME + " = ?";
+		String[] selectionArgs = {name};
 		
-		String query = "SELECT rowid FROM " + DB.TB_ARTIST + " WHERE " + DB.ARTIST_NAME + " = '" + name + "'";
-		Cursor c = db.rawQuery(query, null);
+		Cursor c = db.query(DB.TB_ARTIST, columns, selection, selectionArgs, null, null, null);
 		
 		long aId = -1;
 		if (c.moveToFirst()) {
 			aId = c.getLong(0);
 		}
 		c.close();
-		db.close();
 		return mr.getArtist(aId);		
 	}
 	
@@ -1186,7 +1189,6 @@ class DBHelper extends SQLiteOpenHelper {
 		}
 				
 		Cursor c = db.query(DB.TB_SONG, new String[] {"rowid"}, selection, selectionArgs, null, null, null);
-		//Cursor c = db.rawQuery(query, null);
 		if (c.moveToFirst()) sId = c.getLong(0);
 		c.close();
 		
@@ -1202,14 +1204,16 @@ class DBHelper extends SQLiteOpenHelper {
 	 */
 	User searchUser(String location, String lastFM) {
 		openDB();
+		String[] columns = {"rowid"};
+		String selection = "";
 		long uId = -1;
-		String query = "SELECT rowid FROM " + DB.TB_USER + " WHERE ";
+		if (location != null) selection += DB.USER_ADDRESS + " = '" + location + "'";
+		if (location != null && lastFM != null) selection += " AND ";
+		if (lastFM != null) selection += DB.USER_LASTFM + " = '" + lastFM + "'";
+		if (selection == "") selection = null;
 		
-		if (location != null) query += DB.USER_ADDRESS + " = '" + location + "'";
-		if (location != null && lastFM != null) query += " AND ";
-		if (lastFM != null) query += DB.USER_LASTFM + " = '" + lastFM + "'";
+		Cursor c = db.query(DB.TB_USER, columns, selection, null, null, null, null);
 		
-		Cursor c = db.rawQuery(query , null);
 		if (c.moveToFirst()) uId = c.getLong(0);
 		return mr.getUser(uId);
 	}
@@ -1223,10 +1227,11 @@ class DBHelper extends SQLiteOpenHelper {
 	 */
 	Tag searchTag(String tagName) {
 		openDB();
-		String query = "SELECT rowid FROM " + DB.TB_TAG + " WHERE " + DB.TAG_NAME + " = '" + tagName + "'";
+		String[] columns = {"rowid"};
+		String[] selectionArgs = {tagName};
 		long tId = -1;
 		
-		Cursor c = db.rawQuery(query, null);
+		Cursor c = db.query(DB.TB_TAG, columns, DB.TAG_NAME + " = ?", selectionArgs, null, null, null);
 		
 		if (c.moveToFirst()) tId = c.getLong(0);
 		return mr.getTag(tId);
@@ -1258,7 +1263,11 @@ class DBHelper extends SQLiteOpenHelper {
 	boolean existSongsWithArtist(long artist) {
 		String query = "SELECT rowid FROM " + DB.TB_SONG + " WHERE " + DB.SONG_ARTIST + " = '" + artist + "'";
 		openDB();
-		Cursor c = db.rawQuery(query, null);
+		String[] columns = {"rowid"};
+		String selection = DB.SONG_ARTIST;
+		String[] selectionArgs = {artist + ""};
+		
+		Cursor c = db.query(DB.TB_SONG, columns, selection, selectionArgs, null, null, null);
 		
 		boolean ret = c.getCount() > 0;
 		c.close();
@@ -1278,6 +1287,7 @@ class DBHelper extends SQLiteOpenHelper {
 						+ " UNION SELECT " + DB.SIMILARARTIST_SECOND_ARTIST + ", " + DB.SIMILARARTIST_RATING 
 						+ " FROM " + DB.TB_SIMILARARTIST 
 						+ " WHERE " + DB.SIMILARARTIST_FIRST_ARTIST + " = '" + artist.getId() + "'";
+		
 		Cursor cu = db.rawQuery(query, null);
 		
 		HashMap<Long, Short> idToRating = new HashMap<Long,Short>();
