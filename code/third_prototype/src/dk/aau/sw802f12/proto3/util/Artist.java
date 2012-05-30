@@ -15,11 +15,11 @@ import dk.aau.sw802f12.proto3.lastfm.LastFmData;
  *
  */
 public class Artist {
-	private String name;
-	private long id;
-	HashSet<Tag> tags;
-	HashMap<User, Short> userRates;
-	HashMap<Artist, Short> similarArtists;
+	private volatile String name;
+	private volatile long id;
+	volatile HashSet<Tag> tags;
+	volatile HashMap<User, Short> userRates;
+	volatile HashMap<Artist, Short> similarArtists;
 	
 	/**
 	 * Create a new Artist with the Artist name.

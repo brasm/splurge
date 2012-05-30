@@ -16,17 +16,17 @@ public class User {
 	/**
 	 * The address of the bluetooth device. (Bluetooth adapter can instantiate a BluetoothDevice from this.)
 	 */
-	private String btdeviceAddress;
+	private volatile String btdeviceAddress;
 	
-	private String lastfmName;
+	private volatile String lastfmName;
 	/**
 	 * The {@link Artist}s that has been suggested to the user.
 	 */
-	HashMap<Artist, Short> ratedArtists;
+	volatile HashMap<Artist, Short> ratedArtists;
 	/**
 	 * The id assigned to the User in the database.
 	 */
-	private long id;
+	private volatile long id;
 	
 	/**
 	 * Create new User instance with suggested {@link Artist}s.

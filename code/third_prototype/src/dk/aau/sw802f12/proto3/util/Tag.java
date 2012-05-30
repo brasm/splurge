@@ -14,10 +14,10 @@ import java.util.HashSet;
  *
  */
 public class Tag {
-	private String tagName;
-	private long id;
-	HashSet<Artist> artists;
-	HashSet<Song> songs;
+	private volatile String tagName;
+	private volatile long id;
+	volatile HashSet<Artist> artists;
+	volatile HashSet<Song> songs;
 	
 	/**
 	 * Create new Tag instance. The Id is, by default, set to -1.

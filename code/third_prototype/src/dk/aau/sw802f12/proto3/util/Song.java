@@ -17,13 +17,13 @@ import android.media.MediaMetadataRetriever;
  *
  */
 public class Song {
-	private String title;
-	private Artist artist;
-	private User host;
-	private String location;
-	HashSet<Tag> tags;
-	private long id;
-	private File song;
+	private volatile String title;
+	private volatile Artist artist;
+	private volatile User host;
+	private volatile String location;
+	volatile HashSet<Tag> tags;
+	private volatile long id;
+	private volatile File song;
 	
 	/**
 	 * Create new Song Instance.
