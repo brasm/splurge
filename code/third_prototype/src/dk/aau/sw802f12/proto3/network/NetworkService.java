@@ -186,8 +186,6 @@ public class NetworkService {
 			Log.d(TAG, "Connected.");
 			ct = new ConnectedThread(socket);
 			ct.start();
-			Toast.makeText(mContext, "Connected to device: "
-					+ socket.getRemoteDevice().getName(), Toast.LENGTH_SHORT);
 			ct.write(lastFMUser.getBytes());
 			Log.d(TAG, "Client wrote " + lastFMUser);
 		}

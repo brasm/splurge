@@ -9,6 +9,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -478,7 +479,6 @@ class DBHelper extends SQLiteOpenHelper {
 	 */
 	private void add(Song song, Tag tag) {
 		openDB();
-		//TODO: CHECK WHAT HAPPENS IF ATTEMPTING TO INSERT EXISTING RELATION
 		if (song.getId() == -1) add(song);
 		if (tag.getId() == -1) add(tag);
 		db.insert(DB.TB_SONGTAGS, null, getCV(song, tag));
@@ -492,10 +492,9 @@ class DBHelper extends SQLiteOpenHelper {
 	 */
 	private void add(Artist artist, Tag tag) {
 		openDB();
-		//TODO: CHECK WHAT HAPPENS IF ATTEMPTING TO INSERT EXISTING RELATION
 		if (artist.getId() == -1) add(artist);
 		if (tag.getId() == -1) add(tag);
-		db.insert(DB.TB_ARTISTTAGS, null, getCV(artist, tag));		
+		db.insert(DB.TB_ARTISTTAGS, null, getCV(artist, tag));
 	}
 	
 	/**
@@ -506,7 +505,6 @@ class DBHelper extends SQLiteOpenHelper {
 	 */
 	private void add(Artist artist, User user, short rating) {
 		openDB();
-		//TODO: CHECK WHAT HAPPENS IF ATTEMPTING TO INSERT EXISTING RELATION
 		if (artist.getId() == -1) add(artist);
 		if (user.getId() == -1) add(user);
 		db.insert(DB.TB_USERARTIST, null, getCV(artist, user, rating));

@@ -421,7 +421,7 @@ public class MainActivity extends Activity {
 			discDialog.setCancelable(false);
 			discDialog.setButton(DialogInterface.BUTTON_POSITIVE , mContext.getText(R.string.stop_server), new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
-					netService.stop();
+					if (netService != null) netService.stop();
 		    	  	startClientButton.setText(mContext.getText(R.string.start_client));
 		    	  	startClientButton.setOnClickListener(startClientListener);
 		    	  	startServerButton.setVisibility(View.VISIBLE);
