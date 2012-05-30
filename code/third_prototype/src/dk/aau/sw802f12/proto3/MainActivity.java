@@ -204,10 +204,7 @@ public class MainActivity extends Activity {
 	private BroadcastReceiver updateInterface = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			Toast.makeText(getApplicationContext(), "Received broadcast", Toast.LENGTH_SHORT).show();
 			if (intent.getAction() != PlayService.UPDATESTATE) return;
-			
-			Toast.makeText(getApplicationContext(), "Received Update broadcast", Toast.LENGTH_SHORT).show();
 			
 			try {
 				currentSongText.setText(intent.getStringExtra("current"));
