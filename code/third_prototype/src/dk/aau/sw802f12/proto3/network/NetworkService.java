@@ -114,12 +114,6 @@ public class NetworkService {
 
 					// Do work to manage the connection (in a separate thread)
 					manageConnectedSocket(socket);
-					try {
-						mmServerSocket.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					break;
 				}
 			}
 		}
