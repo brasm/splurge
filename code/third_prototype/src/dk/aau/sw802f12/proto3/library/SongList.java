@@ -8,13 +8,12 @@ import java.util.Vector;
 
 import android.util.Log;
 
-import dk.aau.sw802f12.proto3.util.Artist;
-import dk.aau.sw802f12.proto3.util.Song;
+import dk.aau.sw802f12.proto3.database.Artist;
+import dk.aau.sw802f12.proto3.database.Song;
 
 public class SongList {
 	public final boolean LOCAL;
 	public final String NAME;
-	
 	private List<Song> asList;
 	private HashMap<Artist,List<Song>> artistMap;
 	
@@ -27,20 +26,16 @@ public class SongList {
 	
 	public void put(Song s){
 		Log.d("LASTFM", "Adding song to list: " + s.getLocation());
-		
-		
 		asList.add(s);
 		List<Song> songs = artistMap.get(s.getArtist());
 		if(songs == null) songs = new Vector<Song>();
-		songs.add(s);
-			
+		songs.add(s);	
 		artistMap.put(s.getArtist(), songs);
 	}
 	
 	public Song getRandom(Artist a){
 		List<Song> songs = artistMap.get(a);
-		if(songs == null) return null;
-		
+		if(songs == null) return null;	
 		int size = songs.size() - 1;
 		Random r = new Random();
 		int index = r.nextInt(size);

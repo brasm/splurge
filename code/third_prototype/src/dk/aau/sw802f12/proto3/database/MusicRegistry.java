@@ -1,4 +1,4 @@
-package dk.aau.sw802f12.proto3.util;
+package dk.aau.sw802f12.proto3.database;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -8,7 +8,6 @@ import android.content.Context;
 /**
  * Registry/Factory for storing and creating entities ({@link Artist}, {@link Song}, {@link Tag} and {@link User}), 
  * as well as creating relations inbetween them.
- * @author mlisby
  *
  */
 public class MusicRegistry {
@@ -272,7 +271,6 @@ public class MusicRegistry {
 				// my life				
 			}
 		}
-		
 		return a;
 	}
 	
@@ -287,7 +285,6 @@ public class MusicRegistry {
 	 */
 	public Song createSong(String title, String artist, String host, String location) {
 		Song s = db.searchSong(title, artist, host, location);
-		
 		if (s == null) {
 			s = new Song(title, createArtist(artist), createUser(host), location);
 			db.updateDB(s);
@@ -357,12 +354,10 @@ public class MusicRegistry {
 	 */
 	public Song createSong(String location) throws InstantiationException {
 		Song s = db.searchSong(location);
-		
 		if (s == null) {
 			s = new Song(location);
 			db.updateDB(s);
 		}
-		
 		return s;
 	}
 	

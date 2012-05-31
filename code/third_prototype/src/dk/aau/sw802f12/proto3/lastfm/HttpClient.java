@@ -7,25 +7,20 @@ import org.w3c.dom.Document;
 
 import android.util.Log;
 
-
 /**
  * This class is responsible for HTTP communication with last.fm 
  * , or any other rest service that returns XML.
  * Package protected 
  * 
- * @author brian
- *
  */
 class HttpClient{
 	
 	// limit the amount of concurrent http request threads
 	private Object _mutex = new Object();
 	private Semaphore _pool = new Semaphore(10, true);
-	
 	// The last.fm api allows 5 request/sec
 	private long _requestInterval = 1000/5;
 	private long _lastRequestTimestamp = 0;
-
 	static HttpClient _instance = null;
 	static final HttpClient getInstance(){
 		if (_instance == null)
@@ -67,10 +62,8 @@ class HttpClient{
 		public HttpRequestThread(HttpRequest q) {
 			_query = q;
 		}
-		
 		@Override
-		public void run() {
-			
+		public void run() {	
 			try {
 				_pool.acquire();
 				requestQueue();
@@ -79,12 +72,9 @@ class HttpClient{
 			finally {
 				_pool.release();
 			}
-			
 			Document xmlDocument = sendHttpRequest(_query.getRequest());
 			_query.setResponse(xmlDocument);
 		}
-		
-		
 		// park thread until requestinterval adheres to last.fm api rules
 		private void requestQueue() throws InterruptedException{
 			synchronized (_mutex) {

@@ -1,4 +1,4 @@
-package dk.aau.sw802f12.proto3.util;
+package dk.aau.sw802f12.proto3.database;
 
 import java.io.File;
 import java.util.Collection;
@@ -13,7 +13,7 @@ import android.media.MediaMetadataRetriever;
  * Host and location provides a way of accessing Songs of the library. 
  * Host holds the Bluetooth MAC address (local if the current device has the Song), and location is the file path to the song file.
  * 
- * @author sw802f12 (mlisby)
+ * @author sw802f12
  *
  */
 public class Song {
@@ -39,7 +39,6 @@ public class Song {
 		setHost(host);
 		setLocation(location);
 		id = -1;
-		
 		tags = new HashSet<Tag>();
 	}
 	
@@ -64,23 +63,17 @@ public class Song {
 			song = f.getAbsoluteFile();
 		else
 			throw new IllegalArgumentException();
-		
 		MusicRegistry mr = MusicRegistry.getInstance();
 		setLocation(f.getAbsolutePath());
 		MediaMetadataRetriever mmdr = new MediaMetadataRetriever();
 		mmdr.setDataSource(location);
-		
 		String title = mmdr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
 		setTitle((title != null) ? title : "Unknown");
-		
 		String artName = mmdr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
 		setArtist(mr.createArtist((artName != null)? artName : "Unknown"));
-		
 		setHost(mr.createUser("local")); //TODO: Currently ignores unit, song is located at!!!
 		id = -1;
-		
 		tags = new HashSet<Tag>();
-		
 	}
 	
 	/**

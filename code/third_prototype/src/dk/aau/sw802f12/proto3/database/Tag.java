@@ -1,4 +1,4 @@
-package dk.aau.sw802f12.proto3.util;
+package dk.aau.sw802f12.proto3.database;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -10,7 +10,7 @@ import java.util.HashSet;
  * If the Tag is not added to the database, the Id is -1.
  * The tagName is a convenience representation of the Tag. This could, for instance, be "Rock", "Pop" or "Jazz".
  *  
- * @author sw802f12 (mlisby)
+ * @author sw802f12
  *
  */
 public class Tag {

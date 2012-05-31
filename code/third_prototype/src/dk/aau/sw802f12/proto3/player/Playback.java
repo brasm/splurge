@@ -1,6 +1,6 @@
 package dk.aau.sw802f12.proto3.player;
 
-import dk.aau.sw802f12.proto3.util.Song;
+import dk.aau.sw802f12.proto3.database.Song;
 
 
 public interface Playback {

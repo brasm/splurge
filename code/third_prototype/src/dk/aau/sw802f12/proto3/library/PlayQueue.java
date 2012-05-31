@@ -10,8 +10,8 @@ import java.util.Vector;
 import android.util.Log;
 
 import dk.aau.sw802f12.proto3.Settings;
-import dk.aau.sw802f12.proto3.util.Artist;
-import dk.aau.sw802f12.proto3.util.Song;
+import dk.aau.sw802f12.proto3.database.Artist;
+import dk.aau.sw802f12.proto3.database.Song;
 
 public class PlayQueue {
 	
@@ -32,13 +32,10 @@ public class PlayQueue {
 		for(Map.Entry<Artist, Short> map : similar.entrySet()) {
 			Artist a = map.getKey();
 			int distance  = map.getValue() + d_zero;
-			
 			// dont add if distance to artist is to far 
 			if(distance > d_max) continue;
-			
 			// no duplicate entries
 			if(solution.containsKey(a))	continue;
-			
 			// dont add if artist was recently played 
 			int listsize = Settings.getInstance().getRecentlyPlayedBlacklist();
 			int start = mArtistsPlayed.size() - (listsize + 1); 
@@ -46,14 +43,11 @@ public class PlayQueue {
 			int end = mArtistsPlayed.size() - 1;
 			List<Artist> recently = mArtistsPlayed.subList(start, end);
 			if (recently.contains(a)) continue;
-			
 			// append candidate
 			neighbours.put(a, distance);
 		}
-		
 		// merge into solution space
 		solution.putAll(neighbours);
-		
 		// find more candidates on next level
 		for(Artist a: neighbours.keySet()){
 			d_zero = solution.get(a);
@@ -64,32 +58,26 @@ public class PlayQueue {
 	private List<Artist> getCandidates(Artist nowPlaying){
 		HashMap<Artist,Integer> artistSet = new HashMap<Artist,Integer>();
 		Vector<Artist> result = new Vector<Artist>();
-		
 		getSimilarArtists(nowPlaying,0,5,artistSet);
 		for(Artist a:  artistSet.keySet())
 			if(mLibrary.hasArtist(a)) result.add(a);
-		
 		return result;
 	}
 	
 	private Artist selectArtist(List<Artist> candidates){
-		// TODO: replace with fancy recommender system that makes the perfect desicion
-		
+		// TODO: replace with fancy recommender system that makes the perfect desicion	
 		Random r = new Random();
 		int size = candidates.size();
-		if (size == 0) return null;
-		
+		if (size == 0) return null;	
 		int index = r.nextInt(size - 1);
 		return candidates.get(index);
 	}
 	
 	public Song getNext(){
-		//return mLibrary.getRandom();
-		
+		//return mLibrary.getRandom();	
 		Song nextSong = null;
 		Artist lastArtist;
-		Artist nextArtist;
-		
+		Artist nextArtist;	
 		try{
 			lastArtist = mArtistsPlayed.lastElement();
 			List<Artist> candidates = getCandidates(lastArtist);
@@ -97,12 +85,10 @@ public class PlayQueue {
 			nextSong = mLibrary.getRandom(nextArtist);
 		} 
 		catch (NoSuchElementException e){}
-		
 		if (nextSong == null){
 			nextSong = mLibrary.getRandom();
 			Log.d("LASTFM", "no song, select random");
 		}
-
 		mArtistsPlayed.add(nextSong.getArtist());
 		mSongsPlayed.add(nextSong);
 		return nextSong;

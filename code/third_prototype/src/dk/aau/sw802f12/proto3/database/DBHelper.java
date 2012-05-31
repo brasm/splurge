@@ -1,4 +1,4 @@
-package dk.aau.sw802f12.proto3.util;
+package dk.aau.sw802f12.proto3.database;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,7 +16,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 /**
  * The database helper to interact with the database.
  * 
- * @author sw802f12 (mlisby)
+ * @author sw802f12
  *
  */
 class DBHelper extends SQLiteOpenHelper {
@@ -203,7 +203,6 @@ class DBHelper extends SQLiteOpenHelper {
 			db.close();
 			db = null;
 		}
-		
 		if (db == null) 
 			db = getWritableDatabase();
 	}
@@ -297,11 +296,9 @@ class DBHelper extends SQLiteOpenHelper {
 			ret = add(song);
 		}
 		else ret = update(song);
-		
 		for (Tag tag : song.getTags()) {
 			add(song, tag);
 		}
-		
 		return ret;
 	}
 	
@@ -317,16 +314,13 @@ class DBHelper extends SQLiteOpenHelper {
 		long ret;
 		if (artist.getId() == -1) ret = add(artist);
 		else ret = update(artist);
-		
 		HashMap<User, Short> hm = artist.getUsers();
 		for (User user : hm.keySet()) {
 			add(artist, user, hm.get(user));
 		}
-		
 		for (Tag tag : artist.getTags()) {
 			add(artist, tag);
 		}
-		
 		return ret;
 	}
 	
@@ -339,13 +333,10 @@ class DBHelper extends SQLiteOpenHelper {
 	 */
 	long updateDB(Tag tag) {
 		removeRelations(tag);
-		
 		long tId = (tag.getId() == -1) ? add(tag) : update(tag);
-		
 		for (Artist artist : tag.getTaggedArtists()) {
 			add(artist, tag);
 		}
-		
 		for (Song song : tag.getTaggedSongs()) {
 			add(song, tag);
 		}
@@ -364,12 +355,10 @@ class DBHelper extends SQLiteOpenHelper {
 		removeRelations(user);
 		if (user.getId() == -1) ret = add(user);
 		else ret = update(user);
-		
 		HashMap<Artist, Short> hm = user.getRatedArtists();
 		for (Artist artist : hm.keySet()) {
 			add(artist, user, hm.get(artist));
 		}
-		
 		return ret;
 	}
 	
@@ -521,7 +510,6 @@ class DBHelper extends SQLiteOpenHelper {
 		cv.put(DB.SONG_TITLE, song.getTitle());
 		cv.put(DB.SONG_HOST, song.getHost().getId());
 		cv.put(DB.SONG_LOCATION, song.getLocation());
-		
 		return cv;
 	}
 	
@@ -629,16 +617,12 @@ class DBHelper extends SQLiteOpenHelper {
 		openDB();
 		String[] cols = {DB.SONG_ARTIST, DB.SONG_TITLE, DB.SONG_HOST, DB.SONG_LOCATION};
 		Cursor c = db.query(DB.TB_SONG, cols, "rowid = " + songId, null, null, null, null);
-		
 		if (!c.moveToFirst()) return null;
-		
 		long aId = c.getLong(0);
 		long uId = c.getLong(2);
 		String sTitle = c.getString(1);
 		String sLoc = c.getString(3);
-		
 		c.close();
-		
 		Artist a = mr.getArtist(aId);
 		User u = mr.getUser(uId);
 		Song s = new Song(sTitle, a, u, sLoc);
@@ -655,15 +639,11 @@ class DBHelper extends SQLiteOpenHelper {
 	 */
 	Artist getArtist(long artistId) {
 		openDB();
-		
 		String[] cols = {DB.ARTIST_NAME};
-		
 		Cursor c = db.query(DB.TB_ARTIST, cols, "rowid = " + artistId, null, null, null, null);
-		
 		if (!c.moveToFirst()) return null;
 		String aName = c.getString(0);
 		c.close();
-		
 		Artist a = new Artist(aName);
 		artistTags(a);
 		a.setId(artistId);
@@ -680,11 +660,9 @@ class DBHelper extends SQLiteOpenHelper {
 		openDB();
 		String[] cols = {DB.TAG_NAME};
 		Cursor c = db.query(DB.TB_TAG, cols, "rowid = " + tagId, null, null, null, null);
-		
 		if (!c.moveToFirst()) return null;
 		String tName = c.getString(0);
 		c.close();
-		
 		Tag t = new Tag(tName);
 		taggedSongs(t);
 		taggedArtists(t);
@@ -701,12 +679,10 @@ class DBHelper extends SQLiteOpenHelper {
 		openDB();
 		String[] cols = {DB.USER_ADDRESS, DB.USER_LASTFM};
 		Cursor c = db.query(DB.TB_USER, cols, "rowid = " + userId, null, null, null, null);
-		
 		if (!c.moveToFirst()) return null;
 		String uAddr = c.getString(0);
 		String lastfm = c.getString(1);
 		c.close();
-		
 		User u = new User(uAddr, lastfm);
 		u.setId(userId);
 		userArtists(u);
@@ -721,21 +697,16 @@ class DBHelper extends SQLiteOpenHelper {
 	private void songTags(Song s) {
 		openDB();
 		Collection<Tag> c = new HashSet<Tag>();
-		
 		String[] cols = {DB.SONGTAG_TAG};
 		String selection = DB.SONGTAG_SONG + " = " + s.getId();
 		Cursor cu = db.query(DB.TB_SONGTAGS, cols, selection, null, null, null, null);
-		
 		ArrayList<Long> tagIds = new ArrayList<Long>();
-		
 		while (cu.moveToNext()) {
 			tagIds.add(cu.getLong(0));
 		}
 		cu.close();
-		
 		for (Long tagid : tagIds)
 			c.add(mr.getTag(tagid));
-
 		s.tag(c);
 	}
 	
@@ -746,22 +717,16 @@ class DBHelper extends SQLiteOpenHelper {
 	private void artistTags(Artist artist) {
 		openDB();
 		Collection<Tag> c = new HashSet<Tag>();
-		
 		String[] cols = {DB.ARTISTTAG_TAG};
 		String selection = DB.ARTISTTAG_ARTIST + " = " + artist.getId();
 		Cursor cu = db.query(DB.TB_ARTISTTAGS, cols, selection, null, null, null, null);
-		
 		ArrayList<Long> tagIds = new ArrayList<Long>();
-		
 		while (cu.moveToNext()) {
 			tagIds.add(cu.getLong(0));
 		}
-		
 		cu.close();
-		
 		for (Long tagId : tagIds)
 			c.add(mr.getTag(tagId));
-		
 		artist.addTags(c);
 	}
 	
@@ -775,22 +740,16 @@ class DBHelper extends SQLiteOpenHelper {
 		String[] columns = {DB.USERARTIST_ARTIST, DB.USERARTIST_RATING};
 		String selection = DB.USERARTIST_USER + " = ?";
 		String[] selectionArgs = {user.getId() + ""};
-		
 		Cursor cu = db.query(DB.TB_USERARTIST, columns, selection, selectionArgs, null, null, null);
-		
 		ArrayList<Long> artistIds = new ArrayList<Long>();
 		ArrayList<Short> ratings = new ArrayList<Short>();
-		
 		while (cu.moveToNext()) {
 			artistIds.add(cu.getLong(0));
 			ratings.add(cu.getShort(1));
 		}
-		
 		cu.close();
-		
 		for (int i = 0, s = artistIds.size(); i < s; ++i)
 			hm.put(mr.getArtist(artistIds.get(i)), ratings.get(i));
-		
 		user.addArtistRatings(hm);
 	}
 	
@@ -801,17 +760,14 @@ class DBHelper extends SQLiteOpenHelper {
 	private void taggedSongs(Tag tag) {
 		openDB();
 		Collection<Song> songs = new HashSet<Song>();
-		
 		String[] cols = {DB.SONGTAG_SONG};
 		String select = DB.SONGTAG_TAG + "=" + tag.getId();
 		Cursor c = db.query(DB.TB_SONGTAGS, cols, select, null, null, null, null);
-		
 		ArrayList<Long> songIds = new ArrayList<Long>();
 		while (c.moveToNext()) {
 			songIds.add(c.getLong(0));
 		}
 		c.close();
-		
 		for (long l : songIds) {
 			songs.add(mr.getSong(l));
 		}		
@@ -825,17 +781,14 @@ class DBHelper extends SQLiteOpenHelper {
 	private void taggedArtists(Tag tag) {
 		openDB();
 		Collection<Artist> artists = new HashSet<Artist>();
-		
 		String[] cols = {DB.ARTISTTAG_ARTIST};
 		String select = DB.ARTISTTAG_TAG + "=" + tag.getId();
 		Cursor c = db.query(DB.TB_ARTISTTAGS, cols, select, null, null, null, null);
-		
 		ArrayList<Long> artistIds = new ArrayList<Long>();
 		while (c.moveToNext()) {
 			artistIds.add(c.getLong(0));
 		}
 		c.close();
-		
 		for (long l : artistIds) {
 			artists.add(mr.getArtist(l));
 		}
@@ -853,18 +806,15 @@ class DBHelper extends SQLiteOpenHelper {
 		String[] cols = {DB.USERARTIST_USER, DB.USERARTIST_RATING};
 		String select = DB.USERARTIST_ARTIST + "=" + artist.getId();
 		Cursor c = db.query(DB.TB_USERARTIST, cols, select, null, null, null, null);
-		
 		HashMap<Long, Short> uIdRat = new HashMap<Long, Short>();
 		while(c.moveToNext()) {
 			uIdRat.put(c.getLong(0), c.getShort(1));
 		}
 		c.close();
-		
 		for (Long l : uIdRat.keySet()) {
 			User u = mr.getUser(l);
 			urat.put(u, uIdRat.get(l));
 		}
-		
 		artist.addUserRatings(urat);
 	}
 	
@@ -875,17 +825,13 @@ class DBHelper extends SQLiteOpenHelper {
 	ArrayList<Song> getSongs() {
 		openDB();
 		ArrayList<Song> songs = new ArrayList<Song>();
-		
 		String[] columns = {DB.SONG_ARTIST, DB.SONG_TITLE, DB.SONG_HOST, DB.SONG_LOCATION, "rowid"};
 		Cursor cu = db.query(DB.TB_SONG, columns, null, null, null, null, null);
-		
 		ArrayList<Long> songIds = new ArrayList<Long>();
-		
 		HashMap<Long, Long> artistIds 	= new HashMap<Long, Long>();
 		HashMap<Long, Long> userIds 	= new HashMap<Long, Long>();
 		HashMap<Long, String> titles 	= new HashMap<Long, String>();
 		HashMap<Long, String> locations = new HashMap<Long, String>();
-		
 		while (cu.moveToNext()) {
 			Long l = cu.getLong(4);
 			Song s = mr.songLoaded(l);
@@ -897,16 +843,13 @@ class DBHelper extends SQLiteOpenHelper {
 				locations.put(l, cu.getString(3));
 			} else songs.add(s);
 		}
-		
 		cu.close();
-		
 		for (Long sid : songIds) {
 			Song s = new Song(titles.get(sid), mr.getArtist(artistIds.get(sid)), 
 					mr.getUser(userIds.get(sid)), locations.get(sid));
 			songTags(s);
 			s.setId(sid);
 		}
-		
 		return songs;
 	}
 	
@@ -919,7 +862,6 @@ class DBHelper extends SQLiteOpenHelper {
 		ArrayList<Artist> artists = new ArrayList<Artist>();
 		String[] cols = {DB.ARTIST_NAME, "rowid"};
 		Cursor cu = db.query(DB.TB_ARTIST, cols, null, null, null, null, null);
-		
 		HashMap<Long, String> hm = new HashMap<Long, String>();
 		while(cu.moveToNext()) {
 			Artist artist = mr.artistLoaded(cu.getLong(1));
@@ -930,7 +872,6 @@ class DBHelper extends SQLiteOpenHelper {
 			}
 		}
 		cu.close();
-		
 		for (Long l : hm.keySet()) {
 			Artist a = new Artist(hm.get(l));
 			a.setId(l);
@@ -938,7 +879,6 @@ class DBHelper extends SQLiteOpenHelper {
 			userArtists(a);
 			artists.add(a);
 		}
-		
 		return artists;
 	}
 	
@@ -951,14 +891,12 @@ class DBHelper extends SQLiteOpenHelper {
 		ArrayList<User> users = new ArrayList<User>();
 		String[] cols = {DB.USER_ADDRESS, DB.USER_LASTFM, "rowid"};
 		Cursor cu = db.query(DB.TB_USER, cols, null, null, null, null, null);
-		
 		ArrayList<Long> userIds = new ArrayList<Long>();
 		ArrayList<String> userLocs = new ArrayList<String>();
 		ArrayList<String> uLastfmName = new ArrayList<String>();
 		while (cu.moveToNext()) {
 			Long uId = cu.getLong(2);
 			User user = mr.userLoaded(uId);
-
 			if (user != null) users.add(user);
 			else {
 				userIds.add(cu.getLong(2));
@@ -967,7 +905,6 @@ class DBHelper extends SQLiteOpenHelper {
 			}
 		}
 		cu.close();
-		
 		for (int i = 0, s = userIds.size(); i < s; ++i) {
 			long sid = userIds.get(i);
 			User u = new User(userLocs.get(i), uLastfmName.get(i));
@@ -976,7 +913,6 @@ class DBHelper extends SQLiteOpenHelper {
 			userArtists(u);
 			users.add(u);
 		}
-		
 		return users;
 	}
 	
@@ -989,16 +925,13 @@ class DBHelper extends SQLiteOpenHelper {
 		ArrayList<Tag> tags = new ArrayList<Tag>();
 		String[] cols = {"rowid", DB.TAG_NAME};
 		Cursor cu = db.query(DB.TB_TAG, cols, null, null, null, null, null);
-		
 		HashMap<Long, String> ids = new HashMap<Long, String>();
 		while (cu.moveToNext()) {
 			Tag t = mr.tagLoaded(cu.getLong(0));
 			if (t == null) ids.put(cu.getLong(0), cu.getString(1));
 			else tags.add(t);
-			
 		}
 		cu.close();
-		
 		for (long l : ids.keySet()) {
 			Tag t = new Tag(ids.get(l));
 			t.setId(l);
@@ -1006,7 +939,6 @@ class DBHelper extends SQLiteOpenHelper {
 			taggedArtists(t);
 			tags.add(t);
 		}
-				
 		return tags;
 	}
 	
@@ -1066,9 +998,7 @@ class DBHelper extends SQLiteOpenHelper {
 		String[] columns = {"rowid"};
 		String selection = DB.ARTIST_NAME + " = ?";
 		String[] selectionArgs = {name};
-		
 		Cursor c = db.query(DB.TB_ARTIST, columns, selection, selectionArgs, null, null, null);
-		
 		long aId = -1;
 		if (c.moveToFirst()) {
 			aId = c.getLong(0);
@@ -1104,7 +1034,6 @@ class DBHelper extends SQLiteOpenHelper {
 	 */
 	Song searchSong(String title, Artist artist, String host, String location) {
 		User searchUserRes = searchUser(host, null);
-		
 		if (searchUserRes == null) return searchSong(title, artist.getId(), -1, location);
 		return searchSong(title, artist.getId(), searchUserRes.getId(), location);
 	}
@@ -1155,7 +1084,6 @@ class DBHelper extends SQLiteOpenHelper {
 	private Song searchSong(String title, long artist, long host, String location) {
 		openDB();
 		long sId = -1;
-		
 		String selection = "";
 		ArrayList<String> selArgs = new ArrayList<String>();
 		if (title != null) 
@@ -1163,33 +1091,27 @@ class DBHelper extends SQLiteOpenHelper {
 			selection += DB.SONG_TITLE + " = ? AND ";
 			selArgs.add(title);
 		}
-		
 		if (artist != -1) {
 			selection += DB.SONG_ARTIST + " = ? AND ";
 			selArgs.add("" + artist);
 		}
-		
 		if (location != null) {
 			selection += DB.SONG_LOCATION + " = ? AND ";
 			selArgs.add(location);
 		}
-		
 		if (host != -1) {
 			selection += DB.SONG_HOST + " = ? AND ";
 			selArgs.add(host + "");
 		}
-		
 		selection = selection.substring(0, selection.length() - 5);
 		int selSize = selArgs.size();
 		String[] selectionArgs = new String[selSize];
 		for (int i = 0; i < selSize; ++i) {
 			selectionArgs[i] = selArgs.get(i);
-		}
-				
+		}	
 		Cursor c = db.query(DB.TB_SONG, new String[] {"rowid"}, selection, selectionArgs, null, null, null);
 		if (c.moveToFirst()) sId = c.getLong(0);
 		c.close();
-		
 		return mr.getSong(sId);
 	}
 	
@@ -1209,9 +1131,7 @@ class DBHelper extends SQLiteOpenHelper {
 		if (location != null && lastFM != null) selection += " AND ";
 		if (lastFM != null) selection += DB.USER_LASTFM + " = '" + lastFM + "'";
 		if (selection == "") selection = null;
-		
 		Cursor c = db.query(DB.TB_USER, columns, selection, null, null, null, null);
-		
 		if (c.moveToFirst()) uId = c.getLong(0);
 		return mr.getUser(uId);
 	}
@@ -1228,9 +1148,7 @@ class DBHelper extends SQLiteOpenHelper {
 		String[] columns = {"rowid"};
 		String[] selectionArgs = {tagName};
 		long tId = -1;
-		
 		Cursor c = db.query(DB.TB_TAG, columns, DB.TAG_NAME + " = ?", selectionArgs, null, null, null);
-		
 		if (c.moveToFirst()) tId = c.getLong(0);
 		return mr.getTag(tId);
 	}
@@ -1263,9 +1181,7 @@ class DBHelper extends SQLiteOpenHelper {
 		String[] columns = {"rowid"};
 		String selection = DB.SONG_ARTIST + " = ?";
 		String[] selectionArgs = {artist + ""};
-		
 		Cursor c = db.query(DB.TB_SONG, columns, selection, selectionArgs, null, null, null);
-		
 		boolean ret = c.getCount() > 0;
 		c.close();
 		return ret;
@@ -1284,9 +1200,7 @@ class DBHelper extends SQLiteOpenHelper {
 						+ " UNION SELECT " + DB.SIMILARARTIST_SECOND_ARTIST + ", " + DB.SIMILARARTIST_RATING 
 						+ " FROM " + DB.TB_SIMILARARTIST 
 						+ " WHERE " + DB.SIMILARARTIST_FIRST_ARTIST + " = '" + artist.getId() + "'";
-		
 		Cursor cu = db.rawQuery(query, null);
-		
 		HashMap<Long, Short> idToRating = new HashMap<Long,Short>();
 		while (cu.moveToNext()) {
 			idToRating.put(cu.getLong(0), cu.getShort(0));
@@ -1319,7 +1233,6 @@ class DBHelper extends SQLiteOpenHelper {
 						+ " OR " + DB.SIMILARARTIST_FIRST_ARTIST + " = " + artist2.getId()
 						+ " AND " + DB.SIMILARARTIST_SECOND_ARTIST + " = " + artist.getId();
 		db.execSQL(query);
-		
 	}
 	
 	void removeUser(User user) {

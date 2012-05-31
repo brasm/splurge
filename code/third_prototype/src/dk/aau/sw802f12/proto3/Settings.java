@@ -11,8 +11,7 @@ public class Settings {
 	private int httpThreads = 10;
 	private double similarArtistThreshold = 0.4;
 	private int maximumArtistTags = 3;
-	private int recentlyPlayedBlacklist = 10;
-		
+	private int recentlyPlayedBlacklist = 10;	
 	private static Settings mInstance = null;
 	public static Settings getInstance(){
 		if( mInstance == null)
@@ -37,7 +36,6 @@ public class Settings {
 	public void setLocalMusicFolder(File localMusicFolder) {
 		if (! localMusicFolder.isDirectory())
 			throw new IllegalArgumentException();
-		
 		this.localMusicFolder = localMusicFolder;
 	}
 

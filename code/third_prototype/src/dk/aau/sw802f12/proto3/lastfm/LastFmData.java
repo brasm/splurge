@@ -14,10 +14,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
 import dk.aau.sw802f12.proto3.Settings;
-import dk.aau.sw802f12.proto3.util.Artist;
-import dk.aau.sw802f12.proto3.util.MusicRegistry;
-import dk.aau.sw802f12.proto3.util.Tag;
-import dk.aau.sw802f12.proto3.util.User;
+import dk.aau.sw802f12.proto3.database.Artist;
+import dk.aau.sw802f12.proto3.database.MusicRegistry;
+import dk.aau.sw802f12.proto3.database.Tag;
+import dk.aau.sw802f12.proto3.database.User;
 
 import android.util.Log;
 
@@ -57,7 +57,6 @@ public class LastFmData{
 		String uri = String.format("%s?method=artist.gettoptags&artist=%s&api_key=%s&autocorrect=1",_url,a,_api);
 		new HttpRequest(uri, new TagHandler(artist));
 	}
-	
 
 	/**
 	 * Asynchronously, send request for similar artists.
@@ -98,7 +97,6 @@ public class LastFmData{
 			NodeList artists;
 			NodeList playcount;
 			int playCountIndex = 0;
-
 			try {
 				XPathExpression artists_expr = xpath.compile("//lfm/topartists/artist/name/text()");
 				XPathExpression playcount_expr = xpath.compile("//lfm/topartists/artist/playcount/text()");
@@ -109,16 +107,13 @@ public class LastFmData{
 				Log.d("LASTFM","XPathExpressionException " + e.getMessage());
 				return;
 			}
-
 			HashMap<Artist,Short> topArtists = new HashMap<Artist, Short>();
 			for (int i = 0; i < artists.getLength(); i++) {
 				String artistname = artists.item(i).getNodeValue();
 				int p = Integer.parseInt(playcount.item(i).getNodeValue());
-				
 				if (playCountIndex == 0)
 					playCountIndex = p;
 				p = p * 100 / playCountIndex; 
-				
 				Artist a = _registry.createArtist(artistname);
 				topArtists.put(a,(short) p);		
 			}
@@ -130,17 +125,14 @@ public class LastFmData{
 	private class TagHandler implements  XmlResponseHandler {
 		public final Artist artist;
 		public final int maxTags = Settings.getInstance().getMaximumArtistTags();
-
 		public TagHandler(Artist _artist){
 			artist = _artist;
 		}
-
 		@Override	
 		public void execute(Document xmlDocument) {
 			XPathFactory factory = XPathFactory.newInstance();
 			XPath xpath = factory.newXPath();
-			NodeList tags;
-			
+			NodeList tags;	
 			try {
 				XPathExpression tagname = xpath.compile("//lfm/toptags/tag/name/text()");
 				tags = (NodeList) tagname.evaluate(xmlDocument, XPathConstants.NODESET);
@@ -148,7 +140,6 @@ public class LastFmData{
 				Log.d("LASTFM","XPathExpressionException " + e.getMessage());
 				return;
 			}
-			
 			for (int i = 0; i < tags.getLength(); i++) {
 				if (i > maxTags) break;
 			    String tag = tags.item(i).getNodeValue();
@@ -162,18 +153,15 @@ public class LastFmData{
 	private class SimilarArtistHandler implements  XmlResponseHandler {
 		public final Artist artist;
 		private final double threshold = Settings.getInstance().getSimilarArtistThreshold();
-		
 		public SimilarArtistHandler(Artist _artist){
 			artist = _artist;
 		}
-
 		@Override	
 		public void execute(Document xmlDocument) {
 			XPathFactory factory = XPathFactory.newInstance();
 			XPath xpath = factory.newXPath();
 			NodeList artists;
 			NodeList match;
-			
 			try {
 				XPathExpression artist_expr = xpath.compile("//lfm/similarartists/artist/name/text()");
 				XPathExpression match_expr = xpath.compile("//lfm/similarartists/artist/match/text()");
@@ -182,13 +170,11 @@ public class LastFmData{
 			} catch (XPathExpressionException e) {
 				Log.d("LASTFM","XPathExpressionException " + e.getMessage());
 				return;
-			}
-				
+			}	
 			for (int i = 0; i < artists.getLength(); i++) {
 				String a = artists.item(i).getNodeValue();
 				Double m = Double.parseDouble(match.item(i).getNodeValue());
-				if (m < threshold) continue;
-				
+				if (m < threshold) continue;	
 				Artist similar = _registry.createArtist(a);
 				short similarity = (short) (m * 100);
 				similar.addSimilarArtist(artist, similarity);
@@ -197,7 +183,6 @@ public class LastFmData{
 			}
 			_registry.updateDB(artist);
 		}
-	}
-		
+	}	
 }
 

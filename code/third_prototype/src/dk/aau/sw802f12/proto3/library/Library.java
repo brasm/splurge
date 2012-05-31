@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import dk.aau.sw802f12.proto3.Settings;
-import dk.aau.sw802f12.proto3.util.Artist;
-import dk.aau.sw802f12.proto3.util.MusicRegistry;
-import dk.aau.sw802f12.proto3.util.Song;
+import dk.aau.sw802f12.proto3.database.Artist;
+import dk.aau.sw802f12.proto3.database.MusicRegistry;
+import dk.aau.sw802f12.proto3.database.Song;
 
 import android.os.Handler;
 import android.util.Log;
@@ -59,7 +59,6 @@ public class Library {
 		public void run() {
 			File musicFolder = mSettings.getLocalMusicFolder();
 			int updateInterval = mSettings.getLibraryUpdateInterval();
-
 			scanFilesystem(musicFolder);
 			updateLibraryChecksum();
 			mHandler.postDelayed(updateRunner, updateInterval);
@@ -80,10 +79,8 @@ public class Library {
 	private void scanFilesystem(File dir) {
 		if (!dir.isDirectory())	return;
 		Log.d("LASTFM", "Scan Filesystem " + dir.getAbsolutePath());
-
 		Integer lastModifiedOld = mModificationTimes.get(dir);
 		Integer lastModifiedNew = new Integer((int) dir.lastModified());
-
 		if (!lastModifiedNew.equals(lastModifiedOld)) {
 			boolean success = updateFolder(dir);
 			if (success){
@@ -101,13 +98,11 @@ public class Library {
 		Log.d("LASTFM", "update folder");
 		if (!dir.isDirectory())	return false;
 		MusicRegistry registry = null;
-		
 		try {
 			registry = MusicRegistry.getInstance();
 		} catch (InstantiationException e) {
 			Log.d("LASTFM", "oh no, cannot instantiate musicregistry");
 		}
-			
 		for (File f : dir.listFiles()) {
 			if (f.isDirectory()) continue;
 			Log.d("LASTFM", "song is " + f.getAbsolutePath());
@@ -119,11 +114,7 @@ public class Library {
 			} catch (InstantiationException e) {
 				Log.d("LASTFM", "oh no, cannot instantiate musicregistry through song");
 			}
-			
-			
 		}
-
-		
 		return true;
 	}
 }

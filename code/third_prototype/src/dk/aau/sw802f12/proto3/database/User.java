@@ -1,4 +1,4 @@
-package dk.aau.sw802f12.proto3.util;
+package dk.aau.sw802f12.proto3.database;
 
 import java.util.HashMap;
 
@@ -9,7 +9,7 @@ import dk.aau.sw802f12.proto3.lastfm.LastFmData;
  * The id of the {@link User} is set to -1, if the {@link User} is not set in the database.
  * The user's rating of the {@link Artist} is stored in the suggArtists {@link HashMap}, with the {@link Artist} as key.
  * 
- * @author sw802f12 (mlisby)
+ * @author sw802f12
  *
  */
 public class User {

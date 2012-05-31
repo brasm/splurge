@@ -6,8 +6,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import dk.aau.sw802f12.proto3.util.MusicRegistry;
-import dk.aau.sw802f12.proto3.util.User;
+import dk.aau.sw802f12.proto3.database.MusicRegistry;
+import dk.aau.sw802f12.proto3.database.User;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -20,14 +20,12 @@ import android.widget.Toast;
 public class NetworkService {
 	private static final String TAG = "sw8.BT";
 	private static final String DISC = "Disconnect";
-	static final UUID MY_UUID = UUID
-			.fromString("99E67F40-9849-11E1-A8B0-0800200C9A66");
+	static final UUID MY_UUID = UUID.fromString("99E67F40-9849-11E1-A8B0-0800200C9A66");
 	private BluetoothAdapter mBluetoothAdapter;
 	private String lastFMUser;
 	Context mContext;
 	private ConnectedThread ct;
 	private boolean isClient;
-	
 
 	public NetworkService(Context context, BluetoothAdapter btAdapter) {
 		mBluetoothAdapter = btAdapter;
@@ -46,9 +44,6 @@ public class NetworkService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		Toast.makeText(mContext, "Started server with name: " + name,
-				Toast.LENGTH_SHORT);
 		isClient = false;
 	}
 
@@ -63,7 +58,6 @@ public class NetworkService {
 	public void stop() {
 		if (!isClient) {
 			ct.cancel();
-			Toast.makeText(mContext, "Stopped server.", Toast.LENGTH_SHORT);
 		}
 	}
 
@@ -72,7 +66,6 @@ public class NetworkService {
 			String text = DISC;
 			ct.write(text.getBytes());
 			ct.cancel();
-			Toast.makeText(mContext, "Disconnected.", Toast.LENGTH_SHORT);
 		}
 	}
 
@@ -111,7 +104,6 @@ public class NetworkService {
 				// If a connection was accepted
 				if (socket != null) {
 					Log.d(TAG, "Calling manageconnection");
-
 					// Do work to manage the connection (in a separate thread)
 					manageConnectedSocket(socket);
 				}

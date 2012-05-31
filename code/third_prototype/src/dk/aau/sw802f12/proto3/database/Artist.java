@@ -1,4 +1,4 @@
-package dk.aau.sw802f12.proto3.util;
+package dk.aau.sw802f12.proto3.database;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,7 +11,7 @@ import dk.aau.sw802f12.proto3.lastfm.LastFmData;
  * The id of the Artist is the Database id, it is assigned at database insertion. 
  * This should only be accessed by the Database wrapper.
  * 
- * @author sw802f12 (mlisby)
+ * @author sw802f12
  *
  */
 public class Artist {
@@ -33,7 +33,6 @@ public class Artist {
 		this.tags = new HashSet<Tag>();
 	}
 
-	
 	/**
 	 * Add a {@link User} to the list of Users who have a rating of the Artist.
 	 * @param user The User to add.
@@ -163,9 +162,7 @@ public class Artist {
 		if (similarArtists == null) {
 			MusicRegistry mr = MusicRegistry.getInstance();
 			initiateSimilar();
-			
 			mr.loadSimilarArtists(this);
-			
 			// only request similar artists if artist is in library
 			if (mr.existsSongsByArtist(this) && similarArtists.size() == 0) {
 				new LastFmData().getSimilarArtists(this);

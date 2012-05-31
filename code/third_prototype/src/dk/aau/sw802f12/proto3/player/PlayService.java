@@ -11,8 +11,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import dk.aau.sw802f12.proto3.MainActivity;
+import dk.aau.sw802f12.proto3.database.Song;
 import dk.aau.sw802f12.proto3.library.PlayQueue;
-import dk.aau.sw802f12.proto3.util.Song;
 
 public class PlayService extends Service implements OnCompletionListener, Playback {
 	public static final String UPDATESTATE = PlayService.class.getCanonicalName(); 
@@ -24,7 +24,6 @@ public class PlayService extends Service implements OnCompletionListener, Playba
 	private Song mSong;
 	private final Handler handler = new Handler();
 	Intent currentPositionIntent;
-
 
 	public class LocalBinder extends Binder {
 		public PlayService getService() {
@@ -39,7 +38,6 @@ public class PlayService extends Service implements OnCompletionListener, Playba
 		mPlayer.setOnCompletionListener(this);
 		mPlayQueue = PlayQueue.getInstance();
 		currentPositionIntent = new Intent(UPDATE_INFO);
-		
 		handler.removeCallbacks(sendUpdatesToUI);
 		handler.postDelayed(sendUpdatesToUI, 1000); // 1 second
 	}	
@@ -115,12 +113,10 @@ public class PlayService extends Service implements OnCompletionListener, Playba
 			next();
 			return;
 		}
-		
 		if (mPlayer.isPlaying()) {
 			pause();
 			return;
 		}
-	
 		if (mPaused)
 			resume();
 		else
@@ -162,7 +158,6 @@ public class PlayService extends Service implements OnCompletionListener, Playba
 		String title = mSong.getTitle();
 		if (artist == null) artist = "Unknown Artist";
 		if (title == null) title = "Unknown Title";
-		
 		intent.putExtra("current", artist + " - " + title);
 		intent.putExtra("song1", "Not available.");
 		intent.putExtra("song2", "Not available.");
