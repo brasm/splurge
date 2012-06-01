@@ -2,8 +2,12 @@ package dk.aau.sw802f12.splurge;
 
 import java.io.File;
 
+/**
+ * Contains all settings that should be changeable within the app
+ *
+ * @author sw802f12
+ */
 public class Settings {
-
 	private int libraryUpdateInterval = 60000;
 	private File localMusicFolder = new File("/sdcard/Music");
 	private String deviceName = "MyAndroidDevice";

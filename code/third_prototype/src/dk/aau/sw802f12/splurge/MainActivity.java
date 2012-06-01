@@ -33,8 +33,13 @@ import dk.aau.sw802f12.splurge.database.MusicRegistry;
 import dk.aau.sw802f12.splurge.network.NetworkService;
 import dk.aau.sw802f12.splurge.player.PlayService;
 
+/**
+ * Main activity, point of entry for the application
+ * controls the main user interface
+ *
+ * @author sw802f12
+ */
 public class MainActivity extends Activity {
-	
 	Context mContext;
 	public static String tag = "SW8PLAYER";
 	private static final int REQUEST_ENABLE_BT = 1;

@@ -21,8 +21,9 @@ import dk.aau.sw802f12.splurge.database.User;
 
 import android.util.Log;
 
-/*
+/**
  * Request data from last.fm, and write it to local database
+ * @author sw802f12
  */
 public class LastFmData{
 	private String _url = "http://ws.audioscrobbler.com/2.0/";

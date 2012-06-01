@@ -9,6 +9,8 @@ import android.content.Context;
  * Registry/Factory for storing and creating entities ({@link Artist}, {@link Song}, {@link Tag} and {@link User}), 
  * as well as creating relations inbetween them.
  *
+ * @author sw802f12
+ *
  */
 public class MusicRegistry {
 	HashMap<Long, Artist> artists;

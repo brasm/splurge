@@ -5,6 +5,7 @@ import org.w3c.dom.Document;
 /**
  * Package protected wrapper class.
  * Initiates http request, and passes result on to responseHandler;
+ * @author sw802f12
  */
 class HttpRequest {
 	
