@@ -1,4 +1,4 @@
-package dk.aau.sw802f12.proto3.lastfm;
+package dk.aau.sw802f12.splurge.lastfm;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -13,11 +13,11 @@ import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
-import dk.aau.sw802f12.proto3.Settings;
-import dk.aau.sw802f12.proto3.database.Artist;
-import dk.aau.sw802f12.proto3.database.MusicRegistry;
-import dk.aau.sw802f12.proto3.database.Tag;
-import dk.aau.sw802f12.proto3.database.User;
+import dk.aau.sw802f12.splurge.Settings;
+import dk.aau.sw802f12.splurge.database.Artist;
+import dk.aau.sw802f12.splurge.database.MusicRegistry;
+import dk.aau.sw802f12.splurge.database.Tag;
+import dk.aau.sw802f12.splurge.database.User;
 
 import android.util.Log;
 

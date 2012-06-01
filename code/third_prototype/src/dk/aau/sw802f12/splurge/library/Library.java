@@ -1,14 +1,14 @@
-package dk.aau.sw802f12.proto3.library;
+package dk.aau.sw802f12.splurge.library;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import dk.aau.sw802f12.proto3.Settings;
-import dk.aau.sw802f12.proto3.database.Artist;
-import dk.aau.sw802f12.proto3.database.MusicRegistry;
-import dk.aau.sw802f12.proto3.database.Song;
+import dk.aau.sw802f12.splurge.Settings;
+import dk.aau.sw802f12.splurge.database.Artist;
+import dk.aau.sw802f12.splurge.database.MusicRegistry;
+import dk.aau.sw802f12.splurge.database.Song;
 
 import android.os.Handler;
 import android.util.Log;

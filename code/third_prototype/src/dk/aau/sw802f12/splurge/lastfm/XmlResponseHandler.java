@@ -1,4 +1,4 @@
-package dk.aau.sw802f12.proto3.lastfm;
+package dk.aau.sw802f12.splurge.lastfm;
 
 import org.w3c.dom.Document;
 

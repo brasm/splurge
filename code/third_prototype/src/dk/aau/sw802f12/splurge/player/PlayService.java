@@ -1,4 +1,4 @@
-package dk.aau.sw802f12.proto3.player;
+package dk.aau.sw802f12.splurge.player;
 
 import java.io.IOException;
 
@@ -10,9 +10,9 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
-import dk.aau.sw802f12.proto3.MainActivity;
-import dk.aau.sw802f12.proto3.database.Song;
-import dk.aau.sw802f12.proto3.library.PlayQueue;
+import dk.aau.sw802f12.splurge.MainActivity;
+import dk.aau.sw802f12.splurge.database.Song;
+import dk.aau.sw802f12.splurge.library.PlayQueue;
 
 public class PlayService extends Service implements OnCompletionListener, Playback {
 	public static final String UPDATESTATE = PlayService.class.getCanonicalName(); 
@@ -53,7 +53,7 @@ public class PlayService extends Service implements OnCompletionListener, Playba
 	
 	// Playback Controls //////////////////////////////////////////////////////
 	/* (non-Javadoc)
-	 * @see dk.aau.sw802f12.proto3.Playback#play()
+	 * @see dk.aau.sw802f12.splurge.Playback#play()
 	 */
 	public void play() {
 		try {
@@ -73,7 +73,7 @@ public class PlayService extends Service implements OnCompletionListener, Playba
 	}
 	
 	/* (non-Javadoc)
-	 * @see dk.aau.sw802f12.proto3.Playback#stop()
+	 * @see dk.aau.sw802f12.splurge.Playback#stop()
 	 */
 	public void stop(){
 		mPlayer.stop();
@@ -81,7 +81,7 @@ public class PlayService extends Service implements OnCompletionListener, Playba
 	}
 
 	/* (non-Javadoc)
-	 * @see dk.aau.sw802f12.proto3.Playback#pause()
+	 * @see dk.aau.sw802f12.splurge.Playback#pause()
 	 */
 	public void pause() {
 		mPlayer.pause();
@@ -89,7 +89,7 @@ public class PlayService extends Service implements OnCompletionListener, Playba
 	}
 
 	/* (non-Javadoc)
-	 * @see dk.aau.sw802f12.proto3.Playback#resume()
+	 * @see dk.aau.sw802f12.splurge.Playback#resume()
 	 */
 	public void resume() {
 		mPlayer.start();
@@ -97,7 +97,7 @@ public class PlayService extends Service implements OnCompletionListener, Playba
 	}
 	
 	/* (non-Javadoc)
-	 * @see dk.aau.sw802f12.proto3.Playback#next()
+	 * @see dk.aau.sw802f12.splurge.Playback#next()
 	 */
 	public void next(){
 		Log.d(MainActivity.tag, "Start next.");
@@ -106,7 +106,7 @@ public class PlayService extends Service implements OnCompletionListener, Playba
 	}
 
 	/* (non-Javadoc)
-	 * @see dk.aau.sw802f12.proto3.Playback#toggle()
+	 * @see dk.aau.sw802f12.splurge.Playback#toggle()
 	 */
 	public void toggle() {
 		if (mSong == null) {
@@ -125,28 +125,28 @@ public class PlayService extends Service implements OnCompletionListener, Playba
 	
 	// Playback Info //////////////////////////////////////////////////////////
 	/* (non-Javadoc)
-	 * @see dk.aau.sw802f12.proto3.Playback#nowPlaying()
+	 * @see dk.aau.sw802f12.splurge.Playback#nowPlaying()
 	 */
 	public Song nowPlaying(){
 		return mSong;
 	}
 
 	/* (non-Javadoc)
-	 * @see dk.aau.sw802f12.proto3.Playback#getDuration()
+	 * @see dk.aau.sw802f12.splurge.Playback#getDuration()
 	 */
 	public int getDuration(){
 		return mPlayer.getDuration();
 	}
 	
 	/* (non-Javadoc)
-	 * @see dk.aau.sw802f12.proto3.Playback#getCurrentPosition()
+	 * @see dk.aau.sw802f12.splurge.Playback#getCurrentPosition()
 	 */
 	public int getCurrentPosition(){
 		return mPlayer.getCurrentPosition();
 	}
 	
 	/* (non-Javadoc)
-	 * @see dk.aau.sw802f12.proto3.Playback#getProgress()
+	 * @see dk.aau.sw802f12.splurge.Playback#getProgress()
 	 */
 	public int getProgress(){
 		return 100 * getCurrentPosition() / getDuration();

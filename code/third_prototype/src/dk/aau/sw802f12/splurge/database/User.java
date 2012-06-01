@@ -1,8 +1,8 @@
-package dk.aau.sw802f12.proto3.database;
+package dk.aau.sw802f12.splurge.database;
 
 import java.util.HashMap;
 
-import dk.aau.sw802f12.proto3.lastfm.LastFmData;
+import dk.aau.sw802f12.splurge.lastfm.LastFmData;
 
 /**
  * Wraps User MAC address, as well as {@link Artist}s suggested to the {@link User}. 

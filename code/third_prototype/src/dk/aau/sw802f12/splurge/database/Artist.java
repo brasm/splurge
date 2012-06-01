@@ -1,10 +1,10 @@
-package dk.aau.sw802f12.proto3.database;
+package dk.aau.sw802f12.splurge.database;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import dk.aau.sw802f12.proto3.lastfm.LastFmData;
+import dk.aau.sw802f12.splurge.lastfm.LastFmData;
 
 /**
  * Wraps Artist info from the Database, as well as holds {@link Tag}s related to the Artist.

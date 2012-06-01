@@ -1,4 +1,4 @@
-package dk.aau.sw802f12.proto3.database;
+package dk.aau.sw802f12.splurge.database;
 
 import java.io.File;
 import java.util.Collection;

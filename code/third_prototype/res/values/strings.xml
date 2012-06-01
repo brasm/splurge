@@ -2,7 +2,7 @@
 <resources>
 
     <string name="hello">Hello World, MainActivity!</string>
-    <string name="app_name">Social Music Player</string>
+    <string name="app_name">Splurge</string>
     <string name="play_button">Play/Pause</string>
     <string name="next_button">&gt;&gt;</string>
     <string name="previous_button">&lt;&lt;</string>

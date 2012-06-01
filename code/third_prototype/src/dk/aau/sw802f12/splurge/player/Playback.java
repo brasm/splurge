@@ -1,6 +1,6 @@
-package dk.aau.sw802f12.proto3.player;
+package dk.aau.sw802f12.splurge.player;
 
-import dk.aau.sw802f12.proto3.database.Song;
+import dk.aau.sw802f12.splurge.database.Song;
 
 
 public interface Playback {

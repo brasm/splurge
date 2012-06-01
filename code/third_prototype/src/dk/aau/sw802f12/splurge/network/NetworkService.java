@@ -1,4 +1,4 @@
-package dk.aau.sw802f12.proto3.network;
+package dk.aau.sw802f12.splurge.network;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -6,8 +6,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import dk.aau.sw802f12.proto3.database.MusicRegistry;
-import dk.aau.sw802f12.proto3.database.User;
+import dk.aau.sw802f12.splurge.database.MusicRegistry;
+import dk.aau.sw802f12.splurge.database.User;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;

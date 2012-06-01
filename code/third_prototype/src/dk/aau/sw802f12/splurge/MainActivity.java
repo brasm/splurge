@@ -1,4 +1,4 @@
-package dk.aau.sw802f12.proto3;
+package dk.aau.sw802f12.splurge;
 
 import java.util.ArrayList;
 
@@ -27,10 +27,11 @@ import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import dk.aau.sw802f12.proto3.R.id;
-import dk.aau.sw802f12.proto3.database.MusicRegistry;
-import dk.aau.sw802f12.proto3.network.NetworkService;
-import dk.aau.sw802f12.proto3.player.PlayService;
+import dk.aau.sw802f12.splurge.R;
+import dk.aau.sw802f12.splurge.R.id;
+import dk.aau.sw802f12.splurge.database.MusicRegistry;
+import dk.aau.sw802f12.splurge.network.NetworkService;
+import dk.aau.sw802f12.splurge.player.PlayService;
 
 public class MainActivity extends Activity {
 	

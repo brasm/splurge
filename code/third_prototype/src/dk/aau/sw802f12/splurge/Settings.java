@@ -1,4 +1,4 @@
-package dk.aau.sw802f12.proto3;
+package dk.aau.sw802f12.splurge;
 
 import java.io.File;
 
