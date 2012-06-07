@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Hello World, MainActivity!</string>
+    <string name="app_name">Splurge</string>
+    <string name="play_button">Play/Pause</string>
+    <string name="next_button">&gt;&gt;</string>
+    <string name="previous_button">&lt;&lt;</string>
+    <string name="volume">Volume</string>
+    <string name="defaultnotrack">No track currently playing.</string>
+    <string name="nextsong_text">Next songs:</string>
+    <string name="start_server">Start Server</string>
+    <string name="start_client">Connect as Client</string>
+    <string name="input_server">Server Setup</string>
+    <string name="set_server_button">Set Server Name</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="set_client_button">Set Client Name</string>
+    <string name="server_dialog_msg">Enter the desired name for your SMP-Server:</string>
+    <string name="input_client">Client Setup</string>
+    <string name="client_dialog_msg">Enter the name of the SMP-Server you wish to connect to:</string>
+    <string name="input_lastfm">Set Last.FM Account</string>
+    <string name="lastfm_dialog_msg">Enter your Last.FM username:</string>
+    <string name="set_lastfm_button">Set Last.FM Account</string>
+    <string name="stop_server">Stop Server</string>
+    <string name="disc_client">Disconnect from Server</string>
+    <string name="input_stop_server_msg">Do you really want to stop hosting the server?</string>
+    <string name="disc_client_msg">Do you really want to disconnect from the server?</string>
+
+</resources>
